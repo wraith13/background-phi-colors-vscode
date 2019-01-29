@@ -1,6 +1,6 @@
-# Indent Phi Colors README
+# Background Phi Colors README
 
-This is the README for your extension "indent-phi-colors". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "background3-phi-colors". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 
