@@ -1,27 +1,103 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export module BackgroundPhiColors
+{
+    const applicationKey = "background-phi-colors";
+    interface Property<valueT>
+    {
+        name: string;
+        minValue?: valueT;
+        maxValue?: valueT;
+        defaultValue?: valueT;
+        value: valueT;
+    };
+    const delay =
+    {
+        name: "delay",
+        minValue: 50,
+        maxValue: 1500,
+        defaultValue: 250,
+        value: 250,
+    };
+    let lastUpdateStamp = 0;
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-		console.log('Congratulations, your extension "background-phi-colors" is now active!');
+    export const getConfiguration = <type = vscode.WorkspaceConfiguration>(key? : string | Property<type>, section : string = applicationKey) : type =>
+    {
+        if (!key || "string" === typeof key)
+        {
+            const rawKey = undefined === key ? undefined: key.split(".").reverse()[0];
+            const rawSection = undefined === key || rawKey === key ? section: `${section}.${key.replace(/(.*)\.[^\.]+/, "$1")}`;
+            const configuration = vscode.workspace.getConfiguration(rawSection);
+            return rawKey ?
+            configuration[rawKey] :
+            configuration;
+        }
+        else
+        {
+            let result: type = getConfiguration<type>(key.name);
+            if (undefined === result)
+            {
+                if (undefined !== key.defaultValue)
+                {
+                    result = key.defaultValue;
+                }
+            }
+            else
+            if (undefined !== key.minValue && result < key.minValue)
+            {
+                result = key.minValue;
+            }
+            else
+            if (undefined !== key.maxValue && key.maxValue < result)
+            {
+                result = key.maxValue;
+            }
+            key.value = result;
+            return result;
+        }
+    };
+    export const getTicks = ()=> new Date().getTime();
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('extension.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
+    export const initialize = (context : vscode.ExtensionContext): void =>
+    {
+        context.subscriptions.push
+        (
+            //  コマンドの登録
+            vscode.commands.registerCommand('extension.helloWorld', () => vscode.window.showInformationMessage('Hello World!')),
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World!');
-	});
+            //  イベントリスナーの登録
+            vscode.window.onDidChangeActiveTextEditor(() => updateDecoration()),
+            vscode.workspace.onDidChangeTextDocument(() => updateDecoration()),
+            vscode.workspace.onDidChangeConfiguration(() => onDidChangeConfiguration()),
+        );
 
-	context.subscriptions.push(disposable);
+        onDidChangeConfiguration();
+    };
+
+    export const onDidChangeConfiguration = (): void =>
+    {
+        getConfiguration(delay);
+        updateDecoration();
+    };
+
+    export const updateDecoration = (): void =>
+    {
+        const updateStamp = getTicks();
+        lastUpdateStamp = updateStamp;
+        setTimeout
+        (
+            () =>
+            {
+                if (lastUpdateStamp === updateStamp)
+                {
+                    delayedUpdateDecoration();
+                }
+            },
+            delay.value
+        );
+    };
+    const delayedUpdateDecoration = () =>
+    {
+    };
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() {}
