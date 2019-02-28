@@ -3,6 +3,7 @@
     "displayName": "Background Phi Colors",
     "description": "TBD",
     "version": "0.0.1",
+    "license": "SEE LICENSE IN LICENSE_1_0.txt",
     "engines": {
         "vscode": "^1.30.0"
     },
