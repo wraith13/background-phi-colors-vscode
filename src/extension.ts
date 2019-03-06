@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { phiColors } from 'phi-colors';
 
 export module BackgroundPhiColors
 {
@@ -99,5 +100,7 @@ export module BackgroundPhiColors
     const delayedUpdateDecoration = () =>
     {
     };
+    export const createTextEditorDecorationType = (base: phiColors.Hsla, index: number): vscode.TextEditorDecorationType =>
+        vscode.window.createTextEditorDecorationType({backgroundColor: phiColors.generate(base, index, 0, 0, 0)});
 }
 
