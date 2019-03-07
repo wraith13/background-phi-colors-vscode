@@ -11,7 +11,7 @@ export module BackgroundPhiColors
         maxValue?: valueT;
         defaultValue?: valueT;
         value: valueT;
-    };
+    }
     const delay =
     {
         name: "delay",
@@ -104,3 +104,11 @@ export module BackgroundPhiColors
         vscode.window.createTextEditorDecorationType({backgroundColor: phiColors.generate(base, index, 0, 0, 0)});
 }
 
+export function activate(context: vscode.ExtensionContext) : void
+{
+    BackgroundPhiColors.initialize(context);
+}
+
+export function deactivate() : void
+{
+}
