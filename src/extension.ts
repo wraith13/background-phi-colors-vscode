@@ -64,7 +64,7 @@ export module BackgroundPhiColors
         context.subscriptions.push
         (
             //  コマンドの登録
-            vscode.commands.registerCommand('extension.helloWorld', () => vscode.window.showInformationMessage('Hello World!')),
+            vscode.commands.registerCommand(`${applicationKey}.helloWorld`, async () => await vscode.window.showInformationMessage('Hello World!')),
 
             //  イベントリスナーの登録
             vscode.window.onDidChangeActiveTextEditor(() => updateDecoration()),
@@ -100,8 +100,8 @@ export module BackgroundPhiColors
     const delayedUpdateDecoration = () =>
     {
     };
-    export const createTextEditorDecorationType = (base: phiColors.Hsla, index: number): vscode.TextEditorDecorationType =>
-        vscode.window.createTextEditorDecorationType({backgroundColor: phiColors.generate(base, index, 0, 0, 0)});
+    export const createTextEditorDecorationType = (base: phiColors.Hsla, hue: number, alpha : number = 0.0): vscode.TextEditorDecorationType =>
+        vscode.window.createTextEditorDecorationType({backgroundColor: phiColors.rgbaForStyle(phiColors.hslaToRgba(phiColors.generate(base, hue, 0, 0, alpha)))});
 }
 
 export function activate(context: vscode.ExtensionContext) : void
