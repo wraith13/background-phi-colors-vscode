@@ -24,16 +24,16 @@ export module BackgroundPhiColors
     const baseColor =
     {
         name: "baseColor",
-        defaultValue: "#FF8888CC",
-        value: "#FF8888CC",
+        defaultValue: "#FF666644",
+        value: "#FF666644",
     };
     const hueCount =
     {
         name: "humCount",
         minValue: 3,
-        maxValue: 17,
-        defaultValue: 7,
-        value: 7,
+        maxValue: 47,
+        defaultValue: 13,
+        value: 13,
     };
     let decorations : { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] }[] = [];
 
@@ -96,11 +96,12 @@ export module BackgroundPhiColors
         getConfiguration(baseColor);
         getConfiguration(hueCount);
         const baseColorHsla = phiColors.rgbaToHsla(phiColors.rgbaFromStyle(baseColor.value));
+        decorations.forEach(i => i.decorator.dispose());
         decorations = [];
         decorations.push
         (
             {
-                decorator: createTextEditorDecorationType(baseColorHsla, 0, -1),
+                decorator: createTextEditorDecorationType(baseColorHsla, 0, 1),
                 rangesOrOptions: []
             }
         );
@@ -138,18 +139,22 @@ export module BackgroundPhiColors
         const activeTextEditor = vscode.window.activeTextEditor;
         if (activeTextEditor)
         {
-            console.log(`activeTextEditor.document.fileName: ${activeTextEditor.document.fileName}`);
             const text = activeTextEditor.document.getText();
-            const regexp = /^([ \t]+)/gm;
+
+            //  clear
+            decorations.forEach(i => i.rangesOrOptions = []);
+
+            //  indent
+            const indentRegexp = /^([ \t]+)([^\r\n]*)$/gm;
             while(true)
             {
-                const match = regexp.exec(text);
+                const match = indentRegexp.exec(text);
                 if (null === match)
                 {
                     break;
                 }
                 let hueIndex = 0;
-                for(let i = 0; i < match[0].length; ++i)
+                for(let i = 0; i < match[1].length; ++i)
                 {
                     if (hueCount.value <= hueIndex)
                     {
@@ -167,11 +172,30 @@ export module BackgroundPhiColors
                 }
             }
 
+            //  trail
+            const trailRegexp = /^([^\r\n]*[^ \t\r\n]+)([ \t]+)$/gm;
+            while(true)
+            {
+                const match = trailRegexp.exec(text);
+                if (null === match)
+                {
+                    break;
+                }
+                console.log(`match: ${JSON.stringify(match)}`);
+                decorations[0].rangesOrOptions.push
+                (
+                    new vscode.Range
+                    (
+                        activeTextEditor.document.positionAt(match.index +match[1].length),
+                        activeTextEditor.document.positionAt(match.index +match[1].length +match[2].length)
+                    )
+                );
+            }
+
+            //  apply
             decorations.forEach
             (
-                i =>
-                    0 < i.rangesOrOptions.length &&
-                    activeTextEditor.setDecorations(i.decorator, i.rangesOrOptions)
+                i => activeTextEditor.setDecorations(i.decorator, i.rangesOrOptions)
             );
         }
     };
