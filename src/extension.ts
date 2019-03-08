@@ -135,6 +135,45 @@ export module BackgroundPhiColors
     };
     const delayedUpdateDecoration = () =>
     {
+        const activeTextEditor = vscode.window.activeTextEditor;
+        if (activeTextEditor)
+        {
+            console.log(`activeTextEditor.document.fileName: ${activeTextEditor.document.fileName}`);
+            const text = activeTextEditor.document.getText();
+            const regexp = /^([ \t]+)/gm;
+            while(true)
+            {
+                const match = regexp.exec(text);
+                if (null === match)
+                {
+                    break;
+                }
+                let hueIndex = 0;
+                for(let i = 0; i < match[0].length; ++i)
+                {
+                    if (hueCount.value <= hueIndex)
+                    {
+                        hueIndex = 0;
+                    }
+                    decorations[hueIndex +1].rangesOrOptions.push
+                    (
+                        new vscode.Range
+                        (
+                            activeTextEditor.document.positionAt(match.index +i),
+                            activeTextEditor.document.positionAt(match.index +i +1)
+                        )
+                    );
+                    ++hueIndex;
+                }
+            }
+
+            decorations.forEach
+            (
+                i =>
+                    0 < i.rangesOrOptions.length &&
+                    activeTextEditor.setDecorations(i.decorator, i.rangesOrOptions)
+            );
+        }
     };
     export const createTextEditorDecorationType = (base: phiColors.Hsla, hue: number, alpha : number = 0.0): vscode.TextEditorDecorationType =>
         vscode.window.createTextEditorDecorationType({backgroundColor: phiColors.rgbaForStyle(phiColors.hslaToRgba(phiColors.generate(base, hue, 0, 0, alpha)))});
