@@ -21,6 +21,21 @@ export module BackgroundPhiColors
         value: 250,
     };
     let lastUpdateStamp = 0;
+    const baseColor =
+    {
+        name: "baseColor",
+        defaultValue: "#FF8888CC",
+        value: "#FF8888CC",
+    };
+    const hueCount =
+    {
+        name: "humCount",
+        minValue: 3,
+        maxValue: 17,
+        defaultValue: 7,
+        value: 7,
+    };
+    let decorations : { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] }[] = [];
 
     export const getConfiguration = <type = vscode.WorkspaceConfiguration>(key? : string | Property<type>, section : string = applicationKey) : type =>
     {
@@ -78,6 +93,27 @@ export module BackgroundPhiColors
     export const onDidChangeConfiguration = (): void =>
     {
         getConfiguration(delay);
+        getConfiguration(baseColor);
+        getConfiguration(hueCount);
+        const baseColorHsla = phiColors.rgbaToHsla(phiColors.rgbaFromStyle(baseColor.value));
+        decorations = [];
+        decorations.push
+        (
+            {
+                decorator: createTextEditorDecorationType(baseColorHsla, 0, -1),
+                rangesOrOptions: []
+            }
+        );
+        for(let i = 1; i <= hueCount.value; ++i)
+        {
+            decorations.push
+            (
+                {
+                    decorator: createTextEditorDecorationType(baseColorHsla, i),
+                    rangesOrOptions: []
+                }
+            );
+        }
         updateDecoration();
     };
 
