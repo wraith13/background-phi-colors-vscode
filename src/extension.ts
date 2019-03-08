@@ -72,7 +72,7 @@ export module BackgroundPhiColors
             return result;
         }
     };
-    export const getTicks = ()=> new Date().getTime();
+    export const getTicks = () => new Date().getTime();
 
     export const initialize = (context : vscode.ExtensionContext): void =>
     {
@@ -140,6 +140,13 @@ export module BackgroundPhiColors
         if (activeTextEditor)
         {
             const text = activeTextEditor.document.getText();
+            const tabSize = undefined === activeTextEditor.options.tabSize ?
+                4:
+                (
+                    "number" === typeof activeTextEditor.options.tabSize ?
+                        activeTextEditor.options.tabSize:
+                        parseInt(activeTextEditor.options.tabSize)
+                );
 
             //  clear
             decorations.forEach(i => i.rangesOrOptions = []);
