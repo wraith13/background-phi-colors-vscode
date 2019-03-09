@@ -152,7 +152,9 @@ export module BackgroundPhiColors
             decorations.forEach(i => i.rangesOrOptions = []);
 
             //  indent
+            const indents : { index: number, text: string }[] = [];
             const indentRegexp = /^([ \t]+)([^\r\n]*)$/gm;
+            let totalSpaces = 0;
             while(true)
             {
                 const match = indentRegexp.exec(text);
