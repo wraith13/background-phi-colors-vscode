@@ -134,6 +134,9 @@ export module BackgroundPhiColors
             delay.value
         );
     };
+    export const getIndentSize = (text: string, tabSize: number) : number =>
+        text.replace(/\t/g, (s, offset) => s.repeat(tabSize -(offset %tabSize))).length;
+
     const delayedUpdateDecoration = () =>
     {
         const activeTextEditor = vscode.window.activeTextEditor;
@@ -156,6 +159,7 @@ export module BackgroundPhiColors
             const indentRegexp = /^([ \t]+)([^\r\n]*)$/gm;
             let totalSpaces = 0;
             let totalTabs = 0;
+            const indentSizeDistribution :{ [key: string] : number } = { };
             while(true)
             {
                 const match = indentRegexp.exec(text);
@@ -175,6 +179,7 @@ export module BackgroundPhiColors
                 const spaces = length -tabs;
                 totalSpaces += spaces;
                 totalTabs += tabs;
+                ++indentSizeDistribution[`size-${getIndentSize(match[1], tabSize)}`];
             }
             const isDefaultIndentCharactorSpace = totalTabs *tabSize <= totalSpaces;
             //const indentUnit = isDefaultIndentCharactorSpace ? ddddd: tabSize;
