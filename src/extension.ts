@@ -155,6 +155,7 @@ export module BackgroundPhiColors
             const indents : { index: number, text: string }[] = [];
             const indentRegexp = /^([ \t]+)([^\r\n]*)$/gm;
             let totalSpaces = 0;
+            let totalTabs = 0;
             while(true)
             {
                 const match = indentRegexp.exec(text);
@@ -162,24 +163,45 @@ export module BackgroundPhiColors
                 {
                     break;
                 }
-                let hueIndex = 0;
-                for(let i = 0; i < match[1].length; ++i)
-                {
-                    if (hueCount.value <= hueIndex)
+                indents.push
+                (
                     {
-                        hueIndex = 0;
+                        index: match.index,
+                        text: match[1]
                     }
-                    decorations[hueIndex +1].rangesOrOptions.push
-                    (
-                        new vscode.Range
-                        (
-                            activeTextEditor.document.positionAt(match.index +i),
-                            activeTextEditor.document.positionAt(match.index +i +1)
-                        )
-                    );
-                    ++hueIndex;
-                }
+                );
+                const length = match[1].length;
+                const tabs = match[1].replace(/ /g, "").length;
+                const spaces = length -tabs;
+                totalSpaces += spaces;
+                totalTabs += tabs;
             }
+            const isDefaultIndentCharactorSpace = totalTabs *tabSize <= totalSpaces;
+            //const indentUnit = isDefaultIndentCharactorSpace ? ddddd: tabSize;
+
+            indents.forEach
+            (
+                indent =>
+                {
+                    let hueIndex = 0;
+                    for(let i = 0; i < indent.text.length; ++i)
+                    {
+                        if (hueCount.value <= hueIndex)
+                        {
+                            hueIndex = 0;
+                        }
+                        decorations[hueIndex +1].rangesOrOptions.push
+                        (
+                            new vscode.Range
+                            (
+                                activeTextEditor.document.positionAt(indent.index +i),
+                                activeTextEditor.document.positionAt(indent.index +i +1)
+                            )
+                        );
+                        ++hueIndex;
+                    }
+                }
+            );
 
             //  trail
             const trailRegexp = /^([^\r\n]*[^ \t\r\n]+)([ \t]+)$/gm;
