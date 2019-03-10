@@ -171,10 +171,10 @@ export module BackgroundPhiColors
         return "\t";
     };
     
-    const makeRange = (textEditor: vscode.TextEditor, startPosition: number, endPosition: number) => new vscode.Range
+    const makeRange = (textEditor: vscode.TextEditor, startPosition: number, length: number) => new vscode.Range
     (
         textEditor.document.positionAt(startPosition),
-        textEditor.document.positionAt(endPosition)
+        textEditor.document.positionAt(startPosition +length)
     );
 
     const updateDecoration = (textEditor: vscode.TextEditor) =>
@@ -204,7 +204,7 @@ export module BackgroundPhiColors
         );
         textEditor.setDecorations(errorDecoration.decorator, errorDecoration.rangesOrOptions);
     };
-    export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, endPosition: number, hue: number) =>
+    export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, hue: number) =>
     {
         while(decorations.length <= hue)
         {
@@ -222,7 +222,7 @@ export module BackgroundPhiColors
             (
                 textEditor,
                 startPosition,
-                endPosition
+                length
             )
         );
     };
@@ -273,18 +273,18 @@ export module BackgroundPhiColors
             indent =>
             {
                 let text = indent.text;
-                let cursor;
-                let nextCursor = indent.index;
+                let cursor = indent.index;
+                let length = 0;
                 for(let i = 0; 0 < text.length; ++i)
                 {
-                    cursor = nextCursor;
+                    cursor += length;
                     if (text.startsWith(indentUnit))
                     {
                         addDecoration
                         (
                             textEditor,
                             cursor,
-                            nextCursor = cursor +indentUnit.length,
+                            length = indentUnit.length,
                             i
                         );
                         text = text.substr(indentUnit.length);
@@ -299,7 +299,7 @@ export module BackgroundPhiColors
                                 (
                                     textEditor,
                                     cursor,
-                                    nextCursor = cursor +text.length
+                                    length = text.length
                                 )
                             );
                             text = "";
@@ -315,10 +315,10 @@ export module BackgroundPhiColors
                                     (
                                         textEditor,
                                         cursor,
-                                        nextCursor = cursor +spaces,
+                                        length = spaces,
                                         i
                                     );
-                                    cursor = nextCursor;
+                                    cursor += length;
                                 }
                                 errorDecoration.rangesOrOptions.push
                                 (
@@ -326,7 +326,7 @@ export module BackgroundPhiColors
                                     (
                                         textEditor,
                                         cursor,
-                                        nextCursor = cursor +1
+                                        length = 1
                                     )
                                 );
                                 const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), tabSize) /indentUnitSize) -1;
@@ -342,8 +342,8 @@ export module BackgroundPhiColors
                                     (
                                         textEditor,
                                         cursor,
-                                        nextCursor = cursor +spaces
-                                        )
+                                        length = spaces
+                                    )
                                 );
                                 const indentCount = Math.ceil(spaces /indentUnitSize) -1;
                                 i += indentCount;
@@ -379,7 +379,7 @@ export module BackgroundPhiColors
             (
                 textEditor,
                 prematch.index +prematch[1].length +prematch[2].length +match.index,
-                prematch.index +prematch[1].length +prematch[2].length +match.index +match[0].length,
+                match[0].length,
                 match[0].startsWith("\t") ?
                     //  tabs
                     ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
@@ -398,7 +398,7 @@ export module BackgroundPhiColors
             (
                 textEditor,
                 match.index +match[1].length,
-                match.index +match[1].length +match[2].length
+                match[2].length
             )
         )
     );
