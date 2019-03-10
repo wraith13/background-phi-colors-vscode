@@ -192,42 +192,76 @@ export module BackgroundPhiColors
         decorations.forEach(i => i.rangesOrOptions = []);
         errorDecoration.rangesOrOptions = [];
 
-        //  indent
+        //  update
+        updateIndentDecoration(text, textEditor, tabSize);
+        updateBodySpacesDecoration(text, textEditor, tabSize);
+        updateTrailSpacesDecoration(text, textEditor, tabSize);
+
+        //  apply
+        decorations.forEach
+        (
+            i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
+        );
+        textEditor.setDecorations(errorDecoration.decorator, errorDecoration.rangesOrOptions);
+    };
+    export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, endPosition: number, hue: number) =>
+    {
+        while(decorations.length <= hue)
+        {
+            decorations.push
+            (
+                {
+                    decorator: createTextEditorDecorationType(baseColorHsla, hue +1, -2),
+                    rangesOrOptions: []
+                }
+            );
+        }
+        decorations[hue].rangesOrOptions.push
+        (
+            makeRange
+            (
+                textEditor,
+                startPosition,
+                endPosition
+            )
+        );
+    };
+    export const updateIndentDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) =>
+    {
         const indents: { index: number, text: string, body: string }[] = [];
-        const indentRegexp = /^([ \t]+)([^\r\n]*)$/gm;
         let totalSpaces = 0;
         let totalTabs = 0;
         const indentSizeDistribution:{ [key: number]: number } = { };
-        while(true)
-        {
-            const match = indentRegexp.exec(text);
-            if (null === match)
+        regExpExecForEach
+        (
+            /^([ \t]+)([^\r\n]*)$/gm,
+            text,
+            match =>
             {
-                break;
-            }
-            indents.push
-            (
+                indents.push
+                (
+                    {
+                        index: match.index,
+                        text: match[1],
+                        body: match[2]
+                    }
+                );
+                const length = match[1].length;
+                const tabs = match[1].replace(/ /g, "").length;
+                const spaces = length -tabs;
+                totalSpaces += spaces;
+                totalTabs += tabs;
+                const indentSize = getIndentSize(match[1], tabSize);
+                if (indentSizeDistribution[indentSize])
                 {
-                    index: match.index,
-                    text: match[1],
-                    body: match[2]
+                    ++indentSizeDistribution[indentSize];
                 }
-            );
-            const length = match[1].length;
-            const tabs = match[1].replace(/ /g, "").length;
-            const spaces = length -tabs;
-            totalSpaces += spaces;
-            totalTabs += tabs;
-            const indentSize = getIndentSize(match[1], tabSize);
-            if (indentSizeDistribution[indentSize])
-            {
-                ++indentSizeDistribution[indentSize];
+                else
+                {
+                    indentSizeDistribution[indentSize] = 1;
+                }
             }
-            else
-            {
-                indentSizeDistribution[indentSize] = 1;
-            }
-        }
+        );
         const isDefaultIndentCharactorSpace = totalTabs *tabSize <= totalSpaces;
         const indentUnit = getIndentUnit(indentSizeDistribution, tabSize, isDefaultIndentCharactorSpace);
         const indentUnitSize = getIndentSize(indentUnit, tabSize);
@@ -246,24 +280,12 @@ export module BackgroundPhiColors
                     cursor = nextCursor;
                     if (text.startsWith(indentUnit))
                     {
-                        if (decorations.length <= i)
-                        {
-                            decorations.push
-                            (
-                                {
-                                    decorator: createTextEditorDecorationType(baseColorHsla, i +1, -2),
-                                    rangesOrOptions: []
-                                }
-                            );
-                        }
-                        decorations[i].rangesOrOptions.push
+                        addDecoration
                         (
-                            makeRange
-                            (
-                                textEditor,
-                                cursor,
-                                nextCursor = cursor +indentUnit.length
-                            )
+                            textEditor,
+                            cursor,
+                            nextCursor = cursor +indentUnit.length,
+                            i
                         );
                         text = text.substr(indentUnit.length);
                     }
@@ -289,14 +311,12 @@ export module BackgroundPhiColors
                                 const spaces = text.length -text.replace(/^ +/, "").length;
                                 if (0 < spaces)
                                 {
-                                    decorations[i].rangesOrOptions.push
+                                    addDecoration
                                     (
-                                        makeRange
-                                        (
-                                            textEditor,
-                                            cursor,
-                                            nextCursor = cursor +spaces
-                                        )
+                                        textEditor,
+                                        cursor,
+                                        nextCursor = cursor +spaces,
+                                        i
                                     );
                                     cursor = nextCursor;
                                 }
@@ -334,34 +354,54 @@ export module BackgroundPhiColors
                 }
             }
         );
-
-        //  trail
-        const trailRegexp = /^([^\r\n]*[^ \t\r\n]+)([ \t]+)$/gm;
+    };
+    export const regExpExecForEach = (regexp: RegExp, text: string, matchFunction: (match: RegExpExecArray) => void) =>
+    {
         while(true)
         {
-            const match = trailRegexp.exec(text);
+            const match = regexp.exec(text);
             if (null === match)
             {
                 break;
             }
-            errorDecoration.rangesOrOptions.push
-            (
-                makeRange
-                (
-                    textEditor,
-                    match.index +match[1].length,
-                    match.index +match[1].length +match[2].length
-                )
-            );
+            matchFunction(match);
         }
-
-        //  apply
-        decorations.forEach
-        (
-            i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
-        );
-        textEditor.setDecorations(errorDecoration.decorator, errorDecoration.rangesOrOptions);
     };
+    export const updateBodySpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
+    (
+        /^([ \t]*)([^ \t\r\n]+)([^\r\n]+)([^ \t\r\n]+)([ \t]*)$/gm,
+        text,
+        prematch => regExpExecForEach
+        (
+            / {2,}|\t+/gm,
+            prematch[3],
+            match => addDecoration
+            (
+                textEditor,
+                prematch.index +prematch[1].length +prematch[2].length +match.index,
+                prematch.index +prematch[1].length +prematch[2].length +match.index +match[0].length,
+                match[0].startsWith("\t") ?
+                    //  tabs
+                    ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
+                    //  spaces
+                    match[0].length -1
+            )
+        )
+    );
+    export const updateTrailSpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
+    (
+        /^([^\r\n]*[^ \t\r\n]+)([ \t]+)$/gm,
+        text,
+        match => errorDecoration.rangesOrOptions.push
+        (
+            makeRange
+            (
+                textEditor,
+                match.index +match[1].length,
+                match.index +match[1].length +match[2].length
+            )
+        )
+    );
 
     export const createTextEditorDecorationType = (base: phiColors.Hsla, hue: number, alpha: number = 0.0): vscode.TextEditorDecorationType =>
         vscode.window.createTextEditorDecorationType
