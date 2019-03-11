@@ -195,6 +195,7 @@ export module BackgroundPhiColors
         //  update
         updateIndentDecoration(text, textEditor, tabSize);
         updateSymbolsDecoration(text, textEditor, tabSize);
+        updateTokesDecoration(text, textEditor, tabSize);
         updateBodySpacesDecoration(text, textEditor, tabSize);
         updateTrailSpacesDecoration(text, textEditor, tabSize);
 
@@ -393,6 +394,19 @@ export module BackgroundPhiColors
                     "}": 8,
                 }
             )[match[0]]
+        )
+    );
+    export const hash = (source: string): number => source.split("").map(i => i.codePointAt(0) || 0).reduce((a, b) => a *13 +b) %47;
+    export const updateTokesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
+    (
+        /(^|\W)(\w+)(\W|$)/gm,
+        text,
+        match => addDecoration
+        (
+            textEditor,
+            match.index +match[1].length,
+            match[2].length,
+            hash(match[2])
         )
     );
     export const updateBodySpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
