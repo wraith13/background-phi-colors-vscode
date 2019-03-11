@@ -194,6 +194,7 @@ export module BackgroundPhiColors
 
         //  update
         updateIndentDecoration(text, textEditor, tabSize);
+        updateSymbolsDecoration(text, textEditor, tabSize);
         updateBodySpacesDecoration(text, textEditor, tabSize);
         updateTrailSpacesDecoration(text, textEditor, tabSize);
 
@@ -367,6 +368,33 @@ export module BackgroundPhiColors
             matchFunction(match);
         }
     };
+    export const updateSymbolsDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
+    (
+        /[\!\.\,\:\;\(\)\[\]\{\}]/gm,
+        text,
+        match => addDecoration
+        (
+            textEditor,
+            match.index,
+            match[0].length,
+            (
+                <{[key: string]: number}>
+                {
+                    "!": 1,
+                    ".": 2,
+                    ",": 3,
+                    ":": 4,
+                    ";": 5,
+                    "(": 6,
+                    ")": 6,
+                    "[": 7,
+                    "]": 7,
+                    "{": 8,
+                    "}": 8,
+                }
+            )[match[0]]
+        )
+    );
     export const updateBodySpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
     (
         /^([ \t]*)([^ \t\r\n]+)([^\r\n]+)([^ \t\r\n]+)([ \t]*)$/gm,
