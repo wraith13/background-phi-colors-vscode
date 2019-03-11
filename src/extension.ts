@@ -396,17 +396,20 @@ export module BackgroundPhiColors
             )[match[0]]
         )
     );
-    export const hash = (source: string): number => source.split("").map(i => i.codePointAt(0) || 0).reduce((a, b) => a *13 +b) %47;
+    export const hash = (source: string): number =>
+        source.split("").map(i => i.codePointAt(0) || 0).reduce((a, b) => a *719 +b)
+        %349
+        %21; // ← 通常、こういうところの数字は素数にすることが望ましいがここについては https://wraith13.github.io/phi-ratio-coloring/phi-ratio-coloring.htm で類似色の出てくる周期をベース(8,13,21,...)に調整すること。
     export const updateTokesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
     (
-        /(^|\W)(\w+)(\W|$)/gm,
+        /\w+/gm,
         text,
         match => addDecoration
         (
             textEditor,
-            match.index +match[1].length,
-            match[2].length,
-            hash(match[2])
+            match.index,
+            match[0].length,
+            hash(match[0])
         )
     );
     export const updateBodySpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
