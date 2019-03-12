@@ -29,7 +29,7 @@ export module BackgroundPhiColors
     };
     let baseColorHsla: phiColors.Hsla;
     let errorDecoration: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] };
-    let decorations: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] }[] = [];
+    let decorations: { [paramJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
 
     export const getConfiguration = <type = vscode.WorkspaceConfiguration>(key?: string | Property<type>, section: string = applicationKey): type =>
     {
@@ -90,15 +90,15 @@ export module BackgroundPhiColors
         getConfiguration(delay);
         getConfiguration(baseColor);
         baseColorHsla = phiColors.rgbaToHsla(phiColors.rgbaFromStyle(baseColor.value));
-        decorations.forEach(i => i.decorator.dispose());
+        Object.keys(decorations).forEach(i => decorations[i].decorator.dispose());
         if (errorDecoration)
         {
             errorDecoration.decorator.dispose();
         }
-        decorations = [];
+        decorations = { };
         errorDecoration =
         {
-            decorator: createTextEditorDecorationType(baseColorHsla, 0),
+            decorator: createTextEditorDecorationType({ base:baseColorHsla, hue: 0, alpha: 0 }),
             rangesOrOptions: []
         };
 
@@ -189,7 +189,7 @@ export module BackgroundPhiColors
             );
 
         //  clear
-        decorations.forEach(i => i.rangesOrOptions = []);
+        Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []);
         errorDecoration.rangesOrOptions = [];
 
         //  update
@@ -200,25 +200,36 @@ export module BackgroundPhiColors
         updateTrailSpacesDecoration(text, textEditor, tabSize);
 
         //  apply
-        decorations.forEach
+        Object.keys(decorations).map(i => decorations[i]).forEach
         (
             i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
         );
         textEditor.setDecorations(errorDecoration.decorator, errorDecoration.rangesOrOptions);
     };
-    export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, hue: number) =>
+    export const addHueDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, hue: number) =>
+        addDecoration
+        (
+            textEditor,
+            startPosition,
+            length,
+            {
+                base: baseColorHsla,
+                hue: hue +1,
+                alpha: -2
+            }
+        );
+    export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, param: { base: phiColors.Hsla, hue: number, alpha: number }) =>
     {
-        while(decorations.length <= hue)
+        const key = JSON.stringify(param);
+        if (!decorations[key])
         {
-            decorations.push
-            (
-                {
-                    decorator: createTextEditorDecorationType(baseColorHsla, hue +1, -2),
-                    rangesOrOptions: []
-                }
-            );
+            decorations[key] =
+            {
+                decorator: createTextEditorDecorationType(param),
+                rangesOrOptions: []
+            };
         }
-        decorations[hue].rangesOrOptions.push
+        decorations[key].rangesOrOptions.push
         (
             makeRange
             (
@@ -282,7 +293,7 @@ export module BackgroundPhiColors
                     cursor += length;
                     if (text.startsWith(indentUnit))
                     {
-                        addDecoration
+                        addHueDecoration
                         (
                             textEditor,
                             cursor,
@@ -313,7 +324,7 @@ export module BackgroundPhiColors
                                 const spaces = text.length -text.replace(/^ +/, "").length;
                                 if (0 < spaces)
                                 {
-                                    addDecoration
+                                    addHueDecoration
                                     (
                                         textEditor,
                                         cursor,
@@ -371,9 +382,9 @@ export module BackgroundPhiColors
     };
     export const updateSymbolsDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
     (
-        /[\!\.\,\:\;\(\)\[\]\{\}\<\>\"\'\`\#\$\%\&\=\-\+\*\@\\\/\|\?"]/gm,
+        /[\!\.\,\:\;\(\)\[\]\{\}\<\>\"\'\`\#\$\%\&\=\-\+\*\@\\\/\|\?\^\~"]/gm,
         text,
-        match => addDecoration
+        match => addHueDecoration
         (
             textEditor,
             match.index,
@@ -410,6 +421,8 @@ export module BackgroundPhiColors
                     "\/": 23,
                     "\|": 24,
                     "\?": 25,
+                    "\^": 26,
+                    "\~": 27,
                 }
             )[match[0]]
         )
@@ -422,7 +435,7 @@ export module BackgroundPhiColors
     (
         /\w+/gm,
         text,
-        match => addDecoration
+        match => addHueDecoration
         (
             textEditor,
             match.index,
@@ -438,7 +451,7 @@ export module BackgroundPhiColors
         (
             / {2,}|\t+/gm,
             prematch[3],
-            match => addDecoration
+            match => addHueDecoration
             (
                 textEditor,
                 prematch.index +prematch[1].length +prematch[2].length +match.index,
@@ -466,7 +479,7 @@ export module BackgroundPhiColors
         )
     );
 
-    export const createTextEditorDecorationType = (base: phiColors.Hsla, hue: number, alpha: number = 0.0): vscode.TextEditorDecorationType =>
+    export const createTextEditorDecorationType = (param: { base: phiColors.Hsla, hue: number, alpha: number }): vscode.TextEditorDecorationType =>
         vscode.window.createTextEditorDecorationType
         (
             {
@@ -476,11 +489,11 @@ export module BackgroundPhiColors
                         (
                             phiColors.generate
                             (
-                                base,
-                                hue,
+                                param.base,
+                                param.hue,
                                 0,
                                 0,
-                                alpha
+                                param.alpha
                             )
                         )
                 ),
