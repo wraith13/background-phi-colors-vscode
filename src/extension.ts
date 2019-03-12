@@ -371,7 +371,7 @@ export module BackgroundPhiColors
     };
     export const updateSymbolsDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
     (
-        /[\!\.\,\:\;\(\)\[\]\{\}]/gm,
+        /[\!\.\,\:\;\(\)\[\]\{\}\<\>\"\'\`\#\$\%\&\=\-\+\*\@\\\/\|\?"]/gm,
         text,
         match => addDecoration
         (
@@ -392,6 +392,24 @@ export module BackgroundPhiColors
                     "]": 7,
                     "{": 8,
                     "}": 8,
+                    "<": 9,
+                    ">": 9,
+                    "\"": 10,
+                    "\'": 11,
+                    "\`": 12,
+                    "\#": 13,
+                    "\$": 14,
+                    "\%": 15,
+                    "\&": 16,
+                    "\=": 17,
+                    "\-": 18,
+                    "\+": 19,
+                    "\*": 20,
+                    "\@": 21,
+                    "\\": 22,
+                    "\/": 23,
+                    "\|": 24,
+                    "\?": 25,
                 }
             )[match[0]]
         )
@@ -399,7 +417,7 @@ export module BackgroundPhiColors
     export const hash = (source: string): number =>
         source.split("").map(i => i.codePointAt(0) || 0).reduce((a, b) => a *719 +b)
         %349
-        %21; // ← 通常、こういうところの数字は素数にすることが望ましいがここについては https://wraith13.github.io/phi-ratio-coloring/phi-ratio-coloring.htm で類似色の出てくる周期をベース(8,13,21,...)に調整すること。
+        %34; // ← 通常、こういうところの数字は素数にすることが望ましいがここについては https://wraith13.github.io/phi-ratio-coloring/phi-ratio-coloring.htm で類似色の出てくる周期をベース(8,13,21,...)に調整すること。
     export const updateTokesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
     (
         /\w+/gm,
