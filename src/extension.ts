@@ -28,8 +28,8 @@ export module BackgroundPhiColors
         value: "#CC666666",
     };
     let baseColorHsla: phiColors.Hsla;
-    let errorDecoration: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] };
-    let decorations: { [paramJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
+    let errorDecorationParam: { base: phiColors.Hsla, hue: number, alpha: number };
+    let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
 
     export const getConfiguration = <type = vscode.WorkspaceConfiguration>(key?: string | Property<type>, section: string = applicationKey): type =>
     {
@@ -91,16 +91,8 @@ export module BackgroundPhiColors
         getConfiguration(baseColor);
         baseColorHsla = phiColors.rgbaToHsla(phiColors.rgbaFromStyle(baseColor.value));
         Object.keys(decorations).forEach(i => decorations[i].decorator.dispose());
-        if (errorDecoration)
-        {
-            errorDecoration.decorator.dispose();
-        }
         decorations = { };
-        errorDecoration =
-        {
-            decorator: createTextEditorDecorationType({ base:baseColorHsla, hue: 0, alpha: 0 }),
-            rangesOrOptions: []
-        };
+        errorDecorationParam = { base:baseColorHsla, hue: 0, alpha: 0 };
 
         vscode.window.visibleTextEditors.forEach(i => updateDecoration(i));
     };
@@ -190,7 +182,6 @@ export module BackgroundPhiColors
 
         //  clear
         Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []);
-        errorDecoration.rangesOrOptions = [];
 
         //  update
         updateIndentDecoration(text, textEditor, tabSize);
@@ -204,7 +195,6 @@ export module BackgroundPhiColors
         (
             i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
         );
-        textEditor.setDecorations(errorDecoration.decorator, errorDecoration.rangesOrOptions);
     };
     export const addHueDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, hue: number) =>
         addDecoration
@@ -218,14 +208,14 @@ export module BackgroundPhiColors
                 alpha: -2
             }
         );
-    export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, param: { base: phiColors.Hsla, hue: number, alpha: number }) =>
+    export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, decorationParam: { base: phiColors.Hsla, hue: number, alpha: number }) =>
     {
-        const key = JSON.stringify(param);
+        const key = JSON.stringify(decorationParam);
         if (!decorations[key])
         {
             decorations[key] =
             {
-                decorator: createTextEditorDecorationType(param),
+                decorator: createTextEditorDecorationType(decorationParam),
                 rangesOrOptions: []
             };
         }
@@ -306,14 +296,12 @@ export module BackgroundPhiColors
                     {
                         if (getIndentSize(text, tabSize) < indentUnitSize)
                         {
-                            errorDecoration.rangesOrOptions.push
+                            addDecoration
                             (
-                                makeRange
-                                (
-                                    textEditor,
-                                    cursor,
-                                    length = text.length
-                                )
+                                textEditor,
+                                cursor,
+                                length = text.length,
+                                errorDecorationParam
                             );
                             text = "";
                         }
@@ -333,14 +321,12 @@ export module BackgroundPhiColors
                                     );
                                     cursor += length;
                                 }
-                                errorDecoration.rangesOrOptions.push
+                                addDecoration
                                 (
-                                    makeRange
-                                    (
-                                        textEditor,
-                                        cursor,
-                                        length = 1
-                                    )
+                                    textEditor,
+                                    cursor,
+                                    length = 1,
+                                    errorDecorationParam
                                 );
                                 const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), tabSize) /indentUnitSize) -1;
                                 i += indentCount;
@@ -349,14 +335,12 @@ export module BackgroundPhiColors
                             else
                             {
                                 const spaces = text.length -text.replace(/$ +/, "").length;
-                                errorDecoration.rangesOrOptions.push
+                                addDecoration
                                 (
-                                    makeRange
-                                    (
-                                        textEditor,
-                                        cursor,
-                                        length = spaces
-                                    )
+                                    textEditor,
+                                    cursor,
+                                    length = spaces,
+                                    errorDecorationParam
                                 );
                                 const indentCount = Math.ceil(spaces /indentUnitSize) -1;
                                 i += indentCount;
@@ -429,7 +413,6 @@ export module BackgroundPhiColors
     );
     export const hash = (source: string): number =>
         source.split("").map(i => i.codePointAt(0) || 0).reduce((a, b) => a *719 +b)
-        %349
         %34; // ← 通常、こういうところの数字は素数にすることが望ましいがここについては https://wraith13.github.io/phi-ratio-coloring/phi-ratio-coloring.htm で類似色の出てくる周期をベース(8,13,21,...)に調整すること。
     export const updateTokesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
     (
@@ -468,18 +451,16 @@ export module BackgroundPhiColors
     (
         /^([^\r\n]*[^ \t\r\n]+)([ \t]+)$/gm,
         text,
-        match => errorDecoration.rangesOrOptions.push
+        match => addDecoration
         (
-            makeRange
-            (
-                textEditor,
-                match.index +match[1].length,
-                match[2].length
-            )
+            textEditor,
+            match.index +match[1].length,
+            match[2].length,
+            errorDecorationParam
         )
     );
 
-    export const createTextEditorDecorationType = (param: { base: phiColors.Hsla, hue: number, alpha: number }): vscode.TextEditorDecorationType =>
+    export const createTextEditorDecorationType = (decorationParam: { base: phiColors.Hsla, hue: number, alpha: number }): vscode.TextEditorDecorationType =>
         vscode.window.createTextEditorDecorationType
         (
             {
@@ -489,11 +470,11 @@ export module BackgroundPhiColors
                         (
                             phiColors.generate
                             (
-                                param.base,
-                                param.hue,
+                                decorationParam.base,
+                                decorationParam.hue,
                                 0,
                                 0,
-                                param.alpha
+                                decorationParam.alpha
                             )
                         )
                 ),
