@@ -80,6 +80,7 @@ export module BackgroundPhiColors
             vscode.workspace.onDidChangeConfiguration(() => onDidChangeConfiguration()),
             vscode.window.onDidChangeActiveTextEditor(() => onDidChangeActiveTextEditor()),
             vscode.workspace.onDidChangeTextDocument(() => onDidChangeTextDocument()),
+            vscode.window.onDidChangeTextEditorSelection(() => onDidChangeTextEditorSelection()),
         );
 
         onDidChangeConfiguration();
@@ -125,6 +126,7 @@ export module BackgroundPhiColors
             );
         }
     };
+    export const onDidChangeTextEditorSelection = onDidChangeTextDocument;
 
     export const gcd = (a: number, b: number) : number => b ? gcd(b, a % b): a;
 
@@ -186,7 +188,19 @@ export module BackgroundPhiColors
         //  update
         updateIndentDecoration(text, textEditor, tabSize);
         updateSymbolsDecoration(text, textEditor, tabSize);
-        updateTokesDecoration(text, textEditor, tabSize);
+        updateTokesDecoration
+        (
+            text,
+            textEditor,
+            tabSize,
+            regExpExecToArray
+            (
+                /\w+/gm,
+                textEditor.document
+                    .lineAt(textEditor.selection.start.line).text)
+                    .map(i => i[0]
+            )
+        );
         updateBodySpacesDecoration(text, textEditor, tabSize);
         updateTrailSpacesDecoration(text, textEditor, tabSize);
 
@@ -204,7 +218,8 @@ export module BackgroundPhiColors
             alpha: alpha
         }
     );
-    export const makeStrongHueDecoration = (hue: number) => makeHueDecoration(hue, -1.0);
+    export const makeStrongHueDecoration = (hue: number) => makeHueDecoration(hue, 0.0);
+    export const makeRegularkHueDecoration = (hue: number) => makeHueDecoration(hue, -1.0);
     export const makeWeakHueDecoration = (hue: number) => makeHueDecoration(hue, -2.0);
     export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, decorationParam: { base: phiColors.Hsla, hue: number, alpha: number }) =>
     {
@@ -379,7 +394,7 @@ export module BackgroundPhiColors
             textEditor,
             match.index,
             match[0].length,
-            makeStrongHueDecoration
+            makeRegularkHueDecoration
             (
                 (
                     <{[key: string]: number}>
@@ -428,7 +443,7 @@ export module BackgroundPhiColors
         text: string,
         textEditor: vscode.TextEditor,
         tabSize: number,
-        //strongTokens: string[]
+        strongTokens: string[]
     ) => regExpExecToArray
     (
         /\w+/gm,
@@ -442,8 +457,8 @@ export module BackgroundPhiColors
             match.index,
             match[0].length,
             (
-                //strongTokens.indexOf(match[0]) ?
-                    //makeStrongHueDecoration:
+                0 <= strongTokens.indexOf(match[0]) ?
+                    makeStrongHueDecoration:
                     makeWeakHueDecoration
             )(hash(match[0]))
         )
@@ -512,7 +527,6 @@ export module BackgroundPhiColors
                             )
                         )
                 )
-                //+(decorationParam.alpha < 0.0 ? "33": "DD")
             }
         );
 }
