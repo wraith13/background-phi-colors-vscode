@@ -196,18 +196,14 @@ export module BackgroundPhiColors
             i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
         );
     };
-    export const addHueDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, hue: number) =>
-        addDecoration
-        (
-            textEditor,
-            startPosition,
-            length,
-            {
-                base: baseColorHsla,
-                hue: hue +1,
-                alpha: -2
-            }
-        );
+    export const makeHueDecoration = (hue: number) =>
+    (
+        {
+            base: baseColorHsla,
+            hue: hue +1,
+            alpha: -2
+        }
+    );
     export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, decorationParam: { base: phiColors.Hsla, hue: number, alpha: number }) =>
     {
         const key = JSON.stringify(decorationParam);
@@ -283,12 +279,12 @@ export module BackgroundPhiColors
                     cursor += length;
                     if (text.startsWith(indentUnit))
                     {
-                        addHueDecoration
+                        addDecoration
                         (
                             textEditor,
                             cursor,
                             length = indentUnit.length,
-                            i
+                            makeHueDecoration(i)
                         );
                         text = text.substr(indentUnit.length);
                     }
@@ -312,12 +308,12 @@ export module BackgroundPhiColors
                                 const spaces = text.length -text.replace(/^ +/, "").length;
                                 if (0 < spaces)
                                 {
-                                    addHueDecoration
+                                    addDecoration
                                     (
                                         textEditor,
                                         cursor,
                                         length = spaces,
-                                        i
+                                        makeHueDecoration(i)
                                     );
                                     cursor += length;
                                 }
@@ -368,47 +364,50 @@ export module BackgroundPhiColors
     (
         /[\!\.\,\:\;\(\)\[\]\{\}\<\>\"\'\`\#\$\%\&\=\-\+\*\@\\\/\|\?\^\~"]/gm,
         text,
-        match => addHueDecoration
+        match => addDecoration
         (
             textEditor,
             match.index,
             match[0].length,
+            makeHueDecoration
             (
-                <{[key: string]: number}>
-                {
-                    "!": 1,
-                    ".": 2,
-                    ",": 3,
-                    ":": 4,
-                    ";": 5,
-                    "(": 6,
-                    ")": 6,
-                    "[": 7,
-                    "]": 7,
-                    "{": 8,
-                    "}": 8,
-                    "<": 9,
-                    ">": 9,
-                    "\"": 10,
-                    "\'": 11,
-                    "\`": 12,
-                    "\#": 13,
-                    "\$": 14,
-                    "\%": 15,
-                    "\&": 16,
-                    "\=": 17,
-                    "\-": 18,
-                    "\+": 19,
-                    "\*": 20,
-                    "\@": 21,
-                    "\\": 22,
-                    "\/": 23,
-                    "\|": 24,
-                    "\?": 25,
-                    "\^": 26,
-                    "\~": 27,
-                }
-            )[match[0]]
+                (
+                    <{[key: string]: number}>
+                    {
+                        "!": 1,
+                        ".": 2,
+                        ",": 3,
+                        ":": 4,
+                        ";": 5,
+                        "(": 6,
+                        ")": 6,
+                        "[": 7,
+                        "]": 7,
+                        "{": 8,
+                        "}": 8,
+                        "<": 9,
+                        ">": 9,
+                        "\"": 10,
+                        "\'": 11,
+                        "\`": 12,
+                        "\#": 13,
+                        "\$": 14,
+                        "\%": 15,
+                        "\&": 16,
+                        "\=": 17,
+                        "\-": 18,
+                        "\+": 19,
+                        "\*": 20,
+                        "\@": 21,
+                        "\\": 22,
+                        "\/": 23,
+                        "\|": 24,
+                        "\?": 25,
+                        "\^": 26,
+                        "\~": 27,
+                    }
+                )[match[0]]
+            )
         )
     );
     export const hash = (source: string): number =>
@@ -418,12 +417,12 @@ export module BackgroundPhiColors
     (
         /\w+/gm,
         text,
-        match => addHueDecoration
+        match => addDecoration
         (
             textEditor,
             match.index,
             match[0].length,
-            hash(match[0])
+            makeHueDecoration(hash(match[0]))
         )
     );
     export const updateBodySpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
@@ -434,16 +433,19 @@ export module BackgroundPhiColors
         (
             / {2,}|\t+/gm,
             prematch[3],
-            match => addHueDecoration
+            match => addDecoration
             (
                 textEditor,
                 prematch.index +prematch[1].length +prematch[2].length +match.index,
                 match[0].length,
-                match[0].startsWith("\t") ?
+                makeHueDecoration
+                (
+                    match[0].startsWith("\t") ?
                     //  tabs
                     ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
                     //  spaces
                     match[0].length -1
+                )
             )
         )
     );
