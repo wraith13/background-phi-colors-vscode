@@ -196,14 +196,16 @@ export module BackgroundPhiColors
             i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
         );
     };
-    export const makeHueDecoration = (hue: number) =>
+    export const makeHueDecoration = (hue: number, alpha: number) =>
     (
         {
             base: baseColorHsla,
             hue: hue +1,
-            alpha: -2
+            alpha: alpha
         }
     );
+    export const makeStrongHueDecoration = (hue: number) => makeHueDecoration(hue, -1.0);
+    export const makeWeakHueDecoration = (hue: number) => makeHueDecoration(hue, -2.0);
     export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, decorationParam: { base: phiColors.Hsla, hue: number, alpha: number }) =>
     {
         const key = JSON.stringify(decorationParam);
@@ -231,10 +233,13 @@ export module BackgroundPhiColors
         let totalSpaces = 0;
         let totalTabs = 0;
         const indentSizeDistribution:{ [key: number]: number } = { };
-        regExpExecForEach
+        regExpExecToArray
         (
             /^([ \t]+)([^\r\n]*)$/gm,
-            text,
+            text
+        )
+        .forEach
+        (
             match =>
             {
                 indents.push
@@ -284,7 +289,7 @@ export module BackgroundPhiColors
                             textEditor,
                             cursor,
                             length = indentUnit.length,
-                            makeHueDecoration(i)
+                            makeWeakHueDecoration(i)
                         );
                         text = text.substr(indentUnit.length);
                     }
@@ -313,7 +318,7 @@ export module BackgroundPhiColors
                                         textEditor,
                                         cursor,
                                         length = spaces,
-                                        makeHueDecoration(i)
+                                        makeWeakHueDecoration(i)
                                     );
                                     cursor += length;
                                 }
@@ -348,8 +353,9 @@ export module BackgroundPhiColors
             }
         );
     };
-    export const regExpExecForEach = (regexp: RegExp, text: string, matchFunction: (match: RegExpExecArray) => void) =>
+    export const regExpExecToArray = (regexp: RegExp, text: string) =>
     {
+        const result: RegExpExecArray[] = [];
         while(true)
         {
             const match = regexp.exec(text);
@@ -357,19 +363,23 @@ export module BackgroundPhiColors
             {
                 break;
             }
-            matchFunction(match);
+            result.push(match);
         }
-    };
-    export const updateSymbolsDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
+        return result;
+    };        
+    export const updateSymbolsDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecToArray
     (
         /[\!\.\,\:\;\(\)\[\]\{\}\<\>\"\'\`\#\$\%\&\=\-\+\*\@\\\/\|\?\^\~"]/gm,
-        text,
+        text
+    )
+    .forEach
+    (
         match => addDecoration
         (
             textEditor,
             match.index,
             match[0].length,
-            makeHueDecoration
+            makeStrongHueDecoration
             (
                 (
                     <{[key: string]: number}>
@@ -413,32 +423,51 @@ export module BackgroundPhiColors
     export const hash = (source: string): number =>
         source.split("").map(i => i.codePointAt(0) || 0).reduce((a, b) => a *719 +b)
         %34; // ← 通常、こういうところの数字は素数にすることが望ましいがここについては https://wraith13.github.io/phi-ratio-coloring/phi-ratio-coloring.htm で類似色の出てくる周期をベース(8,13,21,...)に調整すること。
-    export const updateTokesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
+    export const updateTokesDecoration =
+    (
+        text: string,
+        textEditor: vscode.TextEditor,
+        tabSize: number,
+        //strongTokens: string[]
+    ) => regExpExecToArray
     (
         /\w+/gm,
-        text,
+        text
+    )
+    .forEach
+    (
         match => addDecoration
         (
             textEditor,
             match.index,
             match[0].length,
-            makeHueDecoration(hash(match[0]))
+            (
+                //strongTokens.indexOf(match[0]) ?
+                    //makeStrongHueDecoration:
+                    makeWeakHueDecoration
+            )(hash(match[0]))
         )
     );
-    export const updateBodySpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
+    export const updateBodySpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecToArray
     (
         /^([ \t]*)([^ \t\r\n]+)([^\r\n]+)([^ \t\r\n]+)([ \t]*)$/gm,
-        text,
-        prematch => regExpExecForEach
+        text
+    )
+    .forEach
+    (
+        prematch => regExpExecToArray
         (
             / {2,}|\t+/gm,
-            prematch[3],
+            prematch[3]
+        )
+        .forEach
+        (
             match => addDecoration
             (
                 textEditor,
                 prematch.index +prematch[1].length +prematch[2].length +match.index,
                 match[0].length,
-                makeHueDecoration
+                makeWeakHueDecoration
                 (
                     match[0].startsWith("\t") ?
                     //  tabs
@@ -449,10 +478,13 @@ export module BackgroundPhiColors
             )
         )
     );
-    export const updateTrailSpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecForEach
+    export const updateTrailSpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecToArray
     (
         /^([^\r\n]*[^ \t\r\n]+)([ \t]+)$/gm,
-        text,
+        text
+    )
+    .forEach
+    (
         match => addDecoration
         (
             textEditor,
@@ -479,7 +511,8 @@ export module BackgroundPhiColors
                                 decorationParam.alpha
                             )
                         )
-                ),
+                )
+                //+(decorationParam.alpha < 0.0 ? "33": "DD")
             }
         );
 }
