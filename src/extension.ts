@@ -186,7 +186,7 @@ export module BackgroundPhiColors
         Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []);
 
         //  update
-        updateIndentDecoration(text, textEditor, tabSize);
+        updateIndentDecoration(text, textEditor, tabSize, getIndentSize(textEditor.document.lineAt(textEditor.selection.active.line).text.substr(0, textEditor.selection.active.character).replace(/[^ \t]+.*$/, ""), tabSize));
         updateSymbolsDecoration(text, textEditor, tabSize);
         updateTokesDecoration
         (
@@ -197,7 +197,7 @@ export module BackgroundPhiColors
             (
                 /\w+/gm,
                 textEditor.document
-                    .lineAt(textEditor.selection.start.line).text)
+                    .lineAt(textEditor.selection.active.line).text)
                     .map(i => i[0]
             )
         );
@@ -242,7 +242,7 @@ export module BackgroundPhiColors
             )
         );
     };
-    export const updateIndentDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) =>
+    export const updateIndentDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number, currentIndentSize: number) =>
     {
         const indents: { index: number, text: string, body: string }[] = [];
         let totalSpaces = 0;
@@ -284,6 +284,7 @@ export module BackgroundPhiColors
         const isDefaultIndentCharactorSpace = totalTabs *tabSize <= totalSpaces;
         const indentUnit = getIndentUnit(indentSizeDistribution, tabSize, isDefaultIndentCharactorSpace);
         const indentUnitSize = getIndentSize(indentUnit, tabSize);
+        const currentIndentIndex = Math.floor(currentIndentSize /indentUnitSize);
         //console.log(`indentSizeDistribution: ${JSON.stringify(indentSizeDistribution)}`);
         //console.log(`indentUnit: ${JSON.stringify(indentUnit)}`);
 
@@ -304,7 +305,11 @@ export module BackgroundPhiColors
                             textEditor,
                             cursor,
                             length = indentUnit.length,
-                            makeWeakHueDecoration(i)
+                            (
+                                (currentIndentIndex === i) ?
+                                    makeStrongHueDecoration:
+                                    makeWeakHueDecoration
+                            )(i)
                         );
                         text = text.substr(indentUnit.length);
                     }
@@ -333,7 +338,11 @@ export module BackgroundPhiColors
                                         textEditor,
                                         cursor,
                                         length = spaces,
-                                        makeWeakHueDecoration(i)
+                                        (
+                                            (currentIndentIndex === i) ?
+                                                makeStrongHueDecoration:
+                                                makeWeakHueDecoration
+                                        )(i)
                                     );
                                     cursor += length;
                                 }
@@ -381,7 +390,7 @@ export module BackgroundPhiColors
             result.push(match);
         }
         return result;
-    };        
+    };
     export const updateSymbolsDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecToArray
     (
         /[\!\.\,\:\;\(\)\[\]\{\}\<\>\"\'\`\#\$\%\&\=\-\+\*\@\\\/\|\?\^\~"]/gm,
