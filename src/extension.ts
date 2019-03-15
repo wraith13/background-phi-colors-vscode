@@ -18,14 +18,44 @@ export module BackgroundPhiColors
         minValue: 50,
         maxValue: 1500,
         defaultValue: 250,
-        value: 250,
+        value: 0,
     };
     let lastUpdateStamp = 0;
     const baseColor =
     {
         name: "baseColor",
-        defaultValue: "#CC666666",
-        value: "#CC666666",
+        defaultValue: "#CC6666",
+        value: "",
+    };
+    const indentAlpha =
+    {
+        name: "indentAlpha",
+        defaultValue: 0x11,
+        value: 0,
+    };
+    const indentActiveAlpha =
+    {
+        name: "indentActiveAlpha",
+        defaultValue: 0x33,
+        value: 0,
+    };
+    const symbolAlpha =
+    {
+        name: "symbolAlpha",
+        defaultValue: 0x44,
+        value: 0,
+    };
+    const tokenAlpha =
+    {
+        name: "tokenAlpha",
+        defaultValue: 0x33,
+        value: 0,
+    };
+    const tokenActiveAlpha =
+    {
+        name: "tokenActiveAlpha",
+        defaultValue: 0x66,
+        value: 0,
     };
     let baseColorHsla: phiColors.Hsla;
     let errorDecorationParam: { base: phiColors.Hsla, hue: number, alpha: number };
@@ -90,6 +120,11 @@ export module BackgroundPhiColors
     {
         getConfiguration(delay);
         getConfiguration(baseColor);
+        getConfiguration(indentAlpha);
+        getConfiguration(indentActiveAlpha);
+        getConfiguration(symbolAlpha);
+        getConfiguration(tokenAlpha);
+        getConfiguration(tokenActiveAlpha);
         baseColorHsla = phiColors.rgbaToHsla(phiColors.rgbaFromStyle(baseColor.value));
         Object.keys(decorations).forEach(i => decorations[i].decorator.dispose());
         decorations = { };
@@ -186,7 +221,22 @@ export module BackgroundPhiColors
         Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []);
 
         //  update
-        updateIndentDecoration(text, textEditor, tabSize, getIndentSize(textEditor.document.lineAt(textEditor.selection.active.line).text.substr(0, textEditor.selection.active.character).replace(/[^ \t]+.*$/, ""), tabSize));
+        updateIndentDecoration
+        (
+            text,
+            textEditor,
+            tabSize,
+            getIndentSize
+            (
+                textEditor.document
+                    .lineAt(textEditor.selection.active.line)
+                    .text
+                    .substr(0, textEditor.selection.active.character)
+                    .replace(/[^ \t]+.*$/, ""
+                ),
+                tabSize
+            )
+        );
         updateSymbolsDecoration(text, textEditor, tabSize);
         updateTokesDecoration
         (
@@ -218,9 +268,6 @@ export module BackgroundPhiColors
             alpha: alpha
         }
     );
-    export const makeStrongHueDecoration = (hue: number) => makeHueDecoration(hue, 0.0);
-    export const makeRegularkHueDecoration = (hue: number) => makeHueDecoration(hue, -1.0);
-    export const makeWeakHueDecoration = (hue: number) => makeHueDecoration(hue, -2.0);
     export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, decorationParam: { base: phiColors.Hsla, hue: number, alpha: number }) =>
     {
         const key = JSON.stringify(decorationParam);
@@ -305,11 +352,7 @@ export module BackgroundPhiColors
                             textEditor,
                             cursor,
                             length = indentUnit.length,
-                            (
-                                (currentIndentIndex === i) ?
-                                    makeStrongHueDecoration:
-                                    makeWeakHueDecoration
-                            )(i)
+                            makeHueDecoration(i, ((currentIndentIndex === i) ? indentActiveAlpha: indentAlpha).value)
                         );
                         text = text.substr(indentUnit.length);
                     }
@@ -338,11 +381,7 @@ export module BackgroundPhiColors
                                         textEditor,
                                         cursor,
                                         length = spaces,
-                                        (
-                                            (currentIndentIndex === i) ?
-                                                makeStrongHueDecoration:
-                                                makeWeakHueDecoration
-                                        )(i)
+                                        makeHueDecoration(i, ((currentIndentIndex === i) ? indentActiveAlpha: indentAlpha).value)
                                     );
                                     cursor += length;
                                 }
@@ -403,7 +442,7 @@ export module BackgroundPhiColors
             textEditor,
             match.index,
             match[0].length,
-            makeRegularkHueDecoration
+            makeHueDecoration
             (
                 (
                     <{[key: string]: number}>
@@ -440,7 +479,8 @@ export module BackgroundPhiColors
                         "\^": 26,
                         "\~": 27,
                     }
-                )[match[0]]
+                )[match[0]],
+                symbolAlpha.value
             )
         )
     );
@@ -465,11 +505,13 @@ export module BackgroundPhiColors
             textEditor,
             match.index,
             match[0].length,
+            makeHueDecoration
             (
+                hash(match[0]),
                 0 <= strongTokens.indexOf(match[0]) ?
-                    makeStrongHueDecoration:
-                    makeWeakHueDecoration
-            )(hash(match[0]))
+                    tokenActiveAlpha.value:
+                    tokenAlpha.value
+            )
         )
     );
     export const updateBodySpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecToArray
@@ -491,13 +533,14 @@ export module BackgroundPhiColors
                 textEditor,
                 prematch.index +prematch[1].length +prematch[2].length +match.index,
                 match[0].length,
-                makeWeakHueDecoration
+                makeHueDecoration
                 (
                     match[0].startsWith("\t") ?
-                    //  tabs
-                    ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
-                    //  spaces
-                    match[0].length -1
+                        //  tabs
+                        ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
+                        //  spaces
+                        match[0].length -1,
+                    indentAlpha.value
                 )
             )
         )
@@ -522,7 +565,7 @@ export module BackgroundPhiColors
         vscode.window.createTextEditorDecorationType
         (
             {
-                backgroundColor: phiColors.rgbaForStyle
+                backgroundColor: phiColors.rgbForStyle
                 (
                         phiColors.hslaToRgba
                         (
@@ -532,10 +575,11 @@ export module BackgroundPhiColors
                                 decorationParam.hue,
                                 0,
                                 0,
-                                decorationParam.alpha
+                                0
                             )
                         )
                 )
+                +((0x100 +decorationParam.alpha).toString(16)).substr(1)
             }
         );
 }
