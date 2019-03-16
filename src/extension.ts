@@ -27,16 +27,22 @@ export module BackgroundPhiColors
         defaultValue: "#CC6666",
         value: "",
     };
-    const indentAlpha =
+    const spacesAlpha =
     {
-        name: "indentAlpha",
+        name: "spacesAlpha",
         defaultValue: 0x11,
         value: 0,
     };
-    const indentActiveAlpha =
+    const spacesActiveAlpha =
     {
-        name: "indentActiveAlpha",
+        name: "spacesActiveAlpha",
         defaultValue: 0x33,
+        value: 0,
+    };
+    const spacesErrorAlpha =
+    {
+        name: "spacesErrorAlpha",
+        defaultValue: 0x88,
         value: 0,
     };
     const symbolAlpha =
@@ -58,7 +64,15 @@ export module BackgroundPhiColors
         value: 0,
     };
     let baseColorHsla: phiColors.Hsla;
-    let errorDecorationParam: { base: phiColors.Hsla, hue: number, alpha: number };
+    interface DecorationParam
+    {
+        base: phiColors.Hsla;
+        hue: number;
+        alpha: number;
+        overviewRulerLane?: vscode.OverviewRulerLane;
+    }
+    let indentErrorDecorationParam: DecorationParam;
+    let trailingSpacesErrorDecorationParam: DecorationParam;
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
 
     export const getConfiguration = <type = vscode.WorkspaceConfiguration>(key?: string | Property<type>, section: string = applicationKey): type =>
@@ -120,15 +134,17 @@ export module BackgroundPhiColors
     {
         getConfiguration(delay);
         getConfiguration(baseColor);
-        getConfiguration(indentAlpha);
-        getConfiguration(indentActiveAlpha);
+        getConfiguration(spacesAlpha);
+        getConfiguration(spacesActiveAlpha);
+        getConfiguration(spacesErrorAlpha);
         getConfiguration(symbolAlpha);
         getConfiguration(tokenAlpha);
         getConfiguration(tokenActiveAlpha);
         baseColorHsla = phiColors.rgbaToHsla(phiColors.rgbaFromStyle(baseColor.value));
         Object.keys(decorations).forEach(i => decorations[i].decorator.dispose());
         decorations = { };
-        errorDecorationParam = { base:baseColorHsla, hue: 0, alpha: 0 };
+        indentErrorDecorationParam = makeHueDecoration(-1, spacesErrorAlpha, vscode.OverviewRulerLane.Left);
+        trailingSpacesErrorDecorationParam = makeHueDecoration(-1, spacesErrorAlpha, vscode.OverviewRulerLane.Right);
 
         vscode.window.visibleTextEditors.forEach(i => updateDecoration(i));
     };
@@ -260,22 +276,41 @@ export module BackgroundPhiColors
             i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
         );
     };
-    export const makeHueDecoration = (hue: number, alpha: number) =>
+    export const makeHueDecoration = (hue: number, alpha: Property<number>, overviewRulerLane?: vscode.OverviewRulerLane) =>
     (
         {
             base: baseColorHsla,
             hue: hue +1,
-            alpha: alpha
+            alpha: alpha.value,
+            overviewRulerLane: overviewRulerLane,
         }
     );
-    export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, decorationParam: { base: phiColors.Hsla, hue: number, alpha: number }) =>
+    export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, decorationParam: DecorationParam) =>
     {
         const key = JSON.stringify(decorationParam);
         if (!decorations[key])
         {
             decorations[key] =
             {
-                decorator: createTextEditorDecorationType(decorationParam),
+                decorator: createTextEditorDecorationType
+                (
+                    phiColors.rgbForStyle
+                    (
+                            phiColors.hslaToRgba
+                            (
+                                phiColors.generate
+                                (
+                                    decorationParam.base,
+                                    decorationParam.hue,
+                                    0,
+                                    0,
+                                    0
+                                )
+                            )
+                    )
+                    +((0x100 +decorationParam.alpha).toString(16)).substr(1),
+                    decorationParam.overviewRulerLane,
+                ),
                 rangesOrOptions: []
             };
         }
@@ -352,7 +387,7 @@ export module BackgroundPhiColors
                             textEditor,
                             cursor,
                             length = indentUnit.length,
-                            makeHueDecoration(i, ((currentIndentIndex === i) ? indentActiveAlpha: indentAlpha).value)
+                            makeHueDecoration(i, (currentIndentIndex === i) ? spacesActiveAlpha: spacesAlpha)
                         );
                         text = text.substr(indentUnit.length);
                     }
@@ -365,7 +400,7 @@ export module BackgroundPhiColors
                                 textEditor,
                                 cursor,
                                 length = text.length,
-                                errorDecorationParam
+                                indentErrorDecorationParam
                             );
                             text = "";
                         }
@@ -381,7 +416,7 @@ export module BackgroundPhiColors
                                         textEditor,
                                         cursor,
                                         length = spaces,
-                                        makeHueDecoration(i, ((currentIndentIndex === i) ? indentActiveAlpha: indentAlpha).value)
+                                        makeHueDecoration(i, (currentIndentIndex === i) ? spacesActiveAlpha: spacesAlpha)
                                     );
                                     cursor += length;
                                 }
@@ -390,7 +425,7 @@ export module BackgroundPhiColors
                                     textEditor,
                                     cursor,
                                     length = 1,
-                                    errorDecorationParam
+                                    indentErrorDecorationParam
                                 );
                                 const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), tabSize) /indentUnitSize) -1;
                                 i += indentCount;
@@ -404,7 +439,7 @@ export module BackgroundPhiColors
                                     textEditor,
                                     cursor,
                                     length = spaces,
-                                    errorDecorationParam
+                                    indentErrorDecorationParam
                                 );
                                 const indentCount = Math.ceil(spaces /indentUnitSize) -1;
                                 i += indentCount;
@@ -480,7 +515,7 @@ export module BackgroundPhiColors
                         "\~": 27,
                     }
                 )[match[0]],
-                symbolAlpha.value
+                symbolAlpha
             )
         )
     );
@@ -498,19 +533,29 @@ export module BackgroundPhiColors
         /\w+/gm,
         text
     )
+    .map
+    (
+        match =>
+        (
+            {
+                index: match.index,
+                token: match[0],
+                isActive: 0 <= strongTokens.indexOf(match[0])
+            }
+        )
+    )
     .forEach
     (
-        match => addDecoration
+        i => addDecoration
         (
             textEditor,
-            match.index,
-            match[0].length,
+            i.index,
+            i.token.length,
             makeHueDecoration
             (
-                hash(match[0]),
-                0 <= strongTokens.indexOf(match[0]) ?
-                    tokenActiveAlpha.value:
-                    tokenAlpha.value
+                hash(i.token),
+                i.isActive ? tokenActiveAlpha: tokenAlpha,
+                i.isActive ? vscode.OverviewRulerLane.Center: undefined,
             )
         )
     );
@@ -540,7 +585,7 @@ export module BackgroundPhiColors
                         ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
                         //  spaces
                         match[0].length -1,
-                    indentAlpha.value
+                    spacesAlpha
                 )
             )
         )
@@ -557,31 +602,22 @@ export module BackgroundPhiColors
             textEditor,
             match.index +match[1].length,
             match[2].length,
-            errorDecorationParam
+            trailingSpacesErrorDecorationParam
         )
     );
 
-    export const createTextEditorDecorationType = (decorationParam: { base: phiColors.Hsla, hue: number, alpha: number }): vscode.TextEditorDecorationType =>
-        vscode.window.createTextEditorDecorationType
-        (
-            {
-                backgroundColor: phiColors.rgbForStyle
-                (
-                        phiColors.hslaToRgba
-                        (
-                            phiColors.generate
-                            (
-                                decorationParam.base,
-                                decorationParam.hue,
-                                0,
-                                0,
-                                0
-                            )
-                        )
-                )
-                +((0x100 +decorationParam.alpha).toString(16)).substr(1)
-            }
-        );
+    export const createTextEditorDecorationType =
+    (
+        backgroundColor: string,
+        overviewRulerLane?: vscode.OverviewRulerLane
+    ) => vscode.window.createTextEditorDecorationType
+    (
+        {
+            backgroundColor: backgroundColor,
+            overviewRulerColor: undefined !== overviewRulerLane ? backgroundColor: undefined,
+            overviewRulerLane: overviewRulerLane,
+        }
+    );
 }
 
 export function activate(context: vscode.ExtensionContext): void
