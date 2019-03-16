@@ -66,6 +66,7 @@ export module BackgroundPhiColors
         public clear = this.cache.clear;
     }
     
+    const fileSizeLimit = new Config("fileSizeLimit", 100 *1024, 10 *1024, 10 *1024 *1024);
     const delay = new Config("delay", 250, 50, 1500);
     const baseColor = new Config("baseColor", "#CC6666");
     const spaceBaseColor = new Config("spaceBaseColor", <string | undefined>undefined);
@@ -81,6 +82,9 @@ export module BackgroundPhiColors
     const bodySpacesEnabled = new Config("bodySpacesMode", true);
     const traillingSpacesEnabled = new Config("traillingSpacesMode", true);
     const symbolEnabled = new Config("symbolMode", true);
+    const showIndentErrorInOverviewRulerLane = new Config("showIndentErrorInOverviewRulerLane", true);
+    const showActiveTokenInOverviewRulerLane = new Config("showActiveTokenInOverviewRulerLane", true);
+    const showTraillingSpacesErrorInOverviewRulerLane = new Config("showTraillingSpacesErrorInOverviewRulerLane", true);
     const spacesAlpha =new Config("spacesAlpha", 0x11, 0x00, 0xFF);
     const spacesActiveAlpha =new Config("spacesActiveAlpha", 0x33, 0x00, 0xFF);
     const spacesErrorAlpha =new Config("spacesErrorAlpha", 0x88, 0x00, 0xFF);
@@ -95,8 +99,8 @@ export module BackgroundPhiColors
         alpha: number;
         overviewRulerLane?: vscode.OverviewRulerLane;
     }
-    const makeIndentErrorDecorationParam = (lang: string) => makeHueDecoration(lang, -1, spacesErrorAlpha, vscode.OverviewRulerLane.Left);
-    const makeTrailingSpacesErrorDecorationParam = (lang: string) => makeHueDecoration(lang, -1, spacesErrorAlpha, vscode.OverviewRulerLane.Right);
+    const makeIndentErrorDecorationParam = (lang: string) => makeHueDecoration(lang, -1, spacesErrorAlpha, showIndentErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Left: undefined);
+    const makeTrailingSpacesErrorDecorationParam = (lang: string) => makeHueDecoration(lang, -1, spacesErrorAlpha, showTraillingSpacesErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Right: undefined);
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
 
     export const getTicks = () => new Date().getTime();
@@ -121,6 +125,7 @@ export module BackgroundPhiColors
     export const onDidChangeConfiguration = (): void =>
     {
         [
+            fileSizeLimit,
             delay,
             baseColor,
             spaceBaseColor,
@@ -136,6 +141,9 @@ export module BackgroundPhiColors
             bodySpacesEnabled,
             traillingSpacesEnabled,
             symbolEnabled,
+            showIndentErrorInOverviewRulerLane,
+            showActiveTokenInOverviewRulerLane,
+            showTraillingSpacesErrorInOverviewRulerLane,
             spacesAlpha,
             spacesActiveAlpha,
             spacesErrorAlpha,
@@ -268,45 +276,37 @@ export module BackgroundPhiColors
         Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []);
 
         //  update
-        if ("none" !== indentMode.get(lang))
-        {
-            updateIndentDecoration
-            (
-                lang,
-                text,
-                textEditor,
-                tabSize,
-                getIndentSize
-                (
-                    textEditor.document
-                        .lineAt(textEditor.selection.active.line)
-                        .text
-                        .substr(0, textEditor.selection.active.character)
-                        .replace(/[^ \t]+.*$/, ""
-                    ),
-                    tabSize
-                )
-            );
-        }
+        updateIndentDecoration
+        (
+            lang,
+            text,
+            textEditor,
+            tabSize
+        );
         if (symbolEnabled.get(lang))
         {
             updateSymbolsDecoration(lang, text, textEditor, tabSize);
         }
         if ("none" !== tokenMode.get(lang))
         {
+            const showActive = 0 <= ["smart", "full"].indexOf(tokenMode.get(lang));
+            const showRegular = 0 <= ["light", "full"].indexOf(tokenMode.get(lang));
             updateTokesDecoration
             (
                 lang,
                 text,
                 textEditor,
                 tabSize,
-                regExpExecToArray
-                (
-                    /\w+/gm,
-                    textEditor.document
-                        .lineAt(textEditor.selection.active.line).text)
-                        .map(i => i[0]
-                )
+                showRegular,
+                showActive ?
+                    regExpExecToArray
+                    (
+                        /\w+/gm,
+                        textEditor.document
+                            .lineAt(textEditor.selection.active.line).text
+                    )
+                    .map(i => i[0]):
+                    []
             );
         }
         if (bodySpacesEnabled.get(lang))
@@ -315,7 +315,7 @@ export module BackgroundPhiColors
         }
         if (traillingSpacesEnabled.get(lang))
         {
-            updateTrailSpacesDecoration(lang, text, textEditor, tabSize);
+            updateTrailSpacesDecoration(lang, text, textEditor, tabSize, traillingSpacesErrorEnabled.get(lang));
         }
 
         //  apply
@@ -379,132 +379,147 @@ export module BackgroundPhiColors
             )
         );
     };
-    export const updateIndentDecoration = (lang: string, text: string, textEditor: vscode.TextEditor, tabSize: number, currentIndentSize: number) =>
+    export const updateIndentDecoration = (lang: string, text: string, textEditor: vscode.TextEditor, tabSize: number) =>
     {
-        const indents: { index: number, text: string, body: string }[] = [];
-        let totalSpaces = 0;
-        let totalTabs = 0;
-        const indentSizeDistribution:{ [key: number]: number } = { };
-        regExpExecToArray
-        (
-            /^([ \t]+)([^\r\n]*)$/gm,
-            text
-        )
-        .forEach
-        (
-            match =>
-            {
-                indents.push
+        const showActive = 0 <= ["smart", "full"].indexOf(indentMode.get(lang));
+        const showRegular = 0 <= ["light", "full"].indexOf(indentMode.get(lang));
+        if (showActive || showRegular)
+        {
+            const showIndentError = indentErrorEnabled.get(lang);
+            const currentIndentSize = showActive ? getIndentSize
                 (
+                    textEditor.document
+                        .lineAt(textEditor.selection.active.line)
+                        .text
+                        .substr(0, textEditor.selection.active.character)
+                        .replace(/[^ \t]+.*$/, ""
+                    ),
+                    tabSize
+                ):
+                -1;
+            const indents: { index: number, text: string, body: string }[] = [];
+            let totalSpaces = 0;
+            let totalTabs = 0;
+            const indentSizeDistribution:{ [key: number]: number } = { };
+            regExpExecToArray
+            (
+                /^([ \t]+)([^\r\n]*)$/gm,
+                text
+            )
+            .forEach
+            (
+                match =>
+                {
+                    indents.push
+                    (
+                        {
+                            index: match.index,
+                            text: match[1],
+                            body: match[2]
+                        }
+                    );
+                    const length = match[1].length;
+                    const tabs = match[1].replace(/ /g, "").length;
+                    const spaces = length -tabs;
+                    totalSpaces += spaces;
+                    totalTabs += tabs;
+                    const indentSize = getIndentSize(match[1], tabSize);
+                    if (indentSizeDistribution[indentSize])
                     {
-                        index: match.index,
-                        text: match[1],
-                        body: match[2]
-                    }
-                );
-                const length = match[1].length;
-                const tabs = match[1].replace(/ /g, "").length;
-                const spaces = length -tabs;
-                totalSpaces += spaces;
-                totalTabs += tabs;
-                const indentSize = getIndentSize(match[1], tabSize);
-                if (indentSizeDistribution[indentSize])
-                {
-                    ++indentSizeDistribution[indentSize];
-                }
-                else
-                {
-                    indentSizeDistribution[indentSize] = 1;
-                }
-            }
-        );
-        const isDefaultIndentCharactorSpace = totalTabs *tabSize <= totalSpaces;
-        const indentUnit = getIndentUnit(indentSizeDistribution, tabSize, isDefaultIndentCharactorSpace);
-        const indentUnitSize = getIndentSize(indentUnit, tabSize);
-        const currentIndentIndex = Math.floor(currentIndentSize /indentUnitSize);
-        //console.log(`indentSizeDistribution: ${JSON.stringify(indentSizeDistribution)}`);
-        //console.log(`indentUnit: ${JSON.stringify(indentUnit)}`);
-
-        indents.forEach
-        (
-            indent =>
-            {
-                let text = indent.text;
-                let cursor = indent.index;
-                let length = 0;
-                for(let i = 0; 0 < text.length; ++i)
-                {
-                    cursor += length;
-                    if (text.startsWith(indentUnit))
-                    {
-                        addDecoration
-                        (
-                            textEditor,
-                            cursor,
-                            length = indentUnit.length,
-                            makeHueDecoration(lang, i, (currentIndentIndex === i) ? spacesActiveAlpha: spacesAlpha)
-                        );
-                        text = text.substr(indentUnit.length);
+                        ++indentSizeDistribution[indentSize];
                     }
                     else
                     {
-                        if (getIndentSize(text, tabSize) < indentUnitSize)
+                        indentSizeDistribution[indentSize] = 1;
+                    }
+                }
+            );
+            const isDefaultIndentCharactorSpace = totalTabs *tabSize <= totalSpaces;
+            const indentUnit = getIndentUnit(indentSizeDistribution, tabSize, isDefaultIndentCharactorSpace);
+            const indentUnitSize = getIndentSize(indentUnit, tabSize);
+            const currentIndentIndex = Math.floor(currentIndentSize /indentUnitSize);
+            //console.log(`indentSizeDistribution: ${JSON.stringify(indentSizeDistribution)}`);
+            //console.log(`indentUnit: ${JSON.stringify(indentUnit)}`);
+    
+            const addIndentDecoration = (cursor: number, length: number, indent: number, showError: boolean = false) => addDecoration
+            (
+                textEditor,
+                cursor,
+                length,
+                showError && showIndentError ?
+                    makeIndentErrorDecorationParam(lang):
+                    makeHueDecoration(lang, indent, (currentIndentIndex === indent) ? spacesActiveAlpha: spacesAlpha)
+            );
+
+            indents.forEach
+            (
+                indent =>
+                {
+                    let text = indent.text;
+                    let cursor = indent.index;
+                    let length = 0;
+                    for(let i = 0; 0 < text.length; ++i)
+                    {
+                        cursor += length;
+                        if (text.startsWith(indentUnit))
                         {
-                            addDecoration
-                            (
-                                textEditor,
-                                cursor,
-                                length = text.length,
-                                makeIndentErrorDecorationParam(lang)
-                            );
-                            text = "";
+                            length = indentUnit.length;
+                            if (showRegular || currentIndentIndex === i)
+                            {
+                                addIndentDecoration(cursor, length, i);
+                            }
+                            text = text.substr(indentUnit.length);
                         }
                         else
                         {
-                            if (isDefaultIndentCharactorSpace)
+                            if (getIndentSize(text, tabSize) < indentUnitSize)
                             {
-                                const spaces = text.length -text.replace(/^ +/, "").length;
-                                if (0 < spaces)
+                                length = text.length;
+                                if (showRegular || currentIndentIndex === i || showIndentError)
                                 {
-                                    addDecoration
-                                    (
-                                        textEditor,
-                                        cursor,
-                                        length = spaces,
-                                        makeHueDecoration(lang, i, (currentIndentIndex === i) ? spacesActiveAlpha: spacesAlpha)
-                                    );
-                                    cursor += length;
+                                    addIndentDecoration(cursor, length, i, true);
                                 }
-                                addDecoration
-                                (
-                                    textEditor,
-                                    cursor,
-                                    length = 1,
-                                    makeIndentErrorDecorationParam(lang)
-                                );
-                                const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), tabSize) /indentUnitSize) -1;
-                                i += indentCount;
-                                text = text.substr(spaces +1);
+                                text = "";
                             }
                             else
                             {
-                                const spaces = text.length -text.replace(/$ +/, "").length;
-                                addDecoration
-                                (
-                                    textEditor,
-                                    cursor,
-                                    length = spaces,
-                                    makeIndentErrorDecorationParam(lang)
-                                );
-                                const indentCount = Math.ceil(spaces /indentUnitSize) -1;
-                                i += indentCount;
-                                text = text.substr(spaces);
+                                if (isDefaultIndentCharactorSpace)
+                                {
+                                    const spaces = text.length -text.replace(/^ +/, "").length;
+                                    if (0 < spaces)
+                                    {
+                                        length = spaces;
+                                        if (showRegular || currentIndentIndex === i)
+                                        {
+                                            addIndentDecoration(cursor, length, i);
+                                        }
+                                        cursor += length;
+                                    }
+                                    length = 1;
+                                    if (showRegular || currentIndentIndex === i || showIndentError)
+                                    {
+                                        addIndentDecoration(cursor, length, i, true);
+                                    }
+                                    const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), tabSize) /indentUnitSize) -1;
+                                    i += indentCount;
+                                    text = text.substr(spaces +1);
+                                }
+                                else
+                                {
+                                    const spaces = Math.min(text.length -text.replace(/$ +/, "").length, indentUnitSize);
+                                    length = spaces;
+                                    if (showRegular || currentIndentIndex === i || showIndentError)
+                                    {
+                                        addIndentDecoration(cursor, length, i, true);
+                                    }
+                                    text = text.substr(spaces);
+                                }
                             }
                         }
                     }
                 }
-            }
-        );
+            );
+        }
     };
     export const regExpExecToArray = (regexp: RegExp, text: string) =>
     {
@@ -590,6 +605,7 @@ export module BackgroundPhiColors
         text: string,
         textEditor: vscode.TextEditor,
         tabSize: number,
+        showRegular: boolean,
         strongTokens: string[]
     ) => regExpExecToArray
     (
@@ -607,6 +623,7 @@ export module BackgroundPhiColors
             }
         )
     )
+    .filter(i => showRegular || i.isActive)
     .forEach
     (
         i => addDecoration
@@ -619,7 +636,7 @@ export module BackgroundPhiColors
                 lang,
                 hash(i.token),
                 i.isActive ? tokenActiveAlpha: tokenAlpha,
-                i.isActive ? vscode.OverviewRulerLane.Center: undefined,
+                i.isActive && showActiveTokenInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Center: undefined,
             )
         )
     );
@@ -666,7 +683,8 @@ export module BackgroundPhiColors
         lang: string,
         text: string,
         textEditor: vscode.TextEditor,
-        tabSize: number
+        tabSize: number,
+        showError: boolean
     ) => regExpExecToArray
     (
         /^([^\r\n]*[^ \t\r\n]+)([ \t]+)$/gm,
@@ -679,7 +697,9 @@ export module BackgroundPhiColors
             textEditor,
             match.index +match[1].length,
             match[2].length,
-            makeTrailingSpacesErrorDecorationParam(lang)
+            showError ?
+                makeTrailingSpacesErrorDecorationParam(lang):
+                makeHueDecoration(lang, match[2].length, spacesAlpha)
         )
     );
 

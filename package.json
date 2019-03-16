@@ -20,6 +20,126 @@
                 "command": "background-phi-colors.helloWorld",
                 "title": "Hello World"
             }
+        ],
+        "configuration": [
+            {
+                "title": "background-phi-colors",
+                "properties": {
+                    "background-phi-colors.fileSizeLimit": {
+                        "type": "number",
+                        "default": 250,
+                        "minimum": 10240,
+                        "maximum": 1500,
+                        "overridable": true
+                    },
+                    "background-phi-colors.delay": {
+                        "type": "number",
+                        "default": 250,
+                        "minimum": 50,
+                        "maximum": 1500,
+                        "overridable": true
+                    },
+                    "background-phi-colors.baseColor": {
+                        "type": "string",
+                        "default": "#CC666666",
+                        "overridable": true
+                    },
+                    "background-phi-colors.indentMode": {
+                        "type": "string",
+                        "default": "full",
+                        "enum": ["none", "light", "smart", "full"],
+                        "overridable": true
+                    },
+                    "background-phi-colors.tokenMode": {
+                        "type": "string",
+                        "default": "full",
+                        "enum": ["none", "light", "smart", "full"],
+                        "overridable": true
+                    },
+                    "background-phi-colors.indentErrorEnabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "overridable": true
+                    },
+                    "background-phi-colors.traillingSpacesErrorEnabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "overridable": true
+                    },
+                    "background-phi-colors.bodySpacesEnabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "overridable": true
+                    },
+                    "background-phi-colors.traillingSpacesEnabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "overridable": true
+                    },
+                    "background-phi-colors.symbolEnabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "overridable": true
+                    },
+                    "background-phi-colors.showIndentErrorInOverviewRulerLane": {
+                        "type": "boolean",
+                        "default": true,
+                        "overridable": true
+                    },
+                    "background-phi-colors.showActiveTokenInOverviewRulerLane": {
+                        "type": "boolean",
+                        "default": true,
+                        "overridable": true
+                    },
+                    "background-phi-colors.showTraillingSpacesErrorInOverviewRulerLane": {
+                        "type": "boolean",
+                        "default": true,
+                        "overridable": true
+                    },
+                    "background-phi-colors.spacesAlpha": {
+                        "type": "number",
+                        "default": 17,
+                        "minimum": 0,
+                        "maximum": 255,
+                        "overridable": true
+                    },
+                    "background-phi-colors.spacesActiveAlpha": {
+                        "type": "number",
+                        "default": 51,
+                        "minimum": 0,
+                        "maximum": 255,
+                        "overridable": true
+                    },
+                    "background-phi-colors.spacesErrorAlpha": {
+                        "type": "number",
+                        "default": 136,
+                        "minimum": 0,
+                        "maximum": 255,
+                        "overridable": true
+                    },
+                    "background-phi-colors.symbolAlpha": {
+                        "type": "number",
+                        "default": 68,
+                        "minimum": 0,
+                        "maximum": 255,
+                        "overridable": true
+                    },
+                    "background-phi-colors.tokenAlpha": {
+                        "type": "number",
+                        "default": 51,
+                        "minimum": 0,
+                        "maximum": 255,
+                        "overridable": true
+                    },
+                    "background-phi-colors.tokenActiveAlpha": {
+                        "type": "number",
+                        "default": 102,
+                        "minimum": 0,
+                        "maximum": 255,
+                        "overridable": true
+                    }
+                }
+            }
         ]
     },
     "scripts": {
