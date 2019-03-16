@@ -68,6 +68,19 @@ export module BackgroundPhiColors
     
     const delay = new Config("delay", 250, 50, 1500);
     const baseColor = new Config("baseColor", "#CC6666");
+    const spaceBaseColor = new Config("spaceBaseColor", <string | undefined>undefined);
+    const spaceErrorColor = new Config("spaceErrorColor", <string | undefined>undefined);
+    const symbolBaseColor = new Config("symbolBaseColor", <string | undefined>undefined);
+    const symbolColorMap = new Config("symbolColorMap", <string[]>[]);
+    const tokenBaseColor = new Config("tokenBaseColor", <string | undefined>undefined);
+    const tokenColorMap = new Config("tokenColorMap", <string[]>[]);
+    const indentMode = new Config("indentMode", "full"); // "none", "light", "smart", "full"
+    const tokenMode = new Config("tokenMode", "full"); // "none", "light", "smart", "full"
+    const indentErrorEnabled = new Config("indentErrorEnabled", true);
+    const traillingSpacesErrorEnabled = new Config("traillingSpacesErrorEnabled", true);
+    const bodySpacesEnabled = new Config("bodySpacesMode", true);
+    const traillingSpacesEnabled = new Config("traillingSpacesMode", true);
+    const symbolEnabled = new Config("symbolMode", true);
     const spacesAlpha =new Config("spacesAlpha", 0x11, 0x00, 0xFF);
     const spacesActiveAlpha =new Config("spacesActiveAlpha", 0x33, 0x00, 0xFF);
     const spacesErrorAlpha =new Config("spacesErrorAlpha", 0x88, 0x00, 0xFF);
@@ -75,7 +88,6 @@ export module BackgroundPhiColors
     const tokenAlpha =new Config("tokenAlpha", 0x33, 0x00, 0xFF);
     const tokenActiveAlpha =new Config("tokenActiveAlpha", 0x66, 0x00, 0xFF);
 
-    //let baseColorHsla: phiColors.Hsla;
     interface DecorationParam
     {
         base: phiColors.Hsla;
@@ -83,8 +95,6 @@ export module BackgroundPhiColors
         alpha: number;
         overviewRulerLane?: vscode.OverviewRulerLane;
     }
-    //let indentErrorDecorationParam: DecorationParam;
-    //let trailingSpacesErrorDecorationParam: DecorationParam;
     const makeIndentErrorDecorationParam = (lang: string) => makeHueDecoration(lang, -1, spacesErrorAlpha, vscode.OverviewRulerLane.Left);
     const makeTrailingSpacesErrorDecorationParam = (lang: string) => makeHueDecoration(lang, -1, spacesErrorAlpha, vscode.OverviewRulerLane.Right);
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
@@ -113,6 +123,19 @@ export module BackgroundPhiColors
         [
             delay,
             baseColor,
+            spaceBaseColor,
+            spaceErrorColor,
+            symbolBaseColor,
+            symbolColorMap,
+            tokenBaseColor,
+            tokenColorMap,
+            indentMode,
+            tokenMode,
+            indentErrorEnabled,
+            traillingSpacesErrorEnabled,
+            bodySpacesEnabled,
+            traillingSpacesEnabled,
+            symbolEnabled,
             spacesAlpha,
             spacesActiveAlpha,
             spacesErrorAlpha,
@@ -124,21 +147,23 @@ export module BackgroundPhiColors
 
         Object.keys(decorations).forEach(i => decorations[i].decorator.dispose());
         decorations = { };
+
+        vscode.window.visibleTextEditors.forEach(i => updateDecoration(i));
     };
 
     export const onDidChangeActiveTextEditor = (): void =>
     {
-        const activeTextEditor = vscode.window.activeTextEditor;
-        if (activeTextEditor)
+        const textEditor = vscode.window.activeTextEditor;
+        if (textEditor)
         {
-            updateDecoration(activeTextEditor);
+            updateDecoration(textEditor);
         }
     };
     let lastUpdateStamp = 0;
     export const onDidChangeTextDocument = (): void =>
     {
-        const activeTextEditor = vscode.window.activeTextEditor;
-        if (activeTextEditor)
+        const textEditor = vscode.window.activeTextEditor;
+        if (textEditor)
         {
             const updateStamp = getTicks();
             lastUpdateStamp = updateStamp;
@@ -148,14 +173,41 @@ export module BackgroundPhiColors
                 {
                     if (lastUpdateStamp === updateStamp)
                     {
-                        updateDecoration(activeTextEditor);
+                        updateDecoration(textEditor);
                     }
                 },
-                delay.get(activeTextEditor.document.languageId)
+                delay.get(textEditor.document.languageId)
             );
         }
     };
-    export const onDidChangeTextEditorSelection = onDidChangeTextDocument;
+    export const onDidChangeTextEditorSelection = () =>
+    {
+        const textEditor = vscode.window.activeTextEditor;
+        if (textEditor)
+        {
+            const lang = textEditor.document.languageId;
+            if
+            (
+                [
+                    indentMode,
+                    tokenMode
+                ]
+                .map(i => i.get(lang))
+                .some
+                (
+                    i =>
+                    [
+                        "none",
+                        "light"
+                    ]
+                    .indexOf(i) < 0
+                )
+            )
+            {
+                onDidChangeTextDocument();
+            }
+        }
+    };
 
     export const gcd = (a: number, b: number) : number => b ? gcd(b, a % b): a;
 
@@ -216,40 +268,55 @@ export module BackgroundPhiColors
         Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []);
 
         //  update
-        updateIndentDecoration
-        (
-            lang,
-            text,
-            textEditor,
-            tabSize,
-            getIndentSize
+        if ("none" !== indentMode.get(lang))
+        {
+            updateIndentDecoration
             (
-                textEditor.document
-                    .lineAt(textEditor.selection.active.line)
-                    .text
-                    .substr(0, textEditor.selection.active.character)
-                    .replace(/[^ \t]+.*$/, ""
-                ),
-                tabSize
-            )
-        );
-        updateSymbolsDecoration(lang, text, textEditor, tabSize);
-        updateTokesDecoration
-        (
-            lang,
-            text,
-            textEditor,
-            tabSize,
-            regExpExecToArray
+                lang,
+                text,
+                textEditor,
+                tabSize,
+                getIndentSize
+                (
+                    textEditor.document
+                        .lineAt(textEditor.selection.active.line)
+                        .text
+                        .substr(0, textEditor.selection.active.character)
+                        .replace(/[^ \t]+.*$/, ""
+                    ),
+                    tabSize
+                )
+            );
+        }
+        if (symbolEnabled.get(lang))
+        {
+            updateSymbolsDecoration(lang, text, textEditor, tabSize);
+        }
+        if ("none" !== tokenMode.get(lang))
+        {
+            updateTokesDecoration
             (
-                /\w+/gm,
-                textEditor.document
-                    .lineAt(textEditor.selection.active.line).text)
-                    .map(i => i[0]
-            )
-        );
-        updateBodySpacesDecoration(lang, text, textEditor, tabSize);
-        updateTrailSpacesDecoration(lang, text, textEditor, tabSize);
+                lang,
+                text,
+                textEditor,
+                tabSize,
+                regExpExecToArray
+                (
+                    /\w+/gm,
+                    textEditor.document
+                        .lineAt(textEditor.selection.active.line).text)
+                        .map(i => i[0]
+                )
+            );
+        }
+        if (bodySpacesEnabled.get(lang))
+        {
+            updateBodySpacesDecoration(lang, text, textEditor, tabSize);
+        }
+        if (traillingSpacesEnabled.get(lang))
+        {
+            updateTrailSpacesDecoration(lang, text, textEditor, tabSize);
+        }
 
         //  apply
         Object.keys(decorations).map(i => decorations[i]).forEach
