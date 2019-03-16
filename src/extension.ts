@@ -4,66 +4,78 @@ import { phiColors } from 'phi-colors';
 export module BackgroundPhiColors
 {
     const applicationKey = "background-phi-colors";
-    interface Property<valueT>
+    class Cache<keyT, valueT>
     {
-        name: string;
-        minValue?: valueT;
-        maxValue?: valueT;
-        defaultValue?: valueT;
-        value: valueT;
+        cache: {[key: string]: valueT} = { };
+        public constructor(public loader: (key: keyT) => valueT)
+        {
+
+        }
+
+        public get = (key: keyT): valueT => this.getCore(key, JSON.stringify(key));
+        private getCore = (key: keyT, keyJson: string): valueT => undefined === this.cache[keyJson] ?
+            (this.cache[keyJson] = this.loader(key)):
+            this.cache[keyJson];
+        public clear = () => this.cache = { };
     }
-    const delay =
+    class Config<valueT>
     {
-        name: "delay",
-        minValue: 50,
-        maxValue: 1500,
-        defaultValue: 250,
-        value: 0,
-    };
-    let lastUpdateStamp = 0;
-    const baseColor =
-    {
-        name: "baseColor",
-        defaultValue: "#CC6666",
-        value: "",
-    };
-    const spacesAlpha =
-    {
-        name: "spacesAlpha",
-        defaultValue: 0x11,
-        value: 0,
-    };
-    const spacesActiveAlpha =
-    {
-        name: "spacesActiveAlpha",
-        defaultValue: 0x33,
-        value: 0,
-    };
-    const spacesErrorAlpha =
-    {
-        name: "spacesErrorAlpha",
-        defaultValue: 0x88,
-        value: 0,
-    };
-    const symbolAlpha =
-    {
-        name: "symbolAlpha",
-        defaultValue: 0x44,
-        value: 0,
-    };
-    const tokenAlpha =
-    {
-        name: "tokenAlpha",
-        defaultValue: 0x33,
-        value: 0,
-    };
-    const tokenActiveAlpha =
-    {
-        name: "tokenActiveAlpha",
-        defaultValue: 0x66,
-        value: 0,
-    };
-    let baseColorHsla: phiColors.Hsla;
+        public constructor
+        (
+            public name: string,
+            public defaultValue?: valueT,
+            public minValue?: valueT,
+            public maxValue?: valueT
+        )
+        {
+
+        }
+
+        cache = new Cache
+        (
+            (lang: string): valueT =>
+            {
+                const langSection = vscode.workspace.getConfiguration(`[${lang}]`);
+                let result: valueT = <valueT>langSection[`${applicationKey}.${this.name}`];
+                if (undefined === result)
+                {
+                    result = <valueT>vscode.workspace.getConfiguration(applicationKey)[this.name];
+                    if (undefined === result)
+                    {
+                        if (undefined !== this.defaultValue)
+                        {
+                            result = this.defaultValue;
+                        }
+                    }
+                }
+                else
+                if (undefined !== this.minValue && result < this.minValue)
+                {
+                    result = this.minValue;
+                }
+                else
+                if (undefined !== this.maxValue && this.maxValue < result)
+                {
+                    result = this.maxValue;
+                }
+                return result;
+            }
+        );
+
+        public get = this.cache.get;
+        public clear = this.cache.clear;
+    }
+    
+    const delay = new Config("delay", 250, 50, 1500);
+    const baseColor = new Config("baseColor", "#CC6666");
+    const spacesAlpha =new Config("spacesAlpha", 0x11, 0x00, 0xFF);
+    const spacesActiveAlpha =new Config("spacesActiveAlpha", 0x33, 0x00, 0xFF);
+    const spacesErrorAlpha =new Config("spacesErrorAlpha", 0x88, 0x00, 0xFF);
+    const symbolAlpha =new Config("symbolAlpha", 0x44, 0x00, 0xFF);
+    const tokenAlpha =new Config("tokenAlpha", 0x33, 0x00, 0xFF);
+    const tokenActiveAlpha =new Config("tokenActiveAlpha", 0x66, 0x00, 0xFF);
+
+    //let baseColorHsla: phiColors.Hsla;
     interface DecorationParam
     {
         base: phiColors.Hsla;
@@ -71,45 +83,11 @@ export module BackgroundPhiColors
         alpha: number;
         overviewRulerLane?: vscode.OverviewRulerLane;
     }
-    let indentErrorDecorationParam: DecorationParam;
-    let trailingSpacesErrorDecorationParam: DecorationParam;
+    //let indentErrorDecorationParam: DecorationParam;
+    //let trailingSpacesErrorDecorationParam: DecorationParam;
+    const makeIndentErrorDecorationParam = (lang: string) => makeHueDecoration(lang, -1, spacesErrorAlpha, vscode.OverviewRulerLane.Left);
+    const makeTrailingSpacesErrorDecorationParam = (lang: string) => makeHueDecoration(lang, -1, spacesErrorAlpha, vscode.OverviewRulerLane.Right);
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
-
-    export const getConfiguration = <type = vscode.WorkspaceConfiguration>(key?: string | Property<type>, section: string = applicationKey): type =>
-    {
-        if (!key || "string" === typeof key)
-        {
-            const rawKey = undefined === key ? undefined: key.split(".").reverse()[0];
-            const rawSection = undefined === key || rawKey === key ? section: `${section}.${key.replace(/(.*)\.[^\.]+/, "$1")}`;
-            const configuration = vscode.workspace.getConfiguration(rawSection);
-            return rawKey ?
-            configuration[rawKey]:
-            configuration;
-        }
-        else
-        {
-            let result: type = getConfiguration<type>(key.name);
-            if (undefined === result)
-            {
-                if (undefined !== key.defaultValue)
-                {
-                    result = key.defaultValue;
-                }
-            }
-            else
-            if (undefined !== key.minValue && result < key.minValue)
-            {
-                result = key.minValue;
-            }
-            else
-            if (undefined !== key.maxValue && key.maxValue < result)
-            {
-                result = key.maxValue;
-            }
-            key.value = result;
-            return result;
-        }
-    };
 
     export const getTicks = () => new Date().getTime();
 
@@ -127,26 +105,25 @@ export module BackgroundPhiColors
             vscode.window.onDidChangeTextEditorSelection(() => onDidChangeTextEditorSelection()),
         );
 
-        onDidChangeConfiguration();
+        vscode.window.visibleTextEditors.forEach(i => updateDecoration(i));
     };
 
     export const onDidChangeConfiguration = (): void =>
     {
-        getConfiguration(delay);
-        getConfiguration(baseColor);
-        getConfiguration(spacesAlpha);
-        getConfiguration(spacesActiveAlpha);
-        getConfiguration(spacesErrorAlpha);
-        getConfiguration(symbolAlpha);
-        getConfiguration(tokenAlpha);
-        getConfiguration(tokenActiveAlpha);
-        baseColorHsla = phiColors.rgbaToHsla(phiColors.rgbaFromStyle(baseColor.value));
+        [
+            delay,
+            baseColor,
+            spacesAlpha,
+            spacesActiveAlpha,
+            spacesErrorAlpha,
+            symbolAlpha,
+            tokenAlpha,
+            tokenActiveAlpha,
+        ]
+        .forEach(i => i.clear());
+
         Object.keys(decorations).forEach(i => decorations[i].decorator.dispose());
         decorations = { };
-        indentErrorDecorationParam = makeHueDecoration(-1, spacesErrorAlpha, vscode.OverviewRulerLane.Left);
-        trailingSpacesErrorDecorationParam = makeHueDecoration(-1, spacesErrorAlpha, vscode.OverviewRulerLane.Right);
-
-        vscode.window.visibleTextEditors.forEach(i => updateDecoration(i));
     };
 
     export const onDidChangeActiveTextEditor = (): void =>
@@ -157,6 +134,7 @@ export module BackgroundPhiColors
             updateDecoration(activeTextEditor);
         }
     };
+    let lastUpdateStamp = 0;
     export const onDidChangeTextDocument = (): void =>
     {
         const activeTextEditor = vscode.window.activeTextEditor;
@@ -173,7 +151,7 @@ export module BackgroundPhiColors
                         updateDecoration(activeTextEditor);
                     }
                 },
-                delay.value
+                delay.get(activeTextEditor.document.languageId)
             );
         }
     };
@@ -224,6 +202,7 @@ export module BackgroundPhiColors
 
     const updateDecoration = (textEditor: vscode.TextEditor) =>
     {
+        const lang = textEditor.document.languageId;
         const text = textEditor.document.getText();
         const tabSize = undefined === textEditor.options.tabSize ?
             4:
@@ -239,6 +218,7 @@ export module BackgroundPhiColors
         //  update
         updateIndentDecoration
         (
+            lang,
             text,
             textEditor,
             tabSize,
@@ -253,9 +233,10 @@ export module BackgroundPhiColors
                 tabSize
             )
         );
-        updateSymbolsDecoration(text, textEditor, tabSize);
+        updateSymbolsDecoration(lang, text, textEditor, tabSize);
         updateTokesDecoration
         (
+            lang,
             text,
             textEditor,
             tabSize,
@@ -267,8 +248,8 @@ export module BackgroundPhiColors
                     .map(i => i[0]
             )
         );
-        updateBodySpacesDecoration(text, textEditor, tabSize);
-        updateTrailSpacesDecoration(text, textEditor, tabSize);
+        updateBodySpacesDecoration(lang, text, textEditor, tabSize);
+        updateTrailSpacesDecoration(lang, text, textEditor, tabSize);
 
         //  apply
         Object.keys(decorations).map(i => decorations[i]).forEach
@@ -276,12 +257,19 @@ export module BackgroundPhiColors
             i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
         );
     };
-    export const makeHueDecoration = (hue: number, alpha: Property<number>, overviewRulerLane?: vscode.OverviewRulerLane) =>
+    let hslaCache = new Cache((color: string) => phiColors.rgbaToHsla(phiColors.rgbaFromStyle(color)));
+    export const makeHueDecoration =
+    (
+        lang: string,
+        hue: number,
+        alpha: Config<number>,
+        overviewRulerLane?: vscode.OverviewRulerLane
+    ) =>
     (
         {
-            base: baseColorHsla,
+            base:  hslaCache.get(baseColor.get(lang)),
             hue: hue +1,
-            alpha: alpha.value,
+            alpha: alpha.get(lang),
             overviewRulerLane: overviewRulerLane,
         }
     );
@@ -324,7 +312,7 @@ export module BackgroundPhiColors
             )
         );
     };
-    export const updateIndentDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number, currentIndentSize: number) =>
+    export const updateIndentDecoration = (lang: string, text: string, textEditor: vscode.TextEditor, tabSize: number, currentIndentSize: number) =>
     {
         const indents: { index: number, text: string, body: string }[] = [];
         let totalSpaces = 0;
@@ -387,7 +375,7 @@ export module BackgroundPhiColors
                             textEditor,
                             cursor,
                             length = indentUnit.length,
-                            makeHueDecoration(i, (currentIndentIndex === i) ? spacesActiveAlpha: spacesAlpha)
+                            makeHueDecoration(lang, i, (currentIndentIndex === i) ? spacesActiveAlpha: spacesAlpha)
                         );
                         text = text.substr(indentUnit.length);
                     }
@@ -400,7 +388,7 @@ export module BackgroundPhiColors
                                 textEditor,
                                 cursor,
                                 length = text.length,
-                                indentErrorDecorationParam
+                                makeIndentErrorDecorationParam(lang)
                             );
                             text = "";
                         }
@@ -416,7 +404,7 @@ export module BackgroundPhiColors
                                         textEditor,
                                         cursor,
                                         length = spaces,
-                                        makeHueDecoration(i, (currentIndentIndex === i) ? spacesActiveAlpha: spacesAlpha)
+                                        makeHueDecoration(lang, i, (currentIndentIndex === i) ? spacesActiveAlpha: spacesAlpha)
                                     );
                                     cursor += length;
                                 }
@@ -425,7 +413,7 @@ export module BackgroundPhiColors
                                     textEditor,
                                     cursor,
                                     length = 1,
-                                    indentErrorDecorationParam
+                                    makeIndentErrorDecorationParam(lang)
                                 );
                                 const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), tabSize) /indentUnitSize) -1;
                                 i += indentCount;
@@ -439,7 +427,7 @@ export module BackgroundPhiColors
                                     textEditor,
                                     cursor,
                                     length = spaces,
-                                    indentErrorDecorationParam
+                                    makeIndentErrorDecorationParam(lang)
                                 );
                                 const indentCount = Math.ceil(spaces /indentUnitSize) -1;
                                 i += indentCount;
@@ -465,7 +453,13 @@ export module BackgroundPhiColors
         }
         return result;
     };
-    export const updateSymbolsDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecToArray
+    export const updateSymbolsDecoration =
+    (
+        lang: string,
+        text: string,
+        textEditor: vscode.TextEditor,
+        tabSize: number
+    ) => regExpExecToArray
     (
         /[\!\.\,\:\;\(\)\[\]\{\}\<\>\"\'\`\#\$\%\&\=\-\+\*\@\\\/\|\?\^\~"]/gm,
         text
@@ -479,6 +473,7 @@ export module BackgroundPhiColors
             match[0].length,
             makeHueDecoration
             (
+                lang,
                 (
                     <{[key: string]: number}>
                     {
@@ -524,6 +519,7 @@ export module BackgroundPhiColors
         %34; // ← 通常、こういうところの数字は素数にすることが望ましいがここについては https://wraith13.github.io/phi-ratio-coloring/phi-ratio-coloring.htm で類似色の出てくる周期をベース(8,13,21,...)に調整すること。
     export const updateTokesDecoration =
     (
+        lang: string,
         text: string,
         textEditor: vscode.TextEditor,
         tabSize: number,
@@ -553,13 +549,20 @@ export module BackgroundPhiColors
             i.token.length,
             makeHueDecoration
             (
+                lang,
                 hash(i.token),
                 i.isActive ? tokenActiveAlpha: tokenAlpha,
                 i.isActive ? vscode.OverviewRulerLane.Center: undefined,
             )
         )
     );
-    export const updateBodySpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecToArray
+    export const updateBodySpacesDecoration =
+    (
+        lang: string,
+        text: string,
+        textEditor: vscode.TextEditor,
+        tabSize: number
+    ) => regExpExecToArray
     (
         /^([ \t]*)([^ \t\r\n]+)([^\r\n]+)([^ \t\r\n]+)([ \t]*)$/gm,
         text
@@ -580,6 +583,7 @@ export module BackgroundPhiColors
                 match[0].length,
                 makeHueDecoration
                 (
+                    lang,
                     match[0].startsWith("\t") ?
                         //  tabs
                         ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
@@ -590,7 +594,13 @@ export module BackgroundPhiColors
             )
         )
     );
-    export const updateTrailSpacesDecoration = (text: string, textEditor: vscode.TextEditor, tabSize: number) => regExpExecToArray
+    export const updateTrailSpacesDecoration =
+    (
+        lang: string,
+        text: string,
+        textEditor: vscode.TextEditor,
+        tabSize: number
+    ) => regExpExecToArray
     (
         /^([^\r\n]*[^ \t\r\n]+)([ \t]+)$/gm,
         text
@@ -602,7 +612,7 @@ export module BackgroundPhiColors
             textEditor,
             match.index +match[1].length,
             match[2].length,
-            trailingSpacesErrorDecorationParam
+            makeTrailingSpacesErrorDecorationParam(lang)
         )
     );
 
