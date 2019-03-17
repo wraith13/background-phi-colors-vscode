@@ -6,7 +6,7 @@ export module BackgroundPhiColors
     const applicationKey = "background-phi-colors";
     class Cache<keyT, valueT>
     {
-        cache: {[key: string]: valueT} = { };
+        cache: { [key: string]: valueT } = { };
         public constructor(public loader: (key: keyT) => valueT)
         {
 
@@ -92,6 +92,9 @@ export module BackgroundPhiColors
     const tokenAlpha =new Config("tokenAlpha", 0x33, 0x00, 0xFF);
     const tokenActiveAlpha =new Config("tokenActiveAlpha", 0x66, 0x00, 0xFF);
 
+    const isOverTheLimit: { [fileName: string]: boolean } = { };
+    const isLimitNoticed: { [fileName: string]: boolean } = { };
+
     interface DecorationParam
     {
         base: phiColors.Hsla;
@@ -110,7 +113,17 @@ export module BackgroundPhiColors
         context.subscriptions.push
         (
             //  コマンドの登録
-            vscode.commands.registerCommand(`${applicationKey}.helloWorld`, async () => await vscode.window.showInformationMessage('Hello World!')),
+            vscode.commands.registerCommand
+            (
+                `${applicationKey}.overTheLimig`, () =>
+                {
+                    const textEditor = vscode.window.activeTextEditor;
+                    if (textEditor)
+                    {
+                        overTheLimit(textEditor);
+                    }
+                }
+            ),
 
             //  イベントリスナーの登録
             vscode.workspace.onDidChangeConfiguration(() => onDidChangeConfiguration()),
@@ -264,65 +277,90 @@ export module BackgroundPhiColors
     {
         const lang = textEditor.document.languageId;
         const text = textEditor.document.getText();
-        const tabSize = undefined === textEditor.options.tabSize ?
-            4:
-            (
-                "number" === typeof textEditor.options.tabSize ?
-                    textEditor.options.tabSize:
-                    parseInt(textEditor.options.tabSize)
-            );
-
-        //  clear
-        Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []);
-
-        //  update
-        updateIndentDecoration
-        (
-            lang,
-            text,
-            textEditor,
-            tabSize
-        );
-        if (symbolEnabled.get(lang))
+        if (text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
         {
-            updateSymbolsDecoration(lang, text, textEditor, tabSize);
-        }
-        if ("none" !== tokenMode.get(lang))
-        {
-            const showActive = 0 <= ["smart", "full"].indexOf(tokenMode.get(lang));
-            const showRegular = 0 <= ["light", "full"].indexOf(tokenMode.get(lang));
-            updateTokesDecoration
+            const tabSize = undefined === textEditor.options.tabSize ?
+                4:
+                (
+                    "number" === typeof textEditor.options.tabSize ?
+                        textEditor.options.tabSize:
+                        parseInt(textEditor.options.tabSize)
+                );
+
+            //  clear
+            Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []);
+
+            //  update
+            updateIndentDecoration
             (
                 lang,
                 text,
                 textEditor,
-                tabSize,
-                showRegular,
-                showActive ?
-                    regExpExecToArray
-                    (
-                        /\w+/gm,
-                        textEditor.document
-                            .lineAt(textEditor.selection.active.line).text
-                    )
-                    .map(i => i[0]):
-                    []
+                tabSize
+            );
+            if (symbolEnabled.get(lang))
+            {
+                updateSymbolsDecoration(lang, text, textEditor, tabSize);
+            }
+            if ("none" !== tokenMode.get(lang))
+            {
+                const showActive = 0 <= ["smart", "full"].indexOf(tokenMode.get(lang));
+                const showRegular = 0 <= ["light", "full"].indexOf(tokenMode.get(lang));
+                updateTokesDecoration
+                (
+                    lang,
+                    text,
+                    textEditor,
+                    tabSize,
+                    showRegular,
+                    showActive ?
+                        regExpExecToArray
+                        (
+                            /\w+/gm,
+                            textEditor.document
+                                .lineAt(textEditor.selection.active.line).text
+                        )
+                        .map(i => i[0]):
+                        []
+                );
+            }
+            if (bodySpacesEnabled.get(lang))
+            {
+                updateBodySpacesDecoration(lang, text, textEditor, tabSize);
+            }
+            if (traillingSpacesEnabled.get(lang))
+            {
+                updateTrailSpacesDecoration(lang, text, textEditor, tabSize, traillingSpacesErrorEnabled.get(lang));
+            }
+
+            //  apply
+            Object.keys(decorations).map(i => decorations[i]).forEach
+            (
+                i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
             );
         }
-        if (bodySpacesEnabled.get(lang))
+        else
         {
-            updateBodySpacesDecoration(lang, text, textEditor, tabSize);
+            if (!isLimitNoticed[textEditor.document.fileName])
+            {
+                isLimitNoticed[textEditor.document.fileName] = true;
+                vscode.window.showWarningMessage(`${textEditor.document.fileName} is too large! background-phi-colors has been disabled. But you can over the limit!`, "Close", "Over the limit").then
+                (
+                    i =>
+                    {
+                        if ("Over the limit" === i)
+                        {
+                            overTheLimit(textEditor);
+                        }
+                    }
+                );
+            }
         }
-        if (traillingSpacesEnabled.get(lang))
-        {
-            updateTrailSpacesDecoration(lang, text, textEditor, tabSize, traillingSpacesErrorEnabled.get(lang));
-        }
-
-        //  apply
-        Object.keys(decorations).map(i => decorations[i]).forEach
-        (
-            i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
-        );
+    };
+    export const overTheLimit = (textEditor: vscode.TextEditor) =>
+    {
+        isOverTheLimit[textEditor.document.fileName] = true;
+        updateDecoration(textEditor);
     };
     let hslaCache = new Cache((color: string) => phiColors.rgbaToHsla(phiColors.rgbaFromStyle(color)));
     export const makeHueDecoration =
@@ -557,7 +595,7 @@ export module BackgroundPhiColors
             (
                 lang,
                 (
-                    <{[key: string]: number}>
+                    <{ [key: string]: number }>
                     {
                         "!": 1,
                         ".": 2,

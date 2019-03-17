@@ -17,8 +17,9 @@
     "contributes": {
         "commands": [
             {
-                "command": "background-phi-colors.helloWorld",
-                "title": "Hello World"
+                "command": "background-phi-colors.overTheLimig",
+                "title": "Over the Limit",
+                "category": "Background Phi Colors"
             }
         ],
         "configuration": [
@@ -27,9 +28,9 @@
                 "properties": {
                     "background-phi-colors.fileSizeLimit": {
                         "type": "number",
-                        "default": 250,
+                        "default": 102400,
                         "minimum": 10240,
-                        "maximum": 1500,
+                        "maximum": 10485760,
                         "overridable": true
                     },
                     "background-phi-colors.delay": {
