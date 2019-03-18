@@ -1,65 +1,127 @@
 # Background Phi Colors README
 
-This is the README for your extension "background3-phi-colors". After writing up a brief description, we recommend including the following sections.
+[![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/wraith13.background-phi-colors.svg) ![installs](https://vsmarketplacebadge.apphb.com/installs/wraith13.background-phi-colors.svg) ![rating](https://vsmarketplacebadge.apphb.com/rating/wraith13.background-phi-colors.svg)](https://marketplace.visualstudio.com/items?itemName=wraith13.background-phi-colors)
+
+This extension colors the background in various ways.
+
+⚠ This extension is still PREVIEW version!
+
+This extension is too ambitious and may be very annoying.
+
+![demo](./images/screenshot/demo.gif)
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+This extension colors the background in follow ways.
 
-For example if there is an image subfolder under your extension project workspace:
+- indenet level
+- error indent
+- tokens
+- symbols
+- spaces in body
+- trailling spaces
 
-\!\[feature X\]\(images/feature-x.png\)
+### Indent: light
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+![indent light](./images/screenshot/indent.light.png)
 
-## Requirements
+### Indent: smart
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+![indent smart](./images/screenshot/indent.smart.png)
+
+### Indent: full
+
+![indent full](./images/screenshot/indent.full.png)
+
+### Token: light
+
+![token light](./images/screenshot/token.light.png)
+
+### Token: smart
+
+![token smart](./images/screenshot/token.smart.png)
+
+### Token: full
+
+![token full](./images/screenshot/token.full.png)
+
+### Symbols
+
+![symbols](./images/screenshot/symbols.png)
+
+### Spaces
+
+![spaces](./images/screenshot/spaces.png)
+
+## Tutorial
+
+### 0. ⬇️ Install Background Phi Colors
+
+Show extension side bar within VS Code(Mac:<kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>, Windows and Linux: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>), type `background-phi-colors` and press <kbd>Enter</kbd> and click <kbd>Install</kbd>. Restart VS Code when installation is completed.
+
+### 1. 🌈 Colors background
+
+Open a text file. And move cursor. The background color changes automatically.
+
+### 2. 🔧 Next step
+
+You can change [settings](#extension-settings) by `settings.json`. And you can apply [keyboard shortcuts](#keyboard-shortcut-settings) by `keybindings.json`.
+
+Enjoy!
+
+## Commands
+
+* `Background Phi Colors: Over the Limit` : TBD
+* `Background Phi Colors: Pause` : TBD
+* `Background Phi Colors: Pause All` : TBD
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+This extension contributes the following settings by [`settings.json`](https://code.visualstudio.com/docs/customization/userandworkspace#_creating-user-and-workspace-settings)( Mac: <kbd>Command</kbd>+<kbd>,</kbd>, Windows / Linux: <kbd>File</kbd> -> <kbd>Preferences</kbd> -> <kbd>User Settings</kbd> ):
 
-For example:
+* `background-phi-colors.enabled`: TBD
+* `background-phi-colors.fileSizeLimit`: TBD
+* `background-phi-colors.delay`: TBD
+* `background-phi-colors.baseColor`: TBD
+* `background-phi-colors.indentMode`: TBD
+* `background-phi-colors.tokenMode`: TBD
+* `background-phi-colors.indentErrorEnabled`: TBD
+* `background-phi-colors.traillingSpacesErrorEnabled`: TBD
+* `background-phi-colors.bodySpacesEnabled`: TBD
+* `background-phi-colors.traillingSpacesEnabled`: TBD
+* `background-phi-colors.symbolEnabled`: TBD
+* `background-phi-colors.showIndentErrorInOverviewRulerLane`: TBD
+* `background-phi-colors.showActiveTokenInOverviewRulerLane`: TBD
+* `background-phi-colors.showTraillingSpacesErrorInOverviewRulerLane`: TBD
+* `background-phi-colors.spacesAlpha`: TBD
+* `background-phi-colors.spacesActiveAlpha`: TBD
+* `background-phi-colors.spacesErrorAlpha`: TBD
+* `background-phi-colors.symbolAlpha`: TBD
+* `background-phi-colors.tokenAlpha`: TBD
+* `background-phi-colors.tokenActiveAlpha`: TBD
 
-This extension contributes the following settings:
+## Keyboard shortcut Settings
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+In default, Background Phi Colors's commands doesn't apply keyboard shortcuts. Althogh,
+you can apply keyboard shortcuts by [`keybindings.json`](https://code.visualstudio.com/docs/customization/keybindings#_customizing-shortcuts)
+( Mac: <kbd>Code</kbd> -> <kbd>Preferences</kbd> -> <kbd>Keyboard Shortcuts</kbd>, Windows / Linux: <kbd>File</kbd> -> <kbd>Preferences</kbd> -> <kbd>Keyboard Shortcuts</kbd>).
 
-## Known Issues
+Command name on `keybindings.json` is diffarent from on Command Pallete. See below table.
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+|on Command Pallete|on keybindings.json|
+|-|-|
+|`Background Phi Colors: Over the Limit`|`background-phi-colors.overTheLimig`|
+|`Background Phi Colors: Pause`|`background-phi-colors.pause`|
+|`Background Phi Colors: Pause All`|`background-phi-colors.pauseAll`|
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+see ChangLog on [marketplace](https://marketplace.visualstudio.com/items/wraith13.background-phi-colors/changelog) or [github](https://github.com/wraith13/background-phi-colors/blob/master/CHANGELOG.md)
 
-### 1.0.0
+## Support
 
-Initial release of ...
+[GitHub Issues](https://github.com/wraith13/background-phi-colors-vscode/issues)
 
-### 1.0.1
+## License
 
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+[Boost Software License](https://github.com/wraith13/background-phi-colors-vscode/blob/master/LICENSE_1_0.txt)

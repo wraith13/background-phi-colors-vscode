@@ -1,14 +1,30 @@
 {
     "name": "background-phi-colors",
     "displayName": "Background Phi Colors",
-    "description": "TBD",
-    "version": "0.0.1",
+    "description": "This extension colors the background in various ways.",
+    "icon": "images/phihex.128.png",
+    "version": "0.1.0",
+    "preview": true,
+    "publisher": "wraith13",
     "license": "SEE LICENSE IN LICENSE_1_0.txt",
     "engines": {
         "vscode": "^1.30.0"
     },
+    "bugs": {
+        "url": "https://github.com/wraith13/background-phi-colors/issues"
+    },
+    "homepage": "https://github.com/wraith13/background-phi-colors",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/wraith13/background-phi-colors.git"
+    },
     "categories": [
         "Other"
+    ],
+    "keywords": [
+        "background",
+        "phi",
+        "color"
     ],
     "activationEvents": [
         "*"
@@ -20,12 +36,27 @@
                 "command": "background-phi-colors.overTheLimig",
                 "title": "Over the Limit",
                 "category": "Background Phi Colors"
+            },
+            {
+                "command": "background-phi-colors.pause",
+                "title": "Pause",
+                "category": "Background Phi Colors"
+            },
+            {
+                "command": "background-phi-colors.pauseAll",
+                "title": "Pause All",
+                "category": "Background Phi Colors"
             }
         ],
         "configuration": [
             {
                 "title": "background-phi-colors",
                 "properties": {
+                    "background-phi-colors.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "overridable": true
+                    },
                     "background-phi-colors.fileSizeLimit": {
                         "type": "number",
                         "default": 102400,
@@ -53,7 +84,7 @@
                     },
                     "background-phi-colors.tokenMode": {
                         "type": "string",
-                        "default": "full",
+                        "default": "smart",
                         "enum": ["none", "light", "smart", "full"],
                         "overridable": true
                     },
@@ -79,7 +110,7 @@
                     },
                     "background-phi-colors.symbolEnabled": {
                         "type": "boolean",
-                        "default": true,
+                        "default": false,
                         "overridable": true
                     },
                     "background-phi-colors.showIndentErrorInOverviewRulerLane": {

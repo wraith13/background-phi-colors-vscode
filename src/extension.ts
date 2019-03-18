@@ -66,22 +66,23 @@ export module BackgroundPhiColors
         public clear = this.cache.clear;
     }
     
+    const enabled = new Config("enabled", true);
     const fileSizeLimit = new Config("fileSizeLimit", 100 *1024, 10 *1024, 10 *1024 *1024);
     const delay = new Config("delay", 250, 50, 1500);
     const baseColor = new Config("baseColor", "#CC6666");
-    const spaceBaseColor = new Config("spaceBaseColor", <string | undefined>undefined);
-    const spaceErrorColor = new Config("spaceErrorColor", <string | undefined>undefined);
-    const symbolBaseColor = new Config("symbolBaseColor", <string | undefined>undefined);
-    const symbolColorMap = new Config("symbolColorMap", <string[]>[]);
-    const tokenBaseColor = new Config("tokenBaseColor", <string | undefined>undefined);
-    const tokenColorMap = new Config("tokenColorMap", <string[]>[]);
+    //const spaceBaseColor = new Config("spaceBaseColor", <string | undefined>undefined);
+    //const spaceErrorColor = new Config("spaceErrorColor", <string | undefined>undefined);
+    //const symbolBaseColor = new Config("symbolBaseColor", <string | undefined>undefined);
+    //const symbolColorMap = new Config("symbolColorMap", <string[]>[]);
+    //const tokenBaseColor = new Config("tokenBaseColor", <string | undefined>undefined);
+    //const tokenColorMap = new Config("tokenColorMap", <string[]>[]);
     const indentMode = new Config("indentMode", "full"); // "none", "light", "smart", "full"
-    const tokenMode = new Config("tokenMode", "full"); // "none", "light", "smart", "full"
+    const tokenMode = new Config("tokenMode", "smart"); // "none", "light", "smart", "full"
     const indentErrorEnabled = new Config("indentErrorEnabled", true);
     const traillingSpacesErrorEnabled = new Config("traillingSpacesErrorEnabled", true);
-    const bodySpacesEnabled = new Config("bodySpacesMode", true);
-    const traillingSpacesEnabled = new Config("traillingSpacesMode", true);
-    const symbolEnabled = new Config("symbolMode", true);
+    const bodySpacesEnabled = new Config("bodySpacesEnabled", true);
+    const traillingSpacesEnabled = new Config("traillingSpacesEnabled", true);
+    const symbolEnabled = new Config("symbolEnabled", false);
     const showIndentErrorInOverviewRulerLane = new Config("showIndentErrorInOverviewRulerLane", true);
     const showActiveTokenInOverviewRulerLane = new Config("showActiveTokenInOverviewRulerLane", true);
     const showTraillingSpacesErrorInOverviewRulerLane = new Config("showTraillingSpacesErrorInOverviewRulerLane", true);
@@ -92,8 +93,11 @@ export module BackgroundPhiColors
     const tokenAlpha =new Config("tokenAlpha", 0x33, 0x00, 0xFF);
     const tokenActiveAlpha =new Config("tokenActiveAlpha", 0x66, 0x00, 0xFF);
 
+    const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
     const isLimitNoticed: { [fileName: string]: boolean } = { };
+    let isPaused: { [fileName: string]: boolean } = { };
+    let isPausedAll: boolean | undefined = false;
 
     interface DecorationParam
     {
@@ -113,15 +117,17 @@ export module BackgroundPhiColors
         context.subscriptions.push
         (
             //  コマンドの登録
+            vscode.commands.registerCommand(`${applicationKey}.overTheLimig`, () => activeTextEditor(overTheLimit)),
+            vscode.commands.registerCommand(`${applicationKey}.pause`, () => activeTextEditor(pause)),
             vscode.commands.registerCommand
             (
-                `${applicationKey}.overTheLimig`, () =>
+                `${applicationKey}.pauseAll`, () =>
                 {
-                    const textEditor = vscode.window.activeTextEditor;
-                    if (textEditor)
-                    {
-                        overTheLimit(textEditor);
-                    }
+                    isPausedAll = undefined !== isPausedAll ?
+                        !isPausedAll:
+                        enabled.get("");
+                    isPaused = { };
+                    vscode.window.visibleTextEditors.forEach(i => updateDecoration(i));
                 }
             ),
 
@@ -135,18 +141,47 @@ export module BackgroundPhiColors
         vscode.window.visibleTextEditors.forEach(i => updateDecoration(i));
     };
 
+    const valueThen = <valueT>(value: valueT | undefined, f: (value: valueT) => void) =>
+    {
+        if (value)
+        {
+            f(value);
+        }
+    };
+    const activeTextEditor = (f: (textEditor: vscode.TextEditor) => void) => valueThen(vscode.window.activeTextEditor, f);
+
+    export const overTheLimit = (textEditor: vscode.TextEditor) =>
+    {
+        isOverTheLimit[textEditor.document.fileName] = true;
+        updateDecoration(textEditor);
+    };
+
+    export const pause = (textEditor: vscode.TextEditor) =>
+    {
+        isPaused[textEditor.document.fileName] =
+            undefined !== isPaused[textEditor.document.fileName] ?
+                !isPaused[textEditor.document.fileName]:
+                (
+                    undefined !== isPausedAll ?
+                        !isPausedAll:
+                        enabled.get("")
+                );
+        updateDecoration(textEditor);
+    };
+
     export const onDidChangeConfiguration = (): void =>
     {
         [
+            enabled,
             fileSizeLimit,
             delay,
             baseColor,
-            spaceBaseColor,
-            spaceErrorColor,
-            symbolBaseColor,
-            symbolColorMap,
-            tokenBaseColor,
-            tokenColorMap,
+            //spaceBaseColor,
+            //spaceErrorColor,
+            //symbolBaseColor,
+            //symbolColorMap,
+            //tokenBaseColor,
+            //tokenColorMap,
             indentMode,
             tokenMode,
             indentErrorEnabled,
@@ -172,19 +207,12 @@ export module BackgroundPhiColors
         vscode.window.visibleTextEditors.forEach(i => updateDecoration(i));
     };
 
-    export const onDidChangeActiveTextEditor = (): void =>
-    {
-        const textEditor = vscode.window.activeTextEditor;
-        if (textEditor)
-        {
-            updateDecoration(textEditor);
-        }
-    };
+    export const onDidChangeActiveTextEditor = (): void => activeTextEditor(updateDecoration);
+
     let lastUpdateStamp = 0;
-    export const onDidChangeTextDocument = (): void =>
-    {
-        const textEditor = vscode.window.activeTextEditor;
-        if (textEditor)
+    export const onDidChangeTextDocument = (): void => activeTextEditor
+    (
+        textEditor => 
         {
             const updateStamp = getTicks();
             lastUpdateStamp = updateStamp;
@@ -200,11 +228,11 @@ export module BackgroundPhiColors
                 delay.get(textEditor.document.languageId)
             );
         }
-    };
-    export const onDidChangeTextEditorSelection = () =>
-    {
-        const textEditor = vscode.window.activeTextEditor;
-        if (textEditor)
+    );
+
+    export const onDidChangeTextEditorSelection = () => activeTextEditor
+    (
+        textEditor =>
         {
             const lang = textEditor.document.languageId;
             if
@@ -228,7 +256,7 @@ export module BackgroundPhiColors
                 onDidChangeTextDocument();
             }
         }
-    };
+    );
 
     export const gcd = (a: number, b: number) : number => b ? gcd(b, a % b): a;
 
@@ -273,95 +301,110 @@ export module BackgroundPhiColors
         textEditor.document.positionAt(startPosition +length)
     );
 
+    const inverseKeepUndefined = (v: boolean | undefined) => undefined === v ? v: !v;
     const updateDecoration = (textEditor: vscode.TextEditor) =>
     {
         const lang = textEditor.document.languageId;
         const text = textEditor.document.getText();
-        if (text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
+
+        //  clear
+        Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []);
+
+        if
+        (
+            
+            [
+                inverseKeepUndefined(isPaused[textEditor.document.fileName]),
+                inverseKeepUndefined(isPausedAll),
+                enabled.get(lang)
+            ]
+            .filter(i => undefined !== i)[0]
+        )
         {
-            const tabSize = undefined === textEditor.options.tabSize ?
-                4:
-                (
-                    "number" === typeof textEditor.options.tabSize ?
-                        textEditor.options.tabSize:
-                        parseInt(textEditor.options.tabSize)
-                );
-
-            //  clear
-            Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []);
-
-            //  update
-            updateIndentDecoration
-            (
-                lang,
-                text,
-                textEditor,
-                tabSize
-            );
-            if (symbolEnabled.get(lang))
+            if (false === isPaused[textEditor.document.fileName] || text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
             {
-                updateSymbolsDecoration(lang, text, textEditor, tabSize);
-            }
-            if ("none" !== tokenMode.get(lang))
-            {
-                const showActive = 0 <= ["smart", "full"].indexOf(tokenMode.get(lang));
-                const showRegular = 0 <= ["light", "full"].indexOf(tokenMode.get(lang));
-                updateTokesDecoration
+                const tabSize = undefined === textEditor.options.tabSize ?
+                    4:
+                    (
+                        "number" === typeof textEditor.options.tabSize ?
+                            textEditor.options.tabSize:
+                            parseInt(textEditor.options.tabSize)
+                    );
+
+                //  update
+                updateIndentDecoration
                 (
                     lang,
                     text,
                     textEditor,
-                    tabSize,
-                    showRegular,
-                    showActive ?
-                        regExpExecToArray
-                        (
-                            /\w+/gm,
-                            textEditor.document
-                                .lineAt(textEditor.selection.active.line).text
-                        )
-                        .map(i => i[0]):
-                        []
+                    tabSize
                 );
+                if (symbolEnabled.get(lang))
+                {
+                    updateSymbolsDecoration(lang, text, textEditor, tabSize);
+                }
+                if ("none" !== tokenMode.get(lang))
+                {
+                    const showActive = 0 <= ["smart", "full"].indexOf(tokenMode.get(lang));
+                    const showRegular = 0 <= ["light", "full"].indexOf(tokenMode.get(lang));
+                    updateTokesDecoration
+                    (
+                        lang,
+                        text,
+                        textEditor,
+                        tabSize,
+                        showRegular,
+                        showActive ?
+                            regExpExecToArray
+                            (
+                                /\w+/gm,
+                                textEditor.document
+                                    .lineAt(textEditor.selection.active.line).text
+                            )
+                            .map(i => i[0]):
+                            []
+                    );
+                }
+                if (bodySpacesEnabled.get(lang))
+                {
+                    updateBodySpacesDecoration(lang, text, textEditor, tabSize);
+                }
+                if (traillingSpacesEnabled.get(lang))
+                {
+                    updateTrailSpacesDecoration(lang, text, textEditor, tabSize, traillingSpacesErrorEnabled.get(lang));
+                }
             }
-            if (bodySpacesEnabled.get(lang))
+            else
             {
-                updateBodySpacesDecoration(lang, text, textEditor, tabSize);
+                if (!isLimitNoticed[textEditor.document.fileName])
+                {
+                    isLimitNoticed[textEditor.document.fileName] = true;
+                    vscode.window.showWarningMessage(`${textEditor.document.fileName} is too large! background-phi-colors has been disabled. But you can over the limit!`, "Close", "Over the limit").then
+                    (
+                        i =>
+                        {
+                            if ("Over the limit" === i)
+                            {
+                                overTheLimit(textEditor);
+                            }
+                        }
+                    );
+                }
             }
-            if (traillingSpacesEnabled.get(lang))
-            {
-                updateTrailSpacesDecoration(lang, text, textEditor, tabSize, traillingSpacesErrorEnabled.get(lang));
-            }
+        }
 
-            //  apply
+        //  apply
+        const isToDecorate = Object.keys(decorations).some(i => 0 < decorations[i].rangesOrOptions.length);
+        if (isDecorated[textEditor.document.fileName] || isToDecorate)
+        {
             Object.keys(decorations).map(i => decorations[i]).forEach
             (
                 i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
             );
-        }
-        else
-        {
-            if (!isLimitNoticed[textEditor.document.fileName])
-            {
-                isLimitNoticed[textEditor.document.fileName] = true;
-                vscode.window.showWarningMessage(`${textEditor.document.fileName} is too large! background-phi-colors has been disabled. But you can over the limit!`, "Close", "Over the limit").then
-                (
-                    i =>
-                    {
-                        if ("Over the limit" === i)
-                        {
-                            overTheLimit(textEditor);
-                        }
-                    }
-                );
-            }
+            isDecorated[textEditor.document.fileName] = isToDecorate;
         }
     };
-    export const overTheLimit = (textEditor: vscode.TextEditor) =>
-    {
-        isOverTheLimit[textEditor.document.fileName] = true;
-        updateDecoration(textEditor);
-    };
+
     let hslaCache = new Cache((color: string) => phiColors.rgbaToHsla(phiColors.rgbaFromStyle(color)));
     export const makeHueDecoration =
     (
@@ -372,12 +415,13 @@ export module BackgroundPhiColors
     ) =>
     (
         {
-            base:  hslaCache.get(baseColor.get(lang)),
+            base: hslaCache.get(baseColor.get(lang)),
             hue: hue +1,
             alpha: alpha.get(lang),
             overviewRulerLane: overviewRulerLane,
         }
     );
+
     export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, decorationParam: DecorationParam) =>
     {
         const key = JSON.stringify(decorationParam);
@@ -417,6 +461,7 @@ export module BackgroundPhiColors
             )
         );
     };
+
     export const updateIndentDecoration = (lang: string, text: string, textEditor: vscode.TextEditor, tabSize: number) =>
     {
         const showActive = 0 <= ["smart", "full"].indexOf(indentMode.get(lang));
@@ -559,6 +604,7 @@ export module BackgroundPhiColors
             );
         }
     };
+
     export const regExpExecToArray = (regexp: RegExp, text: string) =>
     {
         const result: RegExpExecArray[] = [];
@@ -573,6 +619,7 @@ export module BackgroundPhiColors
         }
         return result;
     };
+
     export const updateSymbolsDecoration =
     (
         lang: string,
@@ -711,7 +758,7 @@ export module BackgroundPhiColors
                         ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
                         //  spaces
                         match[0].length -1,
-                    spacesAlpha
+                    spacesActiveAlpha
                 )
             )
         )
@@ -763,3 +810,16 @@ export function activate(context: vscode.ExtensionContext): void
 export function deactivate(): void
 {
 }
+
+//  for sample
+
+    /*
+     *
+     * EXACTLY WRONG INDENT
+     *
+     */
+    
+    //    body spaces
+
+    // trailling spaces        
+
