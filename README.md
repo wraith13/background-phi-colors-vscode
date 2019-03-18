@@ -8,7 +8,7 @@ This extension colors the background in various ways.
 
 This extension is too ambitious and may be very annoying.
 
-![demo](./images/screenshot/demo.gif)
+![demo](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/demo.gif)
 
 ## Features
 
@@ -23,35 +23,35 @@ This extension colors the background in follow ways.
 
 ### Indent: light
 
-![indent light](./images/screenshot/indent.light.png)
+![indent light](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/indent.light.png)
 
 ### Indent: smart
 
-![indent smart](./images/screenshot/indent.smart.png)
+![indent smart](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/indent.smart.png)
 
 ### Indent: full
 
-![indent full](./images/screenshot/indent.full.png)
+![indent full](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/indent.full.png)
 
 ### Token: light
 
-![token light](./images/screenshot/token.light.png)
+![token light](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/token.light.png)
 
 ### Token: smart
 
-![token smart](./images/screenshot/token.smart.png)
+![token smart](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/token.smart.png)
 
 ### Token: full
 
-![token full](./images/screenshot/token.full.png)
+![token full](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/token.full.png)
 
 ### Symbols
 
-![symbols](./images/screenshot/symbols.png)
+![symbols](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/symbols.png)
 
 ### Spaces
 
-![spaces](./images/screenshot/spaces.png)
+![spaces](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/spaces.png)
 
 ## Tutorial
 
