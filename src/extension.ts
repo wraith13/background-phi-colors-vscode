@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
 import { phiColors } from 'phi-colors';
 
+const roundCenti = (value : number) : number => Math.round(value *100) /100;
+const percentToDisplayString = (value : number, locales?: string | string[]) : string =>`${roundCenti(value).toLocaleString(locales, { style: "percent" })}`;
+
 export module Profiler
 {
     let profileScore: { [scope: string]: number } = { };
@@ -247,8 +250,9 @@ export module BackgroundPhiColors
                         Profiler.stop();
                         outputChannel.appendLine(`⏲ Stop Profile! - ${new Date()}`);
                         outputChannel.appendLine(`📊 Profile Report`);
-                        outputChannel.appendLine(`- Total: ${Profiler.getReport().map(i => i.ticks).reduce((p, c) => p +c).toLocaleString()}ms`);
-                        Profiler.getReport().forEach(i => outputChannel.appendLine(`- ${i.name}: ${i.ticks.toLocaleString()}ms`));
+                        const total = Profiler.getReport().map(i => i.ticks).reduce((p, c) => p +c);
+                        outputChannel.appendLine(`- Total: ${total.toLocaleString()}ms ( ${percentToDisplayString(1)} )`);
+                        Profiler.getReport().forEach(i => outputChannel.appendLine(`- ${i.name}: ${i.ticks.toLocaleString()}ms ( ${percentToDisplayString(i.ticks / total)} )`));
                     }
                     else
                     {
