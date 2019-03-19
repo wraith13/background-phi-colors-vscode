@@ -74,6 +74,8 @@ Enjoy!
 * `Background Phi Colors: Over the Limit` : TBD
 * `Background Phi Colors: Pause` : TBD
 * `Background Phi Colors: Pause All` : TBD
+* `Background Phi Colors: Start Profile` : TBD
+* `Background Phi Colors: Stop Profile` : TBD
 
 ## Extension Settings
 
@@ -113,6 +115,8 @@ Command name on `keybindings.json` is diffarent from on Command Pallete. See bel
 |`Background Phi Colors: Over the Limit`|`background-phi-colors.overTheLimig`|
 |`Background Phi Colors: Pause`|`background-phi-colors.pause`|
 |`Background Phi Colors: Pause All`|`background-phi-colors.pauseAll`|
+|`Background Phi Colors: Start Profile`|`background-phi-colors.startProfile`|
+|`Background Phi Colors: Stop Profile`|`background-phi-colors.stopProfile`|
 
 ## Release Notes
 

@@ -4,6 +4,12 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.2.0 - 2019-03-1??
+
+### Added
+
+- Embedded self-profiler.
+
 ## 0.1.3 - 2019-03-18
 
 ### Fixed

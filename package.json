@@ -46,6 +46,16 @@
                 "command": "background-phi-colors.pauseAll",
                 "title": "Pause All",
                 "category": "Background Phi Colors"
+            },
+            {
+                "command": "background-phi-colors.startProfile",
+                "title": "Start Profile",
+                "category": "Background Phi Colors"
+            },
+            {
+                "command": "background-phi-colors.stopProfile",
+                "title": "Stop Profile",
+                "category": "Background Phi Colors"
             }
         ],
         "configuration": [
