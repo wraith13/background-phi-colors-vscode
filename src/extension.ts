@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { phiColors } from 'phi-colors';
 
+const getTicks = () => new Date().getTime();
 const roundCenti = (value : number) : number => Math.round(value *100) /100;
 const percentToDisplayString = (value : number, locales?: string | string[]) : string =>`${roundCenti(value).toLocaleString(locales, { style: "percent" })}`;
 
@@ -10,8 +11,6 @@ export module Profiler
     let entryStack: ProfileEntry[] = [ ];
     let isProfiling = false;
     
-    const getTicks = () => new Date().getTime();
-
     export class ProfileEntry
     {
         startTicks: number;
@@ -201,8 +200,6 @@ export module BackgroundPhiColors
     const makeIndentErrorDecorationParam = (lang: string) => makeHueDecoration(lang, -1, spacesErrorAlpha, showIndentErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Left: undefined);
     const makeTrailingSpacesErrorDecorationParam = (lang: string) => makeHueDecoration(lang, -1, spacesErrorAlpha, showTraillingSpacesErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Right: undefined);
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
-
-    export const getTicks = () => new Date().getTime();
 
     export const initialize = (context: vscode.ExtensionContext): void =>
     {
