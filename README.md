@@ -82,6 +82,7 @@ Enjoy!
 This extension contributes the following settings by [`settings.json`](https://code.visualstudio.com/docs/customization/userandworkspace#_creating-user-and-workspace-settings)( Mac: <kbd>Command</kbd>+<kbd>,</kbd>, Windows / Linux: <kbd>File</kbd> -> <kbd>Preferences</kbd> -> <kbd>User Settings</kbd> ):
 
 * `background-phi-colors.enabled`: TBD
+* `background-phi-colors.enabledPanels`: TBD
 * `background-phi-colors.fileSizeLimit`: TBD
 * `background-phi-colors.delay`: TBD
 * `background-phi-colors.baseColor`: TBD

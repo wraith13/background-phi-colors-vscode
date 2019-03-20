@@ -67,6 +67,11 @@
                         "default": true,
                         "overridable": true
                     },
+                    "background-phi-colors.enabledPanels": {
+                        "type": "boolean",
+                        "default": false,
+                        "overridable": true
+                    },
                     "background-phi-colors.fileSizeLimit": {
                         "type": "number",
                         "default": 102400,

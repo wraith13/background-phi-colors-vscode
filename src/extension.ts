@@ -58,7 +58,7 @@ export module Profiler
         {
             entry.end();
         }
-    }
+    };
 
     export const getIsProfiling = () => isProfiling;
 
@@ -102,7 +102,7 @@ export module BackgroundPhiColors
         public get = (key: keyT): valueT => this.getCore(key, JSON.stringify(key));
         private getCore = (key: keyT, keyJson: string): valueT => undefined === this.cache[keyJson] ?
             (this.cache[keyJson] = this.loader(key)):
-            this.cache[keyJson];
+            this.cache[keyJson]
         public clear = () => this.cache = { };
     }
     class Config<valueT>
@@ -154,6 +154,7 @@ export module BackgroundPhiColors
     }
     
     const enabled = new Config("enabled", true);
+    const enabledPanels = new Config("enabledPanels", true);
     const fileSizeLimit = new Config("fileSizeLimit", 100 *1024, 10 *1024, 10 *1024 *1024);
     const delay = new Config("delay", 250, 50, 1500);
     const baseColor = new Config("baseColor", "#CC6666");
@@ -300,6 +301,7 @@ export module BackgroundPhiColors
     {
         [
             enabled,
+            enabledPanels,
             fileSizeLimit,
             delay,
             baseColor,
@@ -451,7 +453,8 @@ export module BackgroundPhiColors
                     inverseKeepUndefined(isPausedAll),
                     enabled.get(lang)
                 ]
-                .filter(i => undefined !== i)[0]
+                .filter(i => undefined !== i)[0] &&
+                (textEditor.viewColumn || enabledPanels.get(lang))
             )
             {
                 if (false === isPaused[textEditor.document.fileName] || text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
