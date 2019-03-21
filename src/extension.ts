@@ -217,7 +217,7 @@ export module BackgroundPhiColors
                         !isPausedAll:
                         enabled.get("");
                     isPaused = { };
-                    vscode.window.visibleTextEditors.forEach(i => updateDecoration(i));
+                    updateAllDecoration();
                 }
             ),
             vscode.commands.registerCommand
@@ -261,12 +261,14 @@ export module BackgroundPhiColors
 
             //  イベントリスナーの登録
             vscode.workspace.onDidChangeConfiguration(() => onDidChangeConfiguration()),
+            vscode.workspace.onDidChangeWorkspaceFolders(() => onDidChangeWorkspaceFolders()),
+            vscode.workspace.onDidChangeTextDocument(event => onDidChangeTextDocument(event.document)),
+            vscode.workspace.onDidCloseTextDocument((document) => onDidCloseTextDocument(document)),
             vscode.window.onDidChangeActiveTextEditor(() => onDidChangeActiveTextEditor()),
-            vscode.workspace.onDidChangeTextDocument(() => onDidChangeTextDocument()),
             vscode.window.onDidChangeTextEditorSelection(() => onDidChangeTextEditorSelection()),
         );
 
-        vscode.window.visibleTextEditors.forEach(i => updateDecoration(i));
+        updateAllDecoration();
     };
 
     const valueThen = <valueT>(value: valueT | undefined, f: (value: valueT) => void) =>
@@ -281,7 +283,7 @@ export module BackgroundPhiColors
     export const overTheLimit = (textEditor: vscode.TextEditor) =>
     {
         isOverTheLimit[textEditor.document.fileName] = true;
-        updateDecoration(textEditor);
+        delayUpdateDecoration(textEditor);
     };
 
     export const pause = (textEditor: vscode.TextEditor) =>
@@ -294,8 +296,18 @@ export module BackgroundPhiColors
                         !isPausedAll:
                         enabled.get("")
                 );
-        updateDecoration(textEditor);
+        delayUpdateDecoration(textEditor);
     };
+
+    export const clearAllDecorationCache = (): void =>
+    {
+
+    };
+    export const clearDecorationCache = (document: vscode.TextDocument): void =>
+    {
+
+    };
+
 
     export const onDidChangeConfiguration = (): void =>
     {
@@ -333,32 +345,46 @@ export module BackgroundPhiColors
         Object.keys(decorations).forEach(i => decorations[i].decorator.dispose());
         decorations = { };
 
-        vscode.window.visibleTextEditors.forEach(i => updateDecoration(i));
+        clearAllDecorationCache();
+
+        updateAllDecoration();
     };
 
-    export const onDidChangeActiveTextEditor = (): void => activeTextEditor(updateDecoration);
-
-    let lastUpdateStamp = 0;
-    export const onDidChangeTextDocument = (): void => activeTextEditor
-    (
-        textEditor => 
-        {
-            const updateStamp = getTicks();
-            lastUpdateStamp = updateStamp;
-            setTimeout
-            (
-                () =>
+    const lastUpdateStamp = new Map<vscode.TextEditor, number>();
+    export const delayUpdateDecoration = (textEditor: vscode.TextEditor): void =>
+    {
+        const updateStamp = getTicks();
+        lastUpdateStamp.set(textEditor, updateStamp);
+        setTimeout
+        (
+            () =>
+            {
+                if (lastUpdateStamp.get(textEditor) === updateStamp)
                 {
-                    if (lastUpdateStamp === updateStamp)
-                    {
-                        updateDecoration(textEditor);
-                    }
-                },
-                delay.get(textEditor.document.languageId)
-            );
-        }
-    );
+                    updateDecoration(textEditor);
+                }
+            },
+            delay.get(textEditor.document.languageId)
+        );
+    };
 
+    export const updateAllDecoration = () =>
+        vscode.window.visibleTextEditors.forEach(i => delayUpdateDecoration(i));
+
+    export const onDidChangeWorkspaceFolders = onDidChangeConfiguration;
+
+    export const onDidChangeActiveTextEditor = (): void => activeTextEditor(delayUpdateDecoration);
+
+    export const onDidCloseTextDocument = clearDecorationCache;
+
+    export const onDidChangeTextDocument = (document: vscode.TextDocument): void =>
+    {
+        clearDecorationCache(document);
+        vscode.window.visibleTextEditors
+            .filter(i => i.document === document)
+            .forEach(i => delayUpdateDecoration(i));
+    };
+    
     export const onDidChangeTextEditorSelection = () => activeTextEditor
     (
         textEditor =>
@@ -382,7 +408,7 @@ export module BackgroundPhiColors
                 )
             )
             {
-                onDidChangeTextDocument();
+                delayUpdateDecoration(textEditor);
             }
         }
     );
