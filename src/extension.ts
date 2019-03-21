@@ -361,6 +361,7 @@ export module BackgroundPhiColors
             {
                 if (lastUpdateStamp.get(textEditor) === updateStamp)
                 {
+                    lastUpdateStamp.delete(textEditor);
                     updateDecoration(textEditor);
                 }
             },
