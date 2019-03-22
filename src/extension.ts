@@ -199,6 +199,12 @@ export module BackgroundPhiColors
         alpha: number;
         overviewRulerLane?: vscode.OverviewRulerLane;
     }
+    interface DecorationEntry
+    {
+        startPosition: number;
+        length: number;
+        decorationParam: DecorationParam;
+    }
     const makeIndentErrorDecorationParam = (lang: string) => makeHueDecoration("indenet:error", lang, -1, spacesErrorAlpha, showIndentErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Left: undefined);
     const makeTrailingSpacesErrorDecorationParam = (lang: string) => makeHueDecoration("trailling-spaces", lang, -1, spacesErrorAlpha, showTraillingSpacesErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Right: undefined);
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
@@ -487,6 +493,8 @@ export module BackgroundPhiColors
             {
                 if (false === isPaused[textEditor.document.fileName] || text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
                 {
+                    let entry: DecorationEntry[] = [];
+
                     const tabSize = undefined === textEditor.options.tabSize ?
                         4:
                         (
@@ -496,47 +504,72 @@ export module BackgroundPhiColors
                         );
     
                     //  update
-                    updateIndentDecoration
+                    entry = entry.concat
                     (
-                        lang,
-                        text,
-                        textEditor,
-                        tabSize
+                        updateIndentDecoration
+                        (
+                            lang,
+                            text,
+                            textEditor,
+                            tabSize
+                        )
                     );
                     if (symbolEnabled.get(lang))
                     {
-                        updateSymbolsDecoration(lang, text, textEditor, tabSize);
+                        entry = entry.concat(updateSymbolsDecoration(lang, text, textEditor, tabSize));
                     }
                     if ("none" !== tokenMode.get(lang))
                     {
                         const showActive = 0 <= ["smart", "full"].indexOf(tokenMode.get(lang));
                         const showRegular = 0 <= ["light", "full"].indexOf(tokenMode.get(lang));
-                        updateTokesDecoration
+                        entry = entry.concat
                         (
-                            lang,
-                            text,
-                            textEditor,
-                            tabSize,
-                            showRegular,
-                            showActive ?
-                                regExpExecToArray
-                                (
-                                    /\w+/gm,
-                                    textEditor.document
-                                        .lineAt(textEditor.selection.active.line).text
-                                )
-                                .map(i => i[0]):
-                                []
+                            updateTokesDecoration
+                            (
+                                lang,
+                                text,
+                                textEditor,
+                                tabSize,
+                                showRegular,
+                                showActive ?
+                                    regExpExecToArray
+                                    (
+                                        /\w+/gm,
+                                        textEditor.document
+                                            .lineAt(textEditor.selection.active.line).text
+                                    )
+                                    .map(i => i[0]):
+                                    []
+                            )
                         );
                     }
                     if (bodySpacesEnabled.get(lang))
                     {
-                        updateBodySpacesDecoration(lang, text, textEditor, tabSize);
+                        entry = entry.concat(updateBodySpacesDecoration(lang, text, textEditor, tabSize));
                     }
                     if (traillingSpacesEnabled.get(lang))
                     {
-                        updateTrailSpacesDecoration(lang, text, textEditor, tabSize, traillingSpacesErrorEnabled.get(lang));
+                        entry = entry.concat(updateTrailSpacesDecoration(lang, text, textEditor, tabSize, traillingSpacesErrorEnabled.get(lang)));
                     }
+
+                    entry.forEach(i => addDecoration(textEditor, i));
+
+                    //  apply
+                    Profiler.profile
+                    (
+                        "updateDecoration.apply(full)", () =>
+                        {
+                            const isToDecorate = Object.keys(decorations).some(i => 0 < decorations[i].rangesOrOptions.length);
+                            if (isDecorated[textEditor.document.fileName] || isToDecorate)
+                            {
+                                Object.keys(decorations).map(i => decorations[i]).forEach
+                                (
+                                    i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
+                                );
+                                isDecorated[textEditor.document.fileName] = isToDecorate;
+                            }
+                        }
+                    );
                 }
                 else
                 {
@@ -556,23 +589,25 @@ export module BackgroundPhiColors
                     }
                 }
             }
-    
-            //  apply
-            Profiler.profile
-            (
-                "updateDecoration.apply", () =>
-                {
-                    const isToDecorate = Object.keys(decorations).some(i => 0 < decorations[i].rangesOrOptions.length);
-                    if (isDecorated[textEditor.document.fileName] || isToDecorate)
+            else
+            {
+                //  apply(for clear)
+                Profiler.profile
+                (
+                    "updateDecoration.apply(clear)", () =>
                     {
-                        Object.keys(decorations).map(i => decorations[i]).forEach
-                        (
-                            i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
-                        );
-                        isDecorated[textEditor.document.fileName] = isToDecorate;
+                        const isToDecorate = Object.keys(decorations).some(i => 0 < decorations[i].rangesOrOptions.length);
+                        if (isDecorated[textEditor.document.fileName] || isToDecorate)
+                        {
+                            Object.keys(decorations).map(i => decorations[i]).forEach
+                            (
+                                i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
+                            );
+                            isDecorated[textEditor.document.fileName] = isToDecorate;
+                        }
                     }
-                }
-            );
+                );
+            }
         }
     );
 
@@ -595,9 +630,9 @@ export module BackgroundPhiColors
         }
     );
 
-    export const addDecoration = (textEditor: vscode.TextEditor, startPosition: number, length: number, decorationParam: DecorationParam) =>
+    export const addDecoration = (textEditor: vscode.TextEditor, entry: DecorationEntry) =>
     {
-        const key = JSON.stringify(decorationParam);
+        const key = JSON.stringify(entry.decorationParam);
         if (!decorations[key])
         {
             decorations[key] =
@@ -610,16 +645,16 @@ export module BackgroundPhiColors
                             (
                                 phiColors.generate
                                 (
-                                    decorationParam.base,
-                                    decorationParam.hue,
+                                    entry.decorationParam.base,
+                                    entry.decorationParam.hue,
                                     0,
                                     0,
                                     0
                                 )
                             )
                     )
-                    +((0x100 +decorationParam.alpha).toString(16)).substr(1),
-                    decorationParam.overviewRulerLane,
+                    +((0x100 +entry.decorationParam.alpha).toString(16)).substr(1),
+                    entry.decorationParam.overviewRulerLane,
                 ),
                 rangesOrOptions: []
             };
@@ -629,16 +664,17 @@ export module BackgroundPhiColors
             makeRange
             (
                 textEditor,
-                startPosition,
-                length
+                entry.startPosition,
+                entry.length
             )
         );
     };
 
-    export const updateIndentDecoration = (lang: string, text: string, textEditor: vscode.TextEditor, tabSize: number) => Profiler.profile
+    export const updateIndentDecoration = (lang: string, text: string, textEditor: vscode.TextEditor, tabSize: number): DecorationEntry[] => Profiler.profile
     (
         "updateIndentDecoration", () =>
         {
+            const result: DecorationEntry[] = [];
             const showActive = 0 <= ["smart", "full"].indexOf(indentMode.get(lang));
             const showRegular = 0 <= ["light", "full"].indexOf(indentMode.get(lang));
             if (showActive || showRegular)
@@ -705,20 +741,21 @@ export module BackgroundPhiColors
                 //console.log(`indentSizeDistribution: ${JSON.stringify(indentSizeDistribution)}`);
                 //console.log(`indentUnit: ${JSON.stringify(indentUnit)}`);
         
-                const addIndentDecoration = (cursor: number, length: number, indent: number, showError: boolean = false) => addDecoration
+                const addIndentDecoration = (cursor: number, length: number, indent: number, showError: boolean = false): DecorationEntry =>
                 (
-                    textEditor,
-                    cursor,
-                    length,
-                    showError && showIndentError ?
-                        makeIndentErrorDecorationParam(lang):
-                        makeHueDecoration
-                        (
-                            `indent:${indent}`,
-                            lang,
-                            indent,
-                            (currentIndentIndex === indent) ? spacesActiveAlpha: spacesAlpha
-                        )
+                    {
+                        startPosition: cursor,
+                        length,
+                        decorationParam: showError && showIndentError ?
+                            makeIndentErrorDecorationParam(lang):
+                            makeHueDecoration
+                            (
+                                `indent:${indent}`,
+                                lang,
+                                indent,
+                                (currentIndentIndex === indent) ? spacesActiveAlpha: spacesAlpha
+                            )
+                    }
                 );
     
                 Profiler.profile
@@ -740,7 +777,7 @@ export module BackgroundPhiColors
                                     length = indentUnit.length;
                                     if (showRegular || currentIndentIndex === i)
                                     {
-                                        addIndentDecoration(cursor, length, i);
+                                        result.push(addIndentDecoration(cursor, length, i));
                                     }
                                     text = text.substr(indentUnit.length);
                                 }
@@ -751,7 +788,7 @@ export module BackgroundPhiColors
                                         length = text.length;
                                         if (showRegular || currentIndentIndex === i || showIndentError)
                                         {
-                                            addIndentDecoration(cursor, length, i, true);
+                                            result.push(addIndentDecoration(cursor, length, i, true));
                                         }
                                         text = "";
                                     }
@@ -765,14 +802,14 @@ export module BackgroundPhiColors
                                                 length = spaces;
                                                 if (showRegular || currentIndentIndex === i)
                                                 {
-                                                    addIndentDecoration(cursor, length, i);
+                                                    result.push(addIndentDecoration(cursor, length, i));
                                                 }
                                                 cursor += length;
                                             }
                                             length = 1;
                                             if (showRegular || currentIndentIndex === i || showIndentError)
                                             {
-                                                addIndentDecoration(cursor, length, i, true);
+                                                result.push(addIndentDecoration(cursor, length, i, true));
                                             }
                                             const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), tabSize) /indentUnitSize) -1;
                                             i += indentCount;
@@ -784,7 +821,7 @@ export module BackgroundPhiColors
                                             length = spaces;
                                             if (showRegular || currentIndentIndex === i || showIndentError)
                                             {
-                                                addIndentDecoration(cursor, length, i, true);
+                                                result.push(addIndentDecoration(cursor, length, i, true));
                                             }
                                             text = text.substr(spaces);
                                         }
@@ -795,6 +832,7 @@ export module BackgroundPhiColors
                     )
                 );
             }
+            return result;
         }
     );
 
@@ -819,7 +857,7 @@ export module BackgroundPhiColors
         text: string,
         textEditor: vscode.TextEditor,
         tabSize: number
-    ) => Profiler.profile
+    ): DecorationEntry[] => Profiler.profile
     (
         "updateSymbolsDecoration", () =>
         regExpExecToArray
@@ -827,55 +865,56 @@ export module BackgroundPhiColors
             /[\!\.\,\:\;\(\)\[\]\{\}\<\>\"\'\`\#\$\%\&\=\-\+\*\@\\\/\|\?\^\~"]/gm,
             text
         )
-        .forEach
+        .map
         (
-            match => addDecoration
+            match =>
             (
-                textEditor,
-                match.index,
-                match[0].length,
-                makeHueDecoration
-                (
-                    "symbols",
-                    lang,
+                {
+                    startPosition: match.index,
+                    length: match[0].length,
+                    decorationParam: makeHueDecoration
                     (
-                        <{ [key: string]: number }>
-                        {
-                            "!": 1,
-                            ".": 2,
-                            ",": 3,
-                            ":": 4,
-                            ";": 5,
-                            "(": 6,
-                            ")": 6,
-                            "[": 7,
-                            "]": 7,
-                            "{": 8,
-                            "}": 8,
-                            "<": 9,
-                            ">": 9,
-                            "\"": 10,
-                            "\'": 11,
-                            "\`": 12,
-                            "\#": 13,
-                            "\$": 14,
-                            "\%": 15,
-                            "\&": 16,
-                            "\=": 17,
-                            "\-": 18,
-                            "\+": 19,
-                            "\*": 20,
-                            "\@": 21,
-                            "\\": 22,
-                            "\/": 23,
-                            "\|": 24,
-                            "\?": 25,
-                            "\^": 26,
-                            "\~": 27,
-                        }
-                    )[match[0]],
-                    symbolAlpha
-                )
+                        "symbols",
+                        lang,
+                        (
+                            <{ [key: string]: number }>
+                            {
+                                "!": 1,
+                                ".": 2,
+                                ",": 3,
+                                ":": 4,
+                                ";": 5,
+                                "(": 6,
+                                ")": 6,
+                                "[": 7,
+                                "]": 7,
+                                "{": 8,
+                                "}": 8,
+                                "<": 9,
+                                ">": 9,
+                                "\"": 10,
+                                "\'": 11,
+                                "\`": 12,
+                                "\#": 13,
+                                "\$": 14,
+                                "\%": 15,
+                                "\&": 16,
+                                "\=": 17,
+                                "\-": 18,
+                                "\+": 19,
+                                "\*": 20,
+                                "\@": 21,
+                                "\\": 22,
+                                "\/": 23,
+                                "\|": 24,
+                                "\?": 25,
+                                "\^": 26,
+                                "\~": 27,
+                            }
+                        )[match[0]],
+                        symbolAlpha
+                    )
+                }
             )
         )
     );
@@ -890,7 +929,7 @@ export module BackgroundPhiColors
         tabSize: number,
         showRegular: boolean,
         strongTokens: string[]
-    ) => Profiler.profile
+    ): DecorationEntry[] => Profiler.profile
     (
         "updateTokesDecoration", () =>
         regExpExecToArray
@@ -910,21 +949,22 @@ export module BackgroundPhiColors
             )
         )
         .filter(i => showRegular || i.isActive)
-        .forEach
+        .map
         (
-            i => addDecoration
+            i =>
             (
-                textEditor,
-                i.index,
-                i.token.length,
-                makeHueDecoration
-                (
-                    `token:${i.token}`,
-                    lang,
-                    hash(i.token),
-                    i.isActive ? tokenActiveAlpha: tokenAlpha,
-                    i.isActive && showActiveTokenInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Center: undefined,
-                )
+                {
+                    startPosition: i.index,
+                    length: i.token.length,
+                    decorationParam: makeHueDecoration
+                    (
+                        `token:${i.token}`,
+                        lang,
+                        hash(i.token),
+                        i.isActive ? tokenActiveAlpha: tokenAlpha,
+                        i.isActive && showActiveTokenInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Center: undefined,
+                    )
+                }
             )
         )
     );
@@ -934,7 +974,7 @@ export module BackgroundPhiColors
         text: string,
         textEditor: vscode.TextEditor,
         tabSize: number
-    ) => Profiler.profile
+    ): DecorationEntry[] => Profiler.profile
     (
         "updateBodySpacesDecoration", () =>
         regExpExecToArray
@@ -942,34 +982,36 @@ export module BackgroundPhiColors
             /^([ \t]*)([^ \t\r\n]+)([^\r\n]+)([^ \t\r\n]+)([ \t]*)$/gm,
             text
         )
-        .forEach
+        .map
         (
             prematch => regExpExecToArray
             (
                 / {2,}|\t+/gm,
                 prematch[3]
             )
-            .forEach
+            .map
             (
-                match => addDecoration
+                match =>
                 (
-                    textEditor,
-                    prematch.index +prematch[1].length +prematch[2].length +match.index,
-                    match[0].length,
-                    makeHueDecoration
-                    (
-                        "body-spaces",
-                        lang,
-                        match[0].startsWith("\t") ?
-                            //  tabs
-                            ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
-                            //  spaces
-                            match[0].length -1,
-                        spacesActiveAlpha
-                    )
+                    {
+                        startPosition: prematch.index +prematch[1].length +prematch[2].length +match.index,
+                        length: match[0].length,
+                        decorationParam: makeHueDecoration
+                        (
+                            "body-spaces",
+                            lang,
+                            match[0].startsWith("\t") ?
+                                //  tabs
+                                ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
+                                //  spaces
+                                match[0].length -1,
+                            spacesActiveAlpha
+                        )
+                    }
                 )
             )
         )
+        .reduce((a, b) => a.concat(b))
     );
     export const updateTrailSpacesDecoration =
     (
@@ -978,7 +1020,7 @@ export module BackgroundPhiColors
         textEditor: vscode.TextEditor,
         tabSize: number,
         showError: boolean
-    ) => Profiler.profile
+    ): DecorationEntry[] => Profiler.profile
     (
         "updateTrailSpacesDecoration", () =>
         regExpExecToArray
@@ -986,16 +1028,17 @@ export module BackgroundPhiColors
             /^([^\r\n]*[^ \t\r\n]+)([ \t]+)$/gm,
             text
         )
-        .forEach
+        .map
         (
-            match => addDecoration
+            match =>
             (
-                textEditor,
-                match.index +match[1].length,
-                match[2].length,
-                showError ?
-                    makeTrailingSpacesErrorDecorationParam(lang):
-                    makeHueDecoration("trailling-spaces", lang, match[2].length, spacesAlpha)
+                {
+                    startPosition: match.index +match[1].length,
+                    length: match[2].length,
+                    decorationParam: showError ?
+                        makeTrailingSpacesErrorDecorationParam(lang):
+                        makeHueDecoration("trailling-spaces", lang, match[2].length, spacesAlpha)
+                }
             )
         )
     );
