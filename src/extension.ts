@@ -193,13 +193,14 @@ export module BackgroundPhiColors
 
     interface DecorationParam
     {
+        name: string;
         base: phiColors.Hsla;
         hue: number;
         alpha: number;
         overviewRulerLane?: vscode.OverviewRulerLane;
     }
-    const makeIndentErrorDecorationParam = (lang: string) => makeHueDecoration(lang, -1, spacesErrorAlpha, showIndentErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Left: undefined);
-    const makeTrailingSpacesErrorDecorationParam = (lang: string) => makeHueDecoration(lang, -1, spacesErrorAlpha, showTraillingSpacesErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Right: undefined);
+    const makeIndentErrorDecorationParam = (lang: string) => makeHueDecoration("indenet:error", lang, -1, spacesErrorAlpha, showIndentErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Left: undefined);
+    const makeTrailingSpacesErrorDecorationParam = (lang: string) => makeHueDecoration("trailling-spaces", lang, -1, spacesErrorAlpha, showTraillingSpacesErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Right: undefined);
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
 
     export const initialize = (context: vscode.ExtensionContext): void =>
@@ -578,6 +579,7 @@ export module BackgroundPhiColors
     let hslaCache = new Cache((color: string) => phiColors.rgbaToHsla(phiColors.rgbaFromStyle(color)));
     export const makeHueDecoration =
     (
+        name: string,
         lang: string,
         hue: number,
         alpha: Config<number>,
@@ -585,6 +587,7 @@ export module BackgroundPhiColors
     ) =>
     (
         {
+            name,
             base: hslaCache.get(baseColor.get(lang)),
             hue: hue +1,
             alpha: alpha.get(lang),
@@ -709,7 +712,13 @@ export module BackgroundPhiColors
                     length,
                     showError && showIndentError ?
                         makeIndentErrorDecorationParam(lang):
-                        makeHueDecoration(lang, indent, (currentIndentIndex === indent) ? spacesActiveAlpha: spacesAlpha)
+                        makeHueDecoration
+                        (
+                            `indent:${indent}`,
+                            lang,
+                            indent,
+                            (currentIndentIndex === indent) ? spacesActiveAlpha: spacesAlpha
+                        )
                 );
     
                 Profiler.profile
@@ -827,6 +836,7 @@ export module BackgroundPhiColors
                 match[0].length,
                 makeHueDecoration
                 (
+                    "symbols",
                     lang,
                     (
                         <{ [key: string]: number }>
@@ -909,6 +919,7 @@ export module BackgroundPhiColors
                 i.token.length,
                 makeHueDecoration
                 (
+                    `token:${i.token}`,
                     lang,
                     hash(i.token),
                     i.isActive ? tokenActiveAlpha: tokenAlpha,
@@ -947,6 +958,7 @@ export module BackgroundPhiColors
                     match[0].length,
                     makeHueDecoration
                     (
+                        "body-spaces",
                         lang,
                         match[0].startsWith("\t") ?
                             //  tabs
@@ -983,7 +995,7 @@ export module BackgroundPhiColors
                 match[2].length,
                 showError ?
                     makeTrailingSpacesErrorDecorationParam(lang):
-                    makeHueDecoration(lang, match[2].length, spacesAlpha)
+                    makeHueDecoration("trailling-spaces", lang, match[2].length, spacesAlpha)
             )
         )
     );
