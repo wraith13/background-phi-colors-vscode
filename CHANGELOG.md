@@ -9,6 +9,16 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Added
 
 - `background-phi-colors.enabledPanels` setting
+- `background-phi-colors.basicDelay` setting
+- `background-phi-colors.additionalDelay` setting
+
+### Removed
+
+- `background-phi-colors.delay` setting
+
+### Changed
+
+- Significantly improved performance.
 
 ## 0.2.0 - 2019-03-20
 

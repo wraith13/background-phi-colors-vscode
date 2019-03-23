@@ -156,7 +156,8 @@ export module BackgroundPhiColors
     const enabled = new Config("enabled", true);
     const enabledPanels = new Config("enabledPanels", true);
     const fileSizeLimit = new Config("fileSizeLimit", 100 *1024, 10 *1024, 10 *1024 *1024);
-    const delay = new Config("delay", 250, 50, 1500);
+    const basicDelay = new Config("basicDelay", 10, 1, 1500);
+    const additionalDelay = new Config("additionalDelay", 200, 50, 1500);
     const baseColor = new Config("baseColor", "#CC6666");
     //const spaceBaseColor = new Config("spaceBaseColor", <string | undefined>undefined);
     //const spaceErrorColor = new Config("spaceErrorColor", <string | undefined>undefined);
@@ -308,11 +309,10 @@ export module BackgroundPhiColors
 
     class DocumentDecorationCacheEntry
     {
-        /*
-        isDefaultIndentCharactorSpace: boolean;
-        indentUnit: number;
-        indentUnitSize: string;
-        */
+        isDefaultIndentCharactorSpace: boolean = false;
+        indentUnit: string = "";
+        indentUnitSize: number = 0;
+        indentLevelMap: { cursor: number, length: number }[][] = [];
     }
     const documentDecorationCache = new Map<vscode.TextDocument, DocumentDecorationCacheEntry>();
 
@@ -348,7 +348,8 @@ export module BackgroundPhiColors
             enabled,
             enabledPanels,
             fileSizeLimit,
-            delay,
+            basicDelay,
+            additionalDelay,
             baseColor,
             //spaceBaseColor,
             //spaceErrorColor,
@@ -398,7 +399,12 @@ export module BackgroundPhiColors
                     updateDecoration(textEditor);
                 }
             },
-            delay.get(textEditor.document.languageId)
+            basicDelay.get(textEditor.document.languageId) +
+            (
+                undefined === documentDecorationCache.get(textEditor.document) ?
+                    additionalDelay.get(textEditor.document.languageId):
+                    0
+            )
         );
     };
 
@@ -519,7 +525,8 @@ export module BackgroundPhiColors
             {
                 if (false === isPaused[textEditor.document.fileName] || text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
                 {
-                    const currentDocumentDecorationCache = documentDecorationCache.get(textEditor.document) || { };
+                    const currentDocumentDecorationCache = new DocumentDecorationCacheEntry();
+                    const previousDocumentDecorationCache = documentDecorationCache.get(textEditor.document);
                     const currentEditorDecorationCache = new EditorDecorationCacheEntry();
                     const previousEditorDecorationCache = editorDecorationCache.get(textEditor);
 
@@ -541,25 +548,20 @@ export module BackgroundPhiColors
                     let entry: DecorationEntry[] = [];
 
                     //  update
-                    if (!previousEditorDecorationCache)
-                    {
-                        entry = entry.concat
+                    entry = entry.concat
+                    (
+                        updateIndentDecoration
                         (
-                            updateIndentDecoration
-                            (
-                                lang,
-                                text,
-                                textEditor,
-                                tabSize,
-                                currentEditorDecorationCache,
-                                previousEditorDecorationCache
-                            )
-                        );
-                    }
-                    else
-                    {
-
-                    }
+                            lang,
+                            text,
+                            textEditor,
+                            tabSize,
+                            currentDocumentDecorationCache,
+                            previousDocumentDecorationCache,
+                            currentEditorDecorationCache,
+                            previousEditorDecorationCache
+                        )
+                    );
                     if ("none" !== tokenMode.get(lang))
                     {
                         const showActive = 0 <= ["smart", "full"].indexOf(tokenMode.get(lang));
@@ -625,7 +627,31 @@ export module BackgroundPhiColors
                                             )
                                         )
                                 );
-
+                                if (showRegular)
+                                {
+                                    entry = entry.concat
+                                    (
+                                        currentEditorDecorationCache.strongTokens
+                                            .filter(i => previousEditorDecorationCache.strongTokens.indexOf(i) < 0)
+                                            .map
+                                            (
+                                                i =>
+                                                (
+                                                    {
+                                                        startPosition: -1,
+                                                        length: -1,
+                                                        decorationParam: makeHueDecoration
+                                                        (
+                                                            `token:${i}`,
+                                                            lang,
+                                                            hash(i),
+                                                            tokenAlpha,
+                                                        )
+                                                    }
+                                                )
+                                            )
+                                    );
+                                }
                             }
                         }
                     }
@@ -642,20 +668,23 @@ export module BackgroundPhiColors
                         entry = entry.concat(updateTrailSpacesDecoration(lang, text, textEditor, tabSize, traillingSpacesErrorEnabled.get(lang)));
                     }
 
-                    entry.forEach(i => addDecoration(textEditor, i));
-
                     //  apply
                     Profiler.profile
                     (
-                        "updateDecoration.apply(full)", () =>
+                        "updateDecoration.apply(regular)", () =>
                         {
-                            const isToDecorate = Object.keys(decorations).some(i => 0 < decorations[i].rangesOrOptions.length);
+                            entry.forEach(i => addDecoration(textEditor, i));
+                            const isToDecorate = 0 < entry.length; //Object.keys(decorations).some(i => 0 < decorations[i].rangesOrOptions.length);
                             if (isDecorated[textEditor.document.fileName] || isToDecorate)
                             {
-                                Object.keys(decorations).map(i => decorations[i]).forEach
-                                (
-                                    i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
-                                );
+                                const currentDecorations = entry.map(i => JSON.stringify(i.decorationParam));
+                                Object.keys(decorations)
+                                    .filter(i => 0 <= currentDecorations.indexOf(i))
+                                    .map(i => decorations[i])
+                                    .forEach
+                                    (
+                                        i => textEditor.setDecorations(i.decorator, i.rangesOrOptions)
+                                    );
                                 isDecorated[textEditor.document.fileName] = isToDecorate;
                             }
                         }
@@ -735,17 +764,17 @@ export module BackgroundPhiColors
                 (
                     phiColors.rgbForStyle
                     (
-                            phiColors.hslaToRgba
+                        phiColors.hslaToRgba
+                        (
+                            phiColors.generate
                             (
-                                phiColors.generate
-                                (
-                                    entry.decorationParam.base,
-                                    entry.decorationParam.hue,
-                                    0,
-                                    0,
-                                    0
-                                )
+                                entry.decorationParam.base,
+                                entry.decorationParam.hue,
+                                0,
+                                0,
+                                0
                             )
+                        )
                     )
                     +((0x100 +entry.decorationParam.alpha).toString(16)).substr(1),
                     entry.decorationParam.overviewRulerLane,
@@ -773,13 +802,15 @@ export module BackgroundPhiColors
         text: string,
         textEditor: vscode.TextEditor,
         tabSize: number,
+        currentDocumentDecorationCache: DocumentDecorationCacheEntry,
+        previousDocumentDecorationCache: DocumentDecorationCacheEntry | undefined,
         currentEditorDecorationCache: EditorDecorationCacheEntry,
-        previousEditorDecorationCache?: EditorDecorationCacheEntry
+        previousEditorDecorationCache: EditorDecorationCacheEntry | undefined
     ): DecorationEntry[] => Profiler.profile
     (
         "updateIndentDecoration", () =>
         {
-            const result: DecorationEntry[] = [];
+            let result: DecorationEntry[] = [];
             const showActive = 0 <= ["smart", "full"].indexOf(indentMode.get(lang));
             const showRegular = 0 <= ["light", "full"].indexOf(indentMode.get(lang));
             if (showActive || showRegular)
@@ -796,59 +827,86 @@ export module BackgroundPhiColors
                         tabSize
                     ):
                     -1;
-                const indents: { index: number, text: string, body: string }[] = [];
-                let totalSpaces = 0;
-                let totalTabs = 0;
-                const indentSizeDistribution:{ [key: number]: number } = { };
-                Profiler.profile
-                (
-                    "updateIndentDecoration.scan",
-                    () =>
-                    regExpExecToArray
-                    (
-                        /^([ \t]+)([^\r\n]*)$/gm,
-                        text
-                    )
-                    .forEach
-                    (
-                        match =>
-                        {
-                            indents.push
-                            (
-                                {
-                                    index: match.index,
-                                    text: match[1],
-                                    body: match[2]
-                                }
-                            );
-                            const length = match[1].length;
-                            const tabs = match[1].replace(/ /g, "").length;
-                            const spaces = length -tabs;
-                            totalSpaces += spaces;
-                            totalTabs += tabs;
-                            const indentSize = getIndentSize(match[1], tabSize);
-                            if (indentSizeDistribution[indentSize])
-                            {
-                                ++indentSizeDistribution[indentSize];
-                            }
-                            else
-                            {
-                                indentSizeDistribution[indentSize] = 1;
-                            }
-                        }
-                    )
-                );
 
-                const isDefaultIndentCharactorSpace = totalTabs *tabSize <= totalSpaces;
-                const indentUnit = getIndentUnit(indentSizeDistribution, tabSize, isDefaultIndentCharactorSpace);
-                const indentUnitSize = getIndentSize(indentUnit, tabSize);
-                const currentIndentIndex = Math.floor(currentIndentSize /indentUnitSize);
-                //console.log(`indentSizeDistribution: ${JSON.stringify(indentSizeDistribution)}`);
-                //console.log(`indentUnit: ${JSON.stringify(indentUnit)}`);
-        
+                const indents: { index: number, text: string }[] = [];
+                if (!previousEditorDecorationCache || !previousDocumentDecorationCache) // previousEditorDecorationCache があるのに previousDocumentDecorationCache がないという状況は存在しないハズなので本来的には || !previousDocumentDecorationCache は要らないがロジック上一応条件に含めておく
+                {
+                    Profiler.profile
+                    (
+                        "updateIndentDecoration.prescan",
+                        () =>
+                        regExpExecToArray
+                        (
+                            /^([ \t]+)([^\r\n]*)$/gm,
+                            text
+                        )
+                        .forEach
+                        (
+                            match =>
+                            {
+                                indents.push
+                                (
+                                    {
+                                        index: match.index,
+                                        text: match[1]
+                                    }
+                                );
+                            }
+                        )
+                    );
+                }
+
+                if (previousDocumentDecorationCache)
+                {
+                    Object.keys(previousDocumentDecorationCache).forEach(key => (<any>currentDocumentDecorationCache)[key] = (<any>previousDocumentDecorationCache)[key]);
+                }
+                else
+                {
+                    let totalSpaces = 0;
+                    let totalTabs = 0;
+                    const indentSizeDistribution:{ [key: number]: number } = { };
+                    Profiler.profile
+                    (
+                        "updateIndentDecoration.scan",
+                        () =>
+                        indents.forEach
+                        (
+                            indent =>
+                            {
+                                const length = indent.text.length;
+                                const tabs = indent.text.replace(/ /g, "").length;
+                                const spaces = length -tabs;
+                                totalSpaces += spaces;
+                                totalTabs += tabs;
+                                const indentSize = getIndentSize(indent.text, tabSize);
+                                if (indentSizeDistribution[indentSize])
+                                {
+                                    ++indentSizeDistribution[indentSize];
+                                }
+                                else
+                                {
+                                    indentSizeDistribution[indentSize] = 1;
+                                }
+                            }
+                        )
+                    );
+    
+                    currentDocumentDecorationCache.isDefaultIndentCharactorSpace = totalTabs *tabSize <= totalSpaces;
+                    currentDocumentDecorationCache.indentUnit = getIndentUnit(indentSizeDistribution, tabSize, currentDocumentDecorationCache.isDefaultIndentCharactorSpace);
+                    currentDocumentDecorationCache.indentUnitSize = getIndentSize(currentDocumentDecorationCache.indentUnit, tabSize);
+                }
+                currentEditorDecorationCache.indentIndex = Math.floor(currentIndentSize /currentDocumentDecorationCache.indentUnitSize);
                 const addIndentDecoration = (cursor: number, length: number, indent: number, showError: boolean = false): DecorationEntry =>
-                (
+                {
+                    if (!previousDocumentDecorationCache && !(showError && showIndentError))
                     {
+                        if (undefined === currentDocumentDecorationCache.indentLevelMap[indent])
+                        {
+                            currentDocumentDecorationCache.indentLevelMap[indent] = [];
+                        }
+                        currentDocumentDecorationCache.indentLevelMap[indent].push({ cursor, length });
+                    }
+                    return {
                         startPosition: cursor,
                         length,
                         decorationParam: showError && showIndentError ?
@@ -858,84 +916,133 @@ export module BackgroundPhiColors
                                 `indent:${indent}`,
                                 lang,
                                 indent,
-                                (currentIndentIndex === indent) ? spacesActiveAlpha: spacesAlpha
+                                (currentEditorDecorationCache.indentIndex === indent) ? spacesActiveAlpha: spacesAlpha
                             )
-                    }
-                );
-    
-                Profiler.profile
-                (
-                    "updateIndentDecoration.addDecoration",
-                    () =>
-                    indents.forEach
-                    (
-                        indent =>
-                        {
-                            let text = indent.text;
-                            let cursor = indent.index;
-                            let length = 0;
-                            for(let i = 0; 0 < text.length; ++i)
+                    };
+                };
+                if (previousEditorDecorationCache)
+                {
+                    if (showActive && previousEditorDecorationCache.indentIndex !== currentEditorDecorationCache.indentIndex)
+                    {
+                        result.push
+                        (
                             {
-                                cursor += length;
-                                if (text.startsWith(indentUnit))
+                                startPosition: -1,
+                                length: -1,
+                                decorationParam: makeHueDecoration
+                                (
+                                    `indent:${previousEditorDecorationCache.indentIndex}`,
+                                    lang,
+                                    previousEditorDecorationCache.indentIndex,
+                                    spacesActiveAlpha
+                                )
+                            }
+                        );
+                        result = result.concat
+                        (
+                            currentDocumentDecorationCache.indentLevelMap[currentEditorDecorationCache.indentIndex]
+                                .map(i => addIndentDecoration(i.cursor, i.length, currentEditorDecorationCache.indentIndex))
+                        );
+                        if (showRegular)
+                        {
+                            result = result.concat
+                            (
+                                currentDocumentDecorationCache.indentLevelMap[previousEditorDecorationCache.indentIndex]
+                                    .map(i => addIndentDecoration(i.cursor, i.length, previousEditorDecorationCache.indentIndex))
+                            );
+                            result.push
+                            (
                                 {
-                                    length = indentUnit.length;
-                                    if (showRegular || currentIndentIndex === i)
-                                    {
-                                        result.push(addIndentDecoration(cursor, length, i));
-                                    }
-                                    text = text.substr(indentUnit.length);
+                                    startPosition: -1,
+                                    length: -1,
+                                    decorationParam: makeHueDecoration
+                                    (
+                                        `indent:${currentEditorDecorationCache.indentIndex}`,
+                                        lang,
+                                        currentEditorDecorationCache.indentIndex,
+                                        spacesAlpha
+                                    )
                                 }
-                                else
+                            );
+                        }
+                    }
+                }
+                else
+                {
+                    Profiler.profile
+                    (
+                        "updateIndentDecoration.addDecoration",
+                        () =>
+                        indents.forEach
+                        (
+                            indent =>
+                            {
+                                let text = indent.text;
+                                let cursor = indent.index;
+                                let length = 0;
+                                for(let i = 0; 0 < text.length; ++i)
                                 {
-                                    if (getIndentSize(text, tabSize) < indentUnitSize)
+                                    cursor += length;
+                                    if (text.startsWith(currentDocumentDecorationCache.indentUnit))
                                     {
-                                        length = text.length;
-                                        if (showRegular || currentIndentIndex === i || showIndentError)
+                                        length = currentDocumentDecorationCache.indentUnit.length;
+                                        if (showRegular || currentEditorDecorationCache.indentIndex === i)
                                         {
-                                            result.push(addIndentDecoration(cursor, length, i, true));
+                                            result.push(addIndentDecoration(cursor, length, i));
                                         }
-                                        text = "";
+                                        text = text.substr(currentDocumentDecorationCache.indentUnit.length);
                                     }
                                     else
                                     {
-                                        if (isDefaultIndentCharactorSpace)
+                                        if (getIndentSize(text, tabSize) < currentDocumentDecorationCache.indentUnitSize)
                                         {
-                                            const spaces = text.length -text.replace(/^ +/, "").length;
-                                            if (0 < spaces)
-                                            {
-                                                length = spaces;
-                                                if (showRegular || currentIndentIndex === i)
-                                                {
-                                                    result.push(addIndentDecoration(cursor, length, i));
-                                                }
-                                                cursor += length;
-                                            }
-                                            length = 1;
-                                            if (showRegular || currentIndentIndex === i || showIndentError)
+                                            length = text.length;
+                                            if (showRegular || currentEditorDecorationCache.indentIndex === i || showIndentError)
                                             {
                                                 result.push(addIndentDecoration(cursor, length, i, true));
                                             }
-                                            const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), tabSize) /indentUnitSize) -1;
-                                            i += indentCount;
-                                            text = text.substr(spaces +1);
+                                            text = "";
                                         }
                                         else
                                         {
-                                            const spaces = Math.min(text.length -text.replace(/$ +/, "").length, indentUnitSize);
-                                            length = spaces;
-                                            if (showRegular || currentIndentIndex === i || showIndentError)
+                                            if (currentDocumentDecorationCache.isDefaultIndentCharactorSpace)
                                             {
-                                                result.push(addIndentDecoration(cursor, length, i, true));
+                                                const spaces = text.length -text.replace(/^ +/, "").length;
+                                                if (0 < spaces)
+                                                {
+                                                    length = spaces;
+                                                    if (showRegular || currentEditorDecorationCache.indentIndex === i)
+                                                    {
+                                                        result.push(addIndentDecoration(cursor, length, i));
+                                                    }
+                                                    cursor += length;
+                                                }
+                                                length = 1;
+                                                if (showRegular || currentEditorDecorationCache.indentIndex === i || showIndentError)
+                                                {
+                                                    result.push(addIndentDecoration(cursor, length, i, true));
+                                                }
+                                                const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), tabSize) /currentDocumentDecorationCache.indentUnitSize) -1;
+                                                i += indentCount;
+                                                text = text.substr(spaces +1);
                                             }
-                                            text = text.substr(spaces);
+                                            else
+                                            {
+                                                const spaces = Math.min(text.length -text.replace(/$ +/, "").length, currentDocumentDecorationCache.indentUnitSize);
+                                                length = spaces;
+                                                if (showRegular || currentEditorDecorationCache.indentIndex === i || showIndentError)
+                                                {
+                                                    result.push(addIndentDecoration(cursor, length, i, true));
+                                                }
+                                                text = text.substr(spaces);
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                    )
-                );
+                        )
+                    );
+                }
             }
             return result;
         }
