@@ -306,13 +306,39 @@ export module BackgroundPhiColors
         delayUpdateDecoration(textEditor);
     };
 
+    class DocumentDecorationCacheEntry
+    {
+        /*
+        isDefaultIndentCharactorSpace: boolean;
+        indentUnit: number;
+        indentUnitSize: string;
+        */
+    }
+    const documentDecorationCache = new Map<vscode.TextDocument, DocumentDecorationCacheEntry>();
+
+    class EditorDecorationCacheEntry
+    {
+        tabSize: number = 0;
+        indentIndex: number = 0;
+        strongTokens: string[] = [];
+    }
+    const editorDecorationCache = new Map<vscode.TextEditor, EditorDecorationCacheEntry>();
+
     export const clearAllDecorationCache = (): void =>
     {
-
+        documentDecorationCache.clear();
+        editorDecorationCache.clear();
     };
     export const clearDecorationCache = (document: vscode.TextDocument): void =>
     {
-
+        documentDecorationCache.delete(document);
+        for(const key of editorDecorationCache.keys())
+        {
+            if (document === key.document)
+            {
+                editorDecorationCache.delete(key);
+            }
+        }
     };
 
 
@@ -493,61 +519,125 @@ export module BackgroundPhiColors
             {
                 if (false === isPaused[textEditor.document.fileName] || text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
                 {
+                    const currentDocumentDecorationCache = documentDecorationCache.get(textEditor.document) || { };
+                    const currentEditorDecorationCache = new EditorDecorationCacheEntry();
+                    const previousEditorDecorationCache = editorDecorationCache.get(textEditor);
+
+                    const tabSize =
+                        undefined !== previousEditorDecorationCache ?
+                            previousEditorDecorationCache.tabSize:
+                            (
+                                undefined === textEditor.options.tabSize ?
+                                4:
+                                (
+                                    "number" === typeof textEditor.options.tabSize ?
+                                        textEditor.options.tabSize:
+                                        parseInt(textEditor.options.tabSize)
+                                )
+                            );
+
+                    currentEditorDecorationCache.tabSize = tabSize;
+    
                     let entry: DecorationEntry[] = [];
 
-                    const tabSize = undefined === textEditor.options.tabSize ?
-                        4:
-                        (
-                            "number" === typeof textEditor.options.tabSize ?
-                                textEditor.options.tabSize:
-                                parseInt(textEditor.options.tabSize)
-                        );
-    
                     //  update
-                    entry = entry.concat
-                    (
-                        updateIndentDecoration
-                        (
-                            lang,
-                            text,
-                            textEditor,
-                            tabSize
-                        )
-                    );
-                    if (symbolEnabled.get(lang))
+                    if (!previousEditorDecorationCache)
                     {
-                        entry = entry.concat(updateSymbolsDecoration(lang, text, textEditor, tabSize));
-                    }
-                    if ("none" !== tokenMode.get(lang))
-                    {
-                        const showActive = 0 <= ["smart", "full"].indexOf(tokenMode.get(lang));
-                        const showRegular = 0 <= ["light", "full"].indexOf(tokenMode.get(lang));
                         entry = entry.concat
                         (
-                            updateTokesDecoration
+                            updateIndentDecoration
                             (
                                 lang,
                                 text,
                                 textEditor,
                                 tabSize,
-                                showRegular,
-                                showActive ?
-                                    regExpExecToArray
-                                    (
-                                        /\w+/gm,
-                                        textEditor.document
-                                            .lineAt(textEditor.selection.active.line).text
-                                    )
-                                    .map(i => i[0]):
-                                    []
+                                currentEditorDecorationCache,
+                                previousEditorDecorationCache
                             )
                         );
                     }
-                    if (bodySpacesEnabled.get(lang))
+                    else
+                    {
+
+                    }
+                    if ("none" !== tokenMode.get(lang))
+                    {
+                        const showActive = 0 <= ["smart", "full"].indexOf(tokenMode.get(lang));
+                        const showRegular = 0 <= ["light", "full"].indexOf(tokenMode.get(lang));
+                        currentEditorDecorationCache.strongTokens = showActive ?
+                            regExpExecToArray
+                            (
+                                /\w+/gm,
+                                textEditor.document
+                                    .lineAt(textEditor.selection.active.line).text
+                            )
+                            .map(i => i[0]):
+                            [];
+                        
+                        if
+                        (
+                            !previousEditorDecorationCache ||
+                            (
+                                showActive &&
+                                (
+                                    previousEditorDecorationCache.strongTokens.some(i => currentEditorDecorationCache.strongTokens.indexOf(i) < 0) ||
+                                    currentEditorDecorationCache.strongTokens.some(i => previousEditorDecorationCache.strongTokens.indexOf(i) < 0)
+                                )
+                            )
+                        )
+                        {
+                            entry = entry.concat
+                            (
+                                updateTokesDecoration
+                                (
+                                    lang,
+                                    text,
+                                    textEditor,
+                                    tabSize,
+                                    showRegular,
+                                    currentEditorDecorationCache.strongTokens,
+                                    undefined !== previousEditorDecorationCache ? previousEditorDecorationCache.strongTokens: undefined
+                                )
+                            );
+
+                            if (previousEditorDecorationCache)
+                            {
+                                entry = entry.concat
+                                (
+                                    previousEditorDecorationCache.strongTokens
+                                        .filter(i => currentEditorDecorationCache.strongTokens.indexOf(i) < 0)
+                                        .map
+                                        (
+                                            i =>
+                                            (
+                                                {
+                                                    startPosition: -1,
+                                                    length: -1,
+                                                    decorationParam: makeHueDecoration
+                                                    (
+                                                        `token:${i}`,
+                                                        lang,
+                                                        hash(i),
+                                                        tokenActiveAlpha,
+                                                        showActiveTokenInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Center: undefined,
+                                                    )
+                                                }
+                                            )
+                                        )
+                                );
+
+                            }
+                        }
+                    }
+                    if (!previousEditorDecorationCache && symbolEnabled.get(lang))
+                    {
+                        entry = entry.concat(updateSymbolsDecoration(lang, text, textEditor, tabSize));
+                    }
+                    if (!previousEditorDecorationCache && bodySpacesEnabled.get(lang))
                     {
                         entry = entry.concat(updateBodySpacesDecoration(lang, text, textEditor, tabSize));
                     }
-                    if (traillingSpacesEnabled.get(lang))
+                    if (!previousEditorDecorationCache && traillingSpacesEnabled.get(lang))
                     {
                         entry = entry.concat(updateTrailSpacesDecoration(lang, text, textEditor, tabSize, traillingSpacesErrorEnabled.get(lang)));
                     }
@@ -570,9 +660,13 @@ export module BackgroundPhiColors
                             }
                         }
                     );
+                    documentDecorationCache.set(textEditor.document, currentDocumentDecorationCache);
+                    editorDecorationCache.set(textEditor, currentEditorDecorationCache);
                 }
                 else
                 {
+                    clearDecorationCache(textEditor.document);
+
                     if (!isLimitNoticed[textEditor.document.fileName])
                     {
                         isLimitNoticed[textEditor.document.fileName] = true;
@@ -659,18 +753,29 @@ export module BackgroundPhiColors
                 rangesOrOptions: []
             };
         }
-        decorations[key].rangesOrOptions.push
-        (
-            makeRange
+        if (0 <= entry.length)
+        {
+            decorations[key].rangesOrOptions.push
             (
-                textEditor,
-                entry.startPosition,
-                entry.length
-            )
-        );
+                makeRange
+                (
+                    textEditor,
+                    entry.startPosition,
+                    entry.length
+                )
+            );
+        }
     };
 
-    export const updateIndentDecoration = (lang: string, text: string, textEditor: vscode.TextEditor, tabSize: number): DecorationEntry[] => Profiler.profile
+    export const updateIndentDecoration =
+    (
+        lang: string,
+        text: string,
+        textEditor: vscode.TextEditor,
+        tabSize: number,
+        currentEditorDecorationCache: EditorDecorationCacheEntry,
+        previousEditorDecorationCache?: EditorDecorationCacheEntry
+    ): DecorationEntry[] => Profiler.profile
     (
         "updateIndentDecoration", () =>
         {
@@ -928,7 +1033,8 @@ export module BackgroundPhiColors
         textEditor: vscode.TextEditor,
         tabSize: number,
         showRegular: boolean,
-        strongTokens: string[]
+        strongTokens: string[],
+        previousStrongTokens?: string[]
     ): DecorationEntry[] => Profiler.profile
     (
         "updateTokesDecoration", () =>
@@ -936,6 +1042,14 @@ export module BackgroundPhiColors
         (
             /\w+/gm,
             text
+        )
+        .filter
+        (
+            match =>
+                undefined === previousStrongTokens ||
+                (
+                    (0 <= previousStrongTokens.indexOf(match[0])) !== (0 <= strongTokens.indexOf(match[0])) 
+                )
         )
         .map
         (
