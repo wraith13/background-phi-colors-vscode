@@ -896,30 +896,36 @@ export module BackgroundPhiColors
                     currentDocumentDecorationCache.indentUnitSize = getIndentSize(currentDocumentDecorationCache.indentUnit, tabSize);
                 }
                 currentEditorDecorationCache.indentIndex = Math.floor(currentIndentSize /currentDocumentDecorationCache.indentUnitSize);
-                const addIndentDecoration = (cursor: number, length: number, indent: number, showError: boolean = false): DecorationEntry =>
+                const addIndentLevelMap = (cursor: number, length: number, indent: number) =>
                 {
-                    if (!previousDocumentDecorationCache && !(showError && showIndentError))
+                    if (undefined === currentDocumentDecorationCache.indentLevelMap[indent])
                     {
-                        if (undefined === currentDocumentDecorationCache.indentLevelMap[indent])
-                        {
-                            currentDocumentDecorationCache.indentLevelMap[indent] = [];
-                        }
-                        currentDocumentDecorationCache.indentLevelMap[indent].push({ cursor, length });
+                        currentDocumentDecorationCache.indentLevelMap[indent] = [];
                     }
+                    currentDocumentDecorationCache.indentLevelMap[indent].push({ cursor, length });
+                };
+                const addIndentDecoration = (cursor: number, length: number, indent: number): DecorationEntry =>
+                {
                     return {
                         startPosition: cursor,
                         length,
-                        decorationParam: showError && showIndentError ?
-                            makeIndentErrorDecorationParam(lang):
-                            makeHueDecoration
-                            (
-                                `indent:${indent}`,
-                                lang,
-                                indent,
-                                (currentEditorDecorationCache.indentIndex === indent) ? spacesActiveAlpha: spacesAlpha
-                            )
+                        decorationParam: makeHueDecoration
+                        (
+                            `indent:${indent}`,
+                            lang,
+                            indent,
+                            (currentEditorDecorationCache.indentIndex === indent) ? spacesActiveAlpha: spacesAlpha
+                        )
                     };
                 };
+                const addErrorIndentDecoration = (cursor: number, length: number, indent: number): DecorationEntry =>
+                (
+                    {
+                        startPosition: cursor,
+                        length,
+                        decorationParam: makeIndentErrorDecorationParam(lang)
+                    }
+                );
                 if (previousEditorDecorationCache)
                 {
                     if (showActive && previousEditorDecorationCache.indentIndex !== currentEditorDecorationCache.indentIndex)
@@ -973,74 +979,93 @@ export module BackgroundPhiColors
                     (
                         "updateIndentDecoration.addDecoration",
                         () =>
-                        indents.forEach
-                        (
-                            indent =>
-                            {
-                                let text = indent.text;
-                                let cursor = indent.index;
-                                let length = 0;
-                                for(let i = 0; 0 < text.length; ++i)
+                        {
+                            indents.forEach
+                            (
+                                indent =>
                                 {
-                                    cursor += length;
-                                    if (text.startsWith(currentDocumentDecorationCache.indentUnit))
+                                    let text = indent.text;
+                                    let cursor = indent.index;
+                                    let length = 0;
+                                    for(let i = 0; 0 < text.length; ++i)
                                     {
-                                        length = currentDocumentDecorationCache.indentUnit.length;
-                                        if (showRegular || currentEditorDecorationCache.indentIndex === i)
+                                        cursor += length;
+                                        if (text.startsWith(currentDocumentDecorationCache.indentUnit))
                                         {
-                                            result.push(addIndentDecoration(cursor, length, i));
-                                        }
-                                        text = text.substr(currentDocumentDecorationCache.indentUnit.length);
-                                    }
-                                    else
-                                    {
-                                        if (getIndentSize(text, tabSize) < currentDocumentDecorationCache.indentUnitSize)
-                                        {
-                                            length = text.length;
-                                            if (showRegular || currentEditorDecorationCache.indentIndex === i || showIndentError)
-                                            {
-                                                result.push(addIndentDecoration(cursor, length, i, true));
-                                            }
-                                            text = "";
+                                            length = currentDocumentDecorationCache.indentUnit.length;
+                                            addIndentLevelMap(cursor, length, i);
+                                            text = text.substr(currentDocumentDecorationCache.indentUnit.length);
                                         }
                                         else
                                         {
-                                            if (currentDocumentDecorationCache.isDefaultIndentCharactorSpace)
+                                            if (getIndentSize(text, tabSize) < currentDocumentDecorationCache.indentUnitSize)
                                             {
-                                                const spaces = text.length -text.replace(/^ +/, "").length;
-                                                if (0 < spaces)
+                                                length = text.length;
+                                                if (showIndentError)
                                                 {
-                                                    length = spaces;
-                                                    if (showRegular || currentEditorDecorationCache.indentIndex === i)
-                                                    {
-                                                        result.push(addIndentDecoration(cursor, length, i));
-                                                    }
-                                                    cursor += length;
+                                                    result.push(addErrorIndentDecoration(cursor, length, i));
                                                 }
-                                                length = 1;
-                                                if (showRegular || currentEditorDecorationCache.indentIndex === i || showIndentError)
+                                                else
                                                 {
-                                                    result.push(addIndentDecoration(cursor, length, i, true));
+                                                    addIndentLevelMap(cursor, length, i);
                                                 }
-                                                const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), tabSize) /currentDocumentDecorationCache.indentUnitSize) -1;
-                                                i += indentCount;
-                                                text = text.substr(spaces +1);
+                                                text = "";
                                             }
                                             else
                                             {
-                                                const spaces = Math.min(text.length -text.replace(/$ +/, "").length, currentDocumentDecorationCache.indentUnitSize);
-                                                length = spaces;
-                                                if (showRegular || currentEditorDecorationCache.indentIndex === i || showIndentError)
+                                                if (currentDocumentDecorationCache.isDefaultIndentCharactorSpace)
                                                 {
-                                                    result.push(addIndentDecoration(cursor, length, i, true));
+                                                    const spaces = text.length -text.replace(/^ +/, "").length;
+                                                    if (0 < spaces)
+                                                    {
+                                                        length = spaces;
+                                                        addIndentLevelMap(cursor, length, i);
+                                                        cursor += length;
+                                                    }
+                                                    length = 1;
+                                                    if (showIndentError)
+                                                    {
+                                                        result.push(addErrorIndentDecoration(cursor, length, i));
+                                                    }
+                                                    else
+                                                    {
+                                                        addIndentLevelMap(cursor, length, i);
+                                                    }
+                                                    const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), tabSize) /currentDocumentDecorationCache.indentUnitSize) -1;
+                                                    i += indentCount;
+                                                    text = text.substr(spaces +1);
                                                 }
-                                                text = text.substr(spaces);
+                                                else
+                                                {
+                                                    const spaces = Math.min(text.length -text.replace(/$ +/, "").length, currentDocumentDecorationCache.indentUnitSize);
+                                                    length = spaces;
+                                                    if (showIndentError)
+                                                    {
+                                                        result.push(addErrorIndentDecoration(cursor, length, i));
+                                                    }
+                                                    else
+                                                    {
+                                                        addIndentLevelMap(cursor, length, i);
+                                                    }
+                                                    text = text.substr(spaces);
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
-                        )
+                            );
+                            result = result.concat
+                            (
+                                currentDocumentDecorationCache.indentLevelMap
+                                    .map
+                                    (
+                                        (level, index) => showRegular || currentEditorDecorationCache.indentIndex === index ?
+                                            level.map(i => addIndentDecoration(i.cursor, i.length, index)):
+                                            []
+                                    )
+                                    .reduce((a, b) => a.concat(b))
+                            );
+                        }
                     );
                 }
             }
