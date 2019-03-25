@@ -337,14 +337,27 @@ export module BackgroundPhiColors
         documentDecorationCache.clear();
         editorDecorationCache.clear();
     };
-    export const clearDecorationCache = (document: vscode.TextDocument): void =>
+    export const clearDecorationCache = (document?: vscode.TextDocument): void =>
     {
-        documentDecorationCache.delete(document);
-        for(const key of editorDecorationCache.keys())
+        if (document)
         {
-            if (document === key.document)
+            documentDecorationCache.delete(document);
+            for(const textEditor of editorDecorationCache.keys())
             {
-                editorDecorationCache.delete(key);
+                if (document === textEditor.document)
+                {
+                    editorDecorationCache.delete(textEditor);
+                }
+            }
+        }
+        else
+        {
+            for(const textEditor of editorDecorationCache.keys())
+            {
+                if (vscode.window.visibleTextEditors.indexOf(textEditor) < 0)
+                {
+                    editorDecorationCache.delete(textEditor);
+                }
             }
         }
     };
@@ -421,7 +434,11 @@ export module BackgroundPhiColors
 
     export const onDidChangeWorkspaceFolders = onDidChangeConfiguration;
 
-    export const onDidChangeActiveTextEditor = (): void => activeTextEditor(delayUpdateDecoration);
+    export const onDidChangeActiveTextEditor = (): void =>
+    {
+        clearDecorationCache();
+        activeTextEditor(delayUpdateDecoration);
+    }
 
     export const onDidCloseTextDocument = clearDecorationCache;
 
@@ -537,7 +554,6 @@ export module BackgroundPhiColors
                     const previousDocumentDecorationCache = documentDecorationCache.get(textEditor.document);
                     const currentEditorDecorationCache = new EditorDecorationCacheEntry();
                     const previousEditorDecorationCache = editorDecorationCache.get(textEditor);
-
                     const tabSize =
                         undefined !== previousEditorDecorationCache ?
                             previousEditorDecorationCache.tabSize:

@@ -4,6 +4,12 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.3.1 - 2019-03-2?
+
+### Fixed
+
+- Fixed a memory leak issue.
+
 ## 0.3.1 - 2019-03-25
 
 ### Fixed
