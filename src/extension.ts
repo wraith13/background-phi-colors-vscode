@@ -687,7 +687,7 @@ export module BackgroundPhiColors
                             {
                                 const currentDecorations = entry.map(i => JSON.stringify(i.decorationParam));
                                 Object.keys(decorations)
-                                    .filter(i => 0 <= currentDecorations.indexOf(i))
+                                    .filter(i => !previousEditorDecorationCache || 0 <= currentDecorations.indexOf(i))
                                     .map(i => decorations[i])
                                     .forEach
                                     (
