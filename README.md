@@ -84,7 +84,8 @@ This extension contributes the following settings by [`settings.json`](https://c
 * `background-phi-colors.enabled`: TBD
 * `background-phi-colors.enabledPanels`: TBD
 * `background-phi-colors.fileSizeLimit`: TBD
-* `background-phi-colors.delay`: TBD
+* `background-phi-colors.basicDelay`: TBD
+* `background-phi-colors.additionalDelay`: TBD
 * `background-phi-colors.baseColor`: TBD
 * `background-phi-colors.indentMode`: TBD
 * `background-phi-colors.tokenMode`: TBD
