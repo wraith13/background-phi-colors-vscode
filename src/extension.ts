@@ -130,7 +130,7 @@ export module BackgroundPhiColors
         (
             (lang: string): valueT =>
             {
-                const langSection = vscode.workspace.getConfiguration(`[${lang}]`);
+                const langSection = vscode.workspace.getConfiguration(`[${lang}]`, null);
                 let result: valueT = <valueT>langSection[`${applicationKey}.${this.name}`];
                 if (undefined === result)
                 {
