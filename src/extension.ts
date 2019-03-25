@@ -952,18 +952,24 @@ export module BackgroundPhiColors
                                 )
                             }
                         );
-                        result = result.concat
-                        (
-                            currentDocumentDecorationCache.indentLevelMap[currentEditorDecorationCache.indentIndex]
-                                .map(i => addIndentDecoration(i.cursor, i.length, currentEditorDecorationCache.indentIndex))
-                        );
-                        if (showRegular)
+                        if (currentDocumentDecorationCache.indentLevelMap[currentEditorDecorationCache.indentIndex])
                         {
                             result = result.concat
                             (
-                                currentDocumentDecorationCache.indentLevelMap[previousEditorDecorationCache.indentIndex]
-                                    .map(i => addIndentDecoration(i.cursor, i.length, previousEditorDecorationCache.indentIndex))
+                                currentDocumentDecorationCache.indentLevelMap[currentEditorDecorationCache.indentIndex]
+                                    .map(i => addIndentDecoration(i.cursor, i.length, currentEditorDecorationCache.indentIndex))
                             );
+                        }
+                        if (showRegular)
+                        {
+                            if (currentDocumentDecorationCache.indentLevelMap[previousEditorDecorationCache.indentIndex])
+                            {
+                                result = result.concat
+                                (
+                                    currentDocumentDecorationCache.indentLevelMap[previousEditorDecorationCache.indentIndex]
+                                        .map(i => addIndentDecoration(i.cursor, i.length, previousEditorDecorationCache.indentIndex))
+                                );
+                            }
                             result.push
                             (
                                 {
