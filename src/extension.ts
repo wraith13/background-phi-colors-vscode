@@ -320,7 +320,7 @@ export module BackgroundPhiColors
         isDefaultIndentCharactorSpace: boolean = false;
         indentUnit: string = "";
         indentUnitSize: number = 0;
-        indentLevelMap: { cursor: number, length: number }[][] = [];
+        indentLevelMap: { cursor: number, length: number }[][] = [[]];
     }
     const documentDecorationCache = new Map<vscode.TextDocument, DocumentDecorationCacheEntry>();
 
