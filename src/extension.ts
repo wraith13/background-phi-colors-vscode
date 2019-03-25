@@ -23,6 +23,7 @@ export module Profiler
             {
                 this.startTicks = getTicks();
                 entryStack.push(this);
+                //console.log(`${"*".repeat(entryStack.length)} ${this.name} begin`);
             }
             else
             {
@@ -33,6 +34,7 @@ export module Profiler
         {
             if (0 !== this.startTicks)
             {
+                //console.log(`${"*".repeat(entryStack.length)} ${this.name} end`);
                 const wholeTicks = getTicks() -this.startTicks;
                 if (undefined === profileScore[this.name])
                 {
@@ -53,6 +55,12 @@ export module Profiler
         try
         {
             return target();
+        }
+        catch(error) // 現状(VS Code v1.32.3)、こうしておかないとデバッグコンソールに例外情報が出力されない為の処置。
+        {
+            console.error(`Exception at: ${name}`);
+            console.error(error);
+            throw error; // ※この再送出により外側のこの関数で再び catch し重複してエラーが出力されることに注意。
         }
         finally
         {
