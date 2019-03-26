@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## 0.3.1 - 2019-03-2?
 
+### Added
+
+- `background-phi-colors.lineEnabled` setting.
+
 ### Fixed
 
 - Fixed a memory leak issue.

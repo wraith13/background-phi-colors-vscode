@@ -24,7 +24,8 @@
     "keywords": [
         "background",
         "phi",
-        "color"
+        "color",
+        "indent"
     ],
     "activationEvents": [
         "*"
@@ -102,6 +103,11 @@
                         "type": "string",
                         "default": "full",
                         "enum": ["none", "light", "smart", "full"],
+                        "overridable": true
+                    },
+                    "background-phi-colors.lineEnabled": {
+                        "type": "boolean",
+                        "default": true,
                         "overridable": true
                     },
                     "background-phi-colors.tokenMode": {
