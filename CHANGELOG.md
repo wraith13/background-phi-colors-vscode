@@ -4,7 +4,7 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## 0.3.1 - 2019-03-2?
+## 0.4.0 - 2019-03-26
 
 ### Added
 
