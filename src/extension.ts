@@ -651,7 +651,6 @@ export module BackgroundPhiColors
                             lang,
                             text,
                             textEditor,
-                            tabSize,
                             currentDocumentDecorationCache,
                             currentEditorDecorationCache,
                             previousEditorDecorationCache
@@ -666,7 +665,6 @@ export module BackgroundPhiColors
                                 lang,
                                 text,
                                 textEditor,
-                                tabSize,
                                 currentDocumentDecorationCache,
                                 currentEditorDecorationCache,
                                 previousEditorDecorationCache
@@ -937,7 +935,6 @@ export module BackgroundPhiColors
         lang: string,
         text: string,
         textEditor: vscode.TextEditor,
-        tabSize: number,
         currentDocumentDecorationCache: DocumentDecorationCacheEntry,
         currentEditorDecorationCache: EditorDecorationCacheEntry,
         previousEditorDecorationCache: EditorDecorationCacheEntry | undefined
@@ -1059,7 +1056,7 @@ export module BackgroundPhiColors
                                         }
                                         else
                                         {
-                                            if (getIndentSize(text, tabSize) < currentDocumentDecorationCache.indentUnitSize)
+                                            if (getIndentSize(text, currentEditorDecorationCache.tabSize) < currentDocumentDecorationCache.indentUnitSize)
                                             {
                                                 length = text.length;
                                                 if (showIndentError)
@@ -1092,7 +1089,7 @@ export module BackgroundPhiColors
                                                     {
                                                         addIndentLevelMap(cursor, length, i);
                                                     }
-                                                    const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), tabSize) /currentDocumentDecorationCache.indentUnitSize) -1;
+                                                    const indentCount = Math.ceil(getIndentSize(text.substr(0, spaces +1), currentEditorDecorationCache.tabSize) /currentDocumentDecorationCache.indentUnitSize) -1;
                                                     i += indentCount;
                                                     text = text.substr(spaces +1);
                                                 }
@@ -1138,7 +1135,6 @@ export module BackgroundPhiColors
         lang: string,
         text: string,
         textEditor: vscode.TextEditor,
-        tabSize: number,
         currentDocumentDecorationCache: DocumentDecorationCacheEntry,
         currentEditorDecorationCache: EditorDecorationCacheEntry,
         previousEditorDecorationCache: EditorDecorationCacheEntry | undefined
