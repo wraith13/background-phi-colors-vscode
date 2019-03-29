@@ -99,9 +99,24 @@
                         "default": "#5679C9",
                         "overridable": true
                     },
+                    "background-phi-colors.spaceBaseColor": {
+                        "type": ["string", "null"],
+                        "default": null,
+                        "overridable": true
+                    },
                     "background-phi-colors.spaceErrorColor": {
                         "type": "string",
                         "default": "#DD4444",
+                        "overridable": true
+                    },
+                    "background-phi-colors.symbolBaseColor": {
+                        "type": ["string", "null"],
+                        "default": null,
+                        "overridable": true
+                    },
+                    "background-phi-colors.tokenBaseColor": {
+                        "type": ["string", "null"],
+                        "default": null,
                         "overridable": true
                     },
                     "background-phi-colors.indentMode": {

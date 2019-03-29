@@ -167,11 +167,11 @@ export module BackgroundPhiColors
     const basicDelay = new Config("basicDelay", 10, 1, 1500);
     const additionalDelay = new Config("additionalDelay", 200, 50, 1500);
     const baseColor = new Config("baseColor", "#5679C9");
-    //const spaceBaseColor = new Config("spaceBaseColor", <string | undefined>undefined);
+    const spaceBaseColor = new Config("spaceBaseColor", <string | null>null);
     const spaceErrorColor = new Config("spaceErrorColor", "#DD4444");
-    //const symbolBaseColor = new Config("symbolBaseColor", <string | undefined>undefined);
+    const symbolBaseColor = new Config("symbolBaseColor", <string | null>null);
     //const symbolColorMap = new Config("symbolColorMap", <string[]>[]);
-    //const tokenBaseColor = new Config("tokenBaseColor", <string | undefined>undefined);
+    const tokenBaseColor = new Config("tokenBaseColor", <string | null>null);
     //const tokenColorMap = new Config("tokenColorMap", <string[]>[]);
     const indentMode = new Config("indentMode", "full"); // "none", "light", "smart", "full"
     const lineEnabled = new Config("lineEnabled", true);
@@ -222,6 +222,7 @@ export module BackgroundPhiColors
     (
         name: string,
         lang: string,
+        color: Config<string | null>,
         hue: number,
         alpha: Config<number>,
         overviewRulerLane?: vscode.OverviewRulerLane,
@@ -230,7 +231,7 @@ export module BackgroundPhiColors
     (
         {
             name,
-            base: hslaCache.get(baseColor.get(lang)),
+            base: hslaCache.get(color.get(lang) || baseColor.get(lang)),
             hue: hue,
             alpha: alpha.get(lang),
             overviewRulerLane: overviewRulerLane,
@@ -486,11 +487,11 @@ export module BackgroundPhiColors
             basicDelay,
             additionalDelay,
             baseColor,
-            //spaceBaseColor,
+            spaceBaseColor,
             spaceErrorColor,
-            //symbolBaseColor,
+            symbolBaseColor,
             //symbolColorMap,
-            //tokenBaseColor,
+            tokenBaseColor,
             //tokenColorMap,
             indentMode,
             lineEnabled,
@@ -767,6 +768,7 @@ export module BackgroundPhiColors
                                                     (
                                                         `token:${i}`,
                                                         lang,
+                                                        tokenBaseColor,
                                                         hash(i),
                                                         tokenActiveAlpha,
                                                         showActiveTokenInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Center: undefined,
@@ -792,6 +794,7 @@ export module BackgroundPhiColors
                                                         (
                                                             `token:${i}`,
                                                             lang,
+                                                            tokenBaseColor,
                                                             hash(i),
                                                             tokenAlpha,
                                                         )
@@ -974,6 +977,7 @@ export module BackgroundPhiColors
                         (
                             `indent:${indent}`,
                             lang,
+                            spaceBaseColor,
                             indent,
                             (showActive && currentEditorDecorationCache.indentIndex === indent) ? spacesActiveAlpha: spacesAlpha
                         )
@@ -992,6 +996,7 @@ export module BackgroundPhiColors
                                 (
                                     `indent:${previousEditorDecorationCache.indentIndex}`,
                                     lang,
+                                    spaceBaseColor,
                                     previousEditorDecorationCache.indentIndex,
                                     spacesActiveAlpha
                                 )
@@ -1024,6 +1029,7 @@ export module BackgroundPhiColors
                                     (
                                         `indent:${currentEditorDecorationCache.indentIndex}`,
                                         lang,
+                                        spaceBaseColor,
                                         currentEditorDecorationCache.indentIndex,
                                         spacesAlpha
                                     )
@@ -1178,6 +1184,7 @@ export module BackgroundPhiColors
                         (
                             `line`,
                             lang,
+                            spaceBaseColor,
                             currentEditorDecorationCache.indentIndex,
                             spacesActiveAlpha,
                             undefined,
@@ -1196,6 +1203,7 @@ export module BackgroundPhiColors
                             (
                                 `line`,
                                 lang,
+                                spaceBaseColor,
                                 previousEditorDecorationCache.indentIndex,
                                 spacesActiveAlpha,
                                 undefined,
@@ -1253,6 +1261,7 @@ export module BackgroundPhiColors
                     (
                         "symbols",
                         lang,
+                        symbolBaseColor,
                         (
                             <{ [key: string]: number }>
                             {
@@ -1346,6 +1355,7 @@ export module BackgroundPhiColors
                     (
                         `token:${i.token}`,
                         lang,
+                        tokenBaseColor,
                         hash(i.token),
                         i.isActive ? tokenActiveAlpha: tokenAlpha,
                         i.isActive && showActiveTokenInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Center: undefined,
@@ -1386,6 +1396,7 @@ export module BackgroundPhiColors
                         (
                             "body-spaces",
                             lang,
+                            spaceBaseColor,
                             match[0].startsWith("\t") ?
                                 //  tabs
                                 ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
@@ -1423,7 +1434,14 @@ export module BackgroundPhiColors
                     length: match[2].length,
                     decorationParam: showError ?
                         makeTrailingSpacesErrorDecorationParam(lang):
-                        makeHueDecoration("trailling-spaces", lang, match[2].length, spacesAlpha)
+                        makeHueDecoration
+                        (
+                            "trailling-spaces",
+                            lang,
+                            spaceBaseColor,
+                            match[2].length,
+                            spacesAlpha
+                        )
                 }
             )
         )
