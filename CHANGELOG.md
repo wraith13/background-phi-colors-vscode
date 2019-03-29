@@ -6,9 +6,15 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## 0.?.? - 2019-0?-??
 
+### Added
+
+- `background-phi-colors.spaceErrorColor` setting.
+
 ### Changed
 
 - Renewal of extension icon.
+- default value of `background-phi-colors.baseColor` setting, and setting mean. ( In default value it does not change in totally. )
+
 
 ## 0.4.0 - 2019-03-26
 

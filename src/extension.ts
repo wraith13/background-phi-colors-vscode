@@ -166,9 +166,9 @@ export module BackgroundPhiColors
     const fileSizeLimit = new Config("fileSizeLimit", 100 *1024, 10 *1024, 10 *1024 *1024);
     const basicDelay = new Config("basicDelay", 10, 1, 1500);
     const additionalDelay = new Config("additionalDelay", 200, 50, 1500);
-    const baseColor = new Config("baseColor", "#CC6666");
+    const baseColor = new Config("baseColor", "#5679C9");
     //const spaceBaseColor = new Config("spaceBaseColor", <string | undefined>undefined);
-    //const spaceErrorColor = new Config("spaceErrorColor", <string | undefined>undefined);
+    const spaceErrorColor = new Config("spaceErrorColor", "#DD4444");
     //const symbolBaseColor = new Config("symbolBaseColor", <string | undefined>undefined);
     //const symbolColorMap = new Config("symbolColorMap", <string[]>[]);
     //const tokenBaseColor = new Config("tokenBaseColor", <string | undefined>undefined);
@@ -217,8 +217,47 @@ export module BackgroundPhiColors
         length: number;
         decorationParam: DecorationParam;
     }
-    const makeIndentErrorDecorationParam = (lang: string) => makeHueDecoration("indenet:error", lang, -1, spacesErrorAlpha, showIndentErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Left: undefined);
-    const makeTrailingSpacesErrorDecorationParam = (lang: string) => makeHueDecoration("trailling-spaces", lang, -1, spacesErrorAlpha, showTraillingSpacesErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Right: undefined);
+    let hslaCache = new Cache((color: string) => phiColors.rgbaToHsla(phiColors.rgbaFromStyle(color)));
+    export const makeHueDecoration =
+    (
+        name: string,
+        lang: string,
+        hue: number,
+        alpha: Config<number>,
+        overviewRulerLane?: vscode.OverviewRulerLane,
+        isWholeLine?: boolean
+    ) =>
+    (
+        {
+            name,
+            base: hslaCache.get(baseColor.get(lang)),
+            hue: hue,
+            alpha: alpha.get(lang),
+            overviewRulerLane: overviewRulerLane,
+            isWholeLine,
+        }
+    );
+
+    const makeIndentErrorDecorationParam = (lang: string) =>
+    (
+        {
+            name: "indenet:error",
+            base: hslaCache.get(spaceErrorColor.get(lang)),
+            hue: 0,
+            alpha: spacesErrorAlpha.get(lang),
+            overviewRulerColor: showIndentErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Left: undefined,
+        }
+    );
+    const makeTrailingSpacesErrorDecorationParam = (lang: string) =>
+    (
+        {
+            name: "trailling-spaces",
+            base: hslaCache.get(spaceErrorColor.get(lang)),
+            hue: 0,
+            alpha: spacesErrorAlpha.get(lang),
+            overviewRulerColor: showTraillingSpacesErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Right: undefined,
+        }
+    );
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
 
     export const initialize = (context: vscode.ExtensionContext): void =>
@@ -448,7 +487,7 @@ export module BackgroundPhiColors
             additionalDelay,
             baseColor,
             //spaceBaseColor,
-            //spaceErrorColor,
+            spaceErrorColor,
             //symbolBaseColor,
             //symbolColorMap,
             //tokenBaseColor,
@@ -840,27 +879,6 @@ export module BackgroundPhiColors
                     }
                 );
             }
-        }
-    );
-
-    let hslaCache = new Cache((color: string) => phiColors.rgbaToHsla(phiColors.rgbaFromStyle(color)));
-    export const makeHueDecoration =
-    (
-        name: string,
-        lang: string,
-        hue: number,
-        alpha: Config<number>,
-        overviewRulerLane?: vscode.OverviewRulerLane,
-        isWholeLine?: boolean
-    ) =>
-    (
-        {
-            name,
-            base: hslaCache.get(baseColor.get(lang)),
-            hue: hue +1,
-            alpha: alpha.get(lang),
-            overviewRulerLane: overviewRulerLane,
-            isWholeLine,
         }
     );
 
