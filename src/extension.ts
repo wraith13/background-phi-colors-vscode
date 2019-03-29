@@ -1209,20 +1209,24 @@ export module BackgroundPhiColors
         }
     );
 
-    export const regExpExecToArray = (regexp: RegExp, text: string) =>
-    {
-        const result: RegExpExecArray[] = [];
-        while(true)
+    export const regExpExecToArray = (regexp: RegExp, text: string) => Profiler.profile
+    (
+        `regExpExecToArray(/${regexp.source}/${regexp.flags})`,
+        () =>
         {
-            const match = regexp.exec(text);
-            if (null === match)
+            const result: RegExpExecArray[] = [];
+            while(true)
             {
-                break;
+                const match = regexp.exec(text);
+                if (null === match)
+                {
+                    break;
+                }
+                result.push(match);
             }
-            result.push(match);
+            return result;
         }
-        return result;
-    };
+    );
 
     export const updateSymbolsDecoration =
     (
