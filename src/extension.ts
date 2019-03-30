@@ -162,7 +162,7 @@ export module BackgroundPhiColors
     }
     
     const enabled = new Config("enabled", true);
-    const enabledPanels = new Config("enabledPanels", true);
+    const enabledPanels = new Config("enabledPanels", false);
     const fileSizeLimit = new Config("fileSizeLimit", 100 *1024, 10 *1024, 10 *1024 *1024);
     const basicDelay = new Config("basicDelay", 10, 1, 1500);
     const additionalDelay = new Config("additionalDelay", 200, 50, 1500);
