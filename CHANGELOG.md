@@ -11,7 +11,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - `background-phi-colors.spaceErrorColor` setting.
 - `background-phi-colors.spaceBaseColor` setting.
 - `background-phi-colors.symbolBaseColor` setting.
+- `background-phi-colors.symbolColorMap` setting.
 - `background-phi-colors.tokenBaseColor` setting.
+- `background-phi-colors.tokenColorMap` setting.
 - regExpExecToArray() as profiling item.
 
 ### Changed

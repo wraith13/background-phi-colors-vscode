@@ -90,7 +90,9 @@ This extension contributes the following settings by [`settings.json`](https://c
 * `background-phi-colors.spaceBaseColor`: TBD
 * `background-phi-colors.spaceErrorColor`: TBD
 * `background-phi-colors.symbolBaseColor`: TBD
+* `background-phi-colors.symbolColorMap`: TBD
 * `background-phi-colors.tokenBaseColor`: TBD
+* `background-phi-colors.tokenColorMap`: TBD
 * `background-phi-colors.indentMode`: TBD
 * `background-phi-colors.lineEnabled`: TBD
 * `background-phi-colors.tokenMode`: TBD

@@ -170,9 +170,9 @@ export module BackgroundPhiColors
     const spaceBaseColor = new Config("spaceBaseColor", <string | null>null);
     const spaceErrorColor = new Config("spaceErrorColor", "#DD4444");
     const symbolBaseColor = new Config("symbolBaseColor", <string | null>null);
-    //const symbolColorMap = new Config("symbolColorMap", <string[]>[]);
+    const symbolColorMap = new Config("symbolColorMap", <{[key: string]: string}>{});
     const tokenBaseColor = new Config("tokenBaseColor", <string | null>null);
-    //const tokenColorMap = new Config("tokenColorMap", <string[]>[]);
+    const tokenColorMap = new Config("tokenColorMap", <{[key: string]: string}>{});
     const indentMode = new Config("indentMode", "full"); // "none", "light", "smart", "full"
     const lineEnabled = new Config("lineEnabled", true);
     const tokenMode = new Config("tokenMode", "smart"); // "none", "light", "smart", "full"
@@ -223,7 +223,7 @@ export module BackgroundPhiColors
         name: string,
         lang: string,
         color: Config<string | null>,
-        hue: number,
+        hue: string | number,
         alpha: Config<number>,
         overviewRulerLane?: vscode.OverviewRulerLane,
         isWholeLine?: boolean
@@ -231,8 +231,13 @@ export module BackgroundPhiColors
     (
         {
             name,
-            base: hslaCache.get(color.get(lang) || baseColor.get(lang)),
-            hue: hue,
+            base: hslaCache.get
+            (
+                "number" === typeof hue ?
+                    color.get(lang) || baseColor.get(lang):
+                    hue
+            ),
+            hue: "number" === typeof hue ? hue: 0,
             alpha: alpha.get(lang),
             overviewRulerLane: overviewRulerLane,
             isWholeLine,
@@ -490,9 +495,9 @@ export module BackgroundPhiColors
             spaceBaseColor,
             spaceErrorColor,
             symbolBaseColor,
-            //symbolColorMap,
+            symbolColorMap,
             tokenBaseColor,
-            //tokenColorMap,
+            tokenColorMap,
             indentMode,
             lineEnabled,
             tokenMode,
@@ -747,6 +752,7 @@ export module BackgroundPhiColors
                                     tabSize,
                                     showRegular,
                                     currentEditorDecorationCache.strongTokens,
+                                    tokenColorMap.get(lang) || { },
                                     undefined !== previousEditorDecorationCache ? previousEditorDecorationCache.strongTokens: undefined
                                 )
                             );
@@ -808,7 +814,7 @@ export module BackgroundPhiColors
                     }
                     if (!previousEditorDecorationCache && symbolEnabled.get(lang))
                     {
-                        entry = entry.concat(updateSymbolsDecoration(lang, text, textEditor, tabSize));
+                        entry = entry.concat(updateSymbolsDecoration(lang, text, textEditor, tabSize, symbolColorMap.get(lang) || { }));
                     }
                     if (!previousEditorDecorationCache && bodySpacesEnabled.get(lang))
                     {
@@ -1241,7 +1247,8 @@ export module BackgroundPhiColors
         lang: string,
         text: string,
         textEditor: vscode.TextEditor,
-        tabSize: number
+        tabSize: number,
+        symbolColorMap: {[key: string]: string}
     ): DecorationEntry[] => Profiler.profile
     (
         "updateSymbolsDecoration", () =>
@@ -1255,13 +1262,26 @@ export module BackgroundPhiColors
             match =>
             (
                 {
-                    startPosition: match.index,
-                    length: match[0].length,
+                    index: match.index,
+                    token: match[0],
+                    specificColor: symbolColorMap[match[0]]
+                }
+            )
+        )
+        .filter(i => null !== i.specificColor)
+        .map
+        (
+            i =>
+            (
+                {
+                    startPosition: i.index,
+                    length: i.token.length,
                     decorationParam: makeHueDecoration
                     (
                         "symbols",
                         lang,
                         symbolBaseColor,
+                        i.specificColor ||
                         (
                             <{ [key: string]: number }>
                             {
@@ -1297,7 +1317,7 @@ export module BackgroundPhiColors
                                 "\^": 26,
                                 "\~": 27,
                             }
-                        )[match[0]],
+                        )[i.token],
                         symbolAlpha
                     )
                 }
@@ -1315,7 +1335,8 @@ export module BackgroundPhiColors
         tabSize: number,
         showRegular: boolean,
         strongTokens: string[],
-        previousStrongTokens?: string[]
+        tokenColorMap: {[key: string]: string},
+        previousStrongTokens?: string[],
     ): DecorationEntry[] => Profiler.profile
     (
         "updateTokesDecoration", () =>
@@ -1339,11 +1360,12 @@ export module BackgroundPhiColors
                 {
                     index: match.index,
                     token: match[0],
-                    isActive: 0 <= strongTokens.indexOf(match[0])
+                    isActive: 0 <= strongTokens.indexOf(match[0]),
+                    specificColor: tokenColorMap[match[0]]
                 }
             )
         )
-        .filter(i => showRegular || i.isActive)
+        .filter(i => (showRegular || i.isActive) && null !== i.specificColor)
         .map
         (
             i =>
@@ -1356,7 +1378,7 @@ export module BackgroundPhiColors
                         `token:${i.token}`,
                         lang,
                         tokenBaseColor,
-                        hash(i.token),
+                        i.specificColor || hash(i.token),
                         i.isActive ? tokenActiveAlpha: tokenAlpha,
                         i.isActive && showActiveTokenInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Center: undefined,
                     )

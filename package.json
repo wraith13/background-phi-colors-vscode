@@ -114,9 +114,19 @@
                         "default": null,
                         "overridable": true
                     },
+                    "background-phi-colors.symbolColorMap": {
+                        "type": "object",
+                        "default": { },
+                        "overridable": true
+                    },
                     "background-phi-colors.tokenBaseColor": {
                         "type": ["string", "null"],
                         "default": null,
+                        "overridable": true
+                    },
+                    "background-phi-colors.tokenColorMap": {
+                        "type": "object",
+                        "default": { },
                         "overridable": true
                     },
                     "background-phi-colors.indentMode": {
