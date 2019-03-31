@@ -143,15 +143,17 @@ export module BackgroundPhiColors
                         }
                     }
                 }
-                else
-                if (undefined !== this.minValue && result < this.minValue)
+                if (undefined !== result)
                 {
-                    result = this.minValue;
-                }
-                else
-                if (undefined !== this.maxValue && this.maxValue < result)
-                {
-                    result = this.maxValue;
+                    if (undefined !== this.minValue && result < this.minValue)
+                    {
+                        result = this.minValue;
+                    }
+                    else
+                    if (undefined !== this.maxValue && this.maxValue < result)
+                    {
+                        result = this.maxValue;
+                    }
                 }
                 return result;
             }

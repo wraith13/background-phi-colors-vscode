@@ -21,6 +21,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Renewal of extension icon.
 - default value of `background-phi-colors.baseColor` setting, and setting mean. ( In default value it does not change in totally. )
 
+### Fixed
+
+- Fixed an issue that setting value min/max does not function properly on TypeScript.
 
 ## 0.4.0 - 2019-03-26
 
