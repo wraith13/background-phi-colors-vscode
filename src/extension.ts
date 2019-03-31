@@ -126,13 +126,27 @@ export module BackgroundPhiColors
 
         }
 
+        regulate = (rawKey: string, value: valueT): valueT =>
+        {
+            let result = value;
+            if (undefined !== this.minValue && result < this.minValue)
+            {
+                result = this.minValue;
+            }
+            else
+            if (undefined !== this.maxValue && this.maxValue < result)
+            {
+                result = this.maxValue;
+            }
+            return result;
+        }
+
         cache = new Cache
         (
             (lang: string): valueT =>
             {
-                const langSection = vscode.workspace.getConfiguration(`[${lang}]`, null);
-                let result: valueT = <valueT>langSection[`${applicationKey}.${this.name}`];
-                if (undefined === result)
+                let result: valueT;
+                if (undefined === lang || null === lang || 0 === lang.length)
                 {
                     result = <valueT>vscode.workspace.getConfiguration(applicationKey)[this.name];
                     if (undefined === result)
@@ -142,17 +156,22 @@ export module BackgroundPhiColors
                             result = this.defaultValue;
                         }
                     }
-                }
-                if (undefined !== result)
-                {
-                    if (undefined !== this.minValue && result < this.minValue)
+                    else
                     {
-                        result = this.minValue;
+                        result = this.regulate(`${applicationKey}.${this.name}]`, result);
+                    }
+                }
+                else
+                {
+                    const langSection = vscode.workspace.getConfiguration(`[${lang}]`, null);
+                    result = <valueT>langSection[`${applicationKey}.${this.name}`];
+                    if (undefined === result)
+                    {
+                        result = this.get("");
                     }
                     else
-                    if (undefined !== this.maxValue && this.maxValue < result)
                     {
-                        result = this.maxValue;
+                        result = this.regulate(`[${lang}.${applicationKey}.${this.name}]`, result);
                     }
                 }
                 return result;
