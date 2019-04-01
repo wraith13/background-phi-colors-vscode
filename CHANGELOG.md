@@ -14,6 +14,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - `background-phi-colors.symbolColorMap` setting.
 - `background-phi-colors.tokenBaseColor` setting.
 - `background-phi-colors.tokenColorMap` setting.
+- settings validator.
 - regExpExecToArray() as profiling item.
 
 ### Changed

@@ -118,7 +118,8 @@ export module BackgroundPhiColors
         public constructor
         (
             public name: string,
-            public defaultValue?: valueT,
+            public defaultValue: valueT,
+            public validator?: (value: valueT) => boolean,
             public minValue?: valueT,
             public maxValue?: valueT
         )
@@ -129,14 +130,22 @@ export module BackgroundPhiColors
         regulate = (rawKey: string, value: valueT): valueT =>
         {
             let result = value;
-            if (undefined !== this.minValue && result < this.minValue)
+            if (this.validator && !this.validator(result))
             {
-                result = this.minValue;
+                vscode.window.showErrorMessage(`${rawKey} setting value is invalid! Please check your settings.`);
+                result = this.defaultValue;
             }
             else
-            if (undefined !== this.maxValue && this.maxValue < result)
             {
-                result = this.maxValue;
+                if (undefined !== this.minValue && result < this.minValue)
+                {
+                    result = this.minValue;
+                }
+                else
+                if (undefined !== this.maxValue && this.maxValue < result)
+                {
+                    result = this.maxValue;
+                }
             }
             return result;
         }
@@ -151,14 +160,11 @@ export module BackgroundPhiColors
                     result = <valueT>vscode.workspace.getConfiguration(applicationKey)[this.name];
                     if (undefined === result)
                     {
-                        if (undefined !== this.defaultValue)
-                        {
-                            result = this.defaultValue;
-                        }
+                        result = this.defaultValue;
                     }
                     else
                     {
-                        result = this.regulate(`${applicationKey}.${this.name}]`, result);
+                        result = this.regulate(`${applicationKey}.${this.name}`, result);
                     }
                 }
                 else
@@ -171,7 +177,7 @@ export module BackgroundPhiColors
                     }
                     else
                     {
-                        result = this.regulate(`[${lang}.${applicationKey}.${this.name}]`, result);
+                        result = this.regulate(`[${lang}].${applicationKey}.${this.name}`, result);
                     }
                 }
                 return result;
@@ -182,18 +188,25 @@ export module BackgroundPhiColors
         public clear = this.cache.clear;
     }
     
+    const colorValidator = (value: string) => /^#[0-9A-Fa-f]{6}$/.test(value);
+    const colorOrNullValidator = (value: string | null) => null === value || colorValidator(value);
+    const colorMapValidator = (value: {[key: string]: string}) =>
+        undefined !== value &&
+        null !== value &&
+        !Object.keys(value).some(key => !colorOrNullValidator(value[key]));
+
     const enabled = new Config("enabled", true);
     const enabledPanels = new Config("enabledPanels", false);
-    const fileSizeLimit = new Config("fileSizeLimit", 100 *1024, 10 *1024, 10 *1024 *1024);
-    const basicDelay = new Config("basicDelay", 10, 1, 1500);
-    const additionalDelay = new Config("additionalDelay", 200, 50, 1500);
-    const baseColor = new Config("baseColor", "#5679C9");
-    const spaceBaseColor = new Config("spaceBaseColor", <string | null>null);
-    const spaceErrorColor = new Config("spaceErrorColor", "#DD4444");
-    const symbolBaseColor = new Config("symbolBaseColor", <string | null>null);
-    const symbolColorMap = new Config("symbolColorMap", <{[key: string]: string}>{});
-    const tokenBaseColor = new Config("tokenBaseColor", <string | null>null);
-    const tokenColorMap = new Config("tokenColorMap", <{[key: string]: string}>{});
+    const fileSizeLimit = new Config("fileSizeLimit", 100 *1024, undefined, 10 *1024, 10 *1024 *1024);
+    const basicDelay = new Config("basicDelay", 10, undefined, 1, 1500);
+    const additionalDelay = new Config("additionalDelay", 200, undefined, 50, 1500);
+    const baseColor = new Config("baseColor", "#5679C9", colorValidator);
+    const spaceBaseColor = new Config("spaceBaseColor", <string | null>null, colorOrNullValidator);
+    const spaceErrorColor = new Config("spaceErrorColor", "#DD4444", colorValidator);
+    const symbolBaseColor = new Config("symbolBaseColor", <string | null>null, colorOrNullValidator);
+    const symbolColorMap = new Config("symbolColorMap", <{[key: string]: string}>{}, colorMapValidator);
+    const tokenBaseColor = new Config("tokenBaseColor", <string | null>null, colorOrNullValidator);
+    const tokenColorMap = new Config("tokenColorMap", <{[key: string]: string}>{}, colorMapValidator);
     const indentMode = new Config("indentMode", "full"); // "none", "light", "smart", "full"
     const lineEnabled = new Config("lineEnabled", true);
     const tokenMode = new Config("tokenMode", "smart"); // "none", "light", "smart", "full"
@@ -205,12 +218,12 @@ export module BackgroundPhiColors
     const showIndentErrorInOverviewRulerLane = new Config("showIndentErrorInOverviewRulerLane", true);
     const showActiveTokenInOverviewRulerLane = new Config("showActiveTokenInOverviewRulerLane", true);
     const showTraillingSpacesErrorInOverviewRulerLane = new Config("showTraillingSpacesErrorInOverviewRulerLane", true);
-    const spacesAlpha =new Config("spacesAlpha", 0x11, 0x00, 0xFF);
-    const spacesActiveAlpha =new Config("spacesActiveAlpha", 0x33, 0x00, 0xFF);
-    const spacesErrorAlpha =new Config("spacesErrorAlpha", 0x88, 0x00, 0xFF);
-    const symbolAlpha =new Config("symbolAlpha", 0x44, 0x00, 0xFF);
-    const tokenAlpha =new Config("tokenAlpha", 0x33, 0x00, 0xFF);
-    const tokenActiveAlpha =new Config("tokenActiveAlpha", 0x66, 0x00, 0xFF);
+    const spacesAlpha =new Config("spacesAlpha", 0x11, undefined, 0x00, 0xFF);
+    const spacesActiveAlpha =new Config("spacesActiveAlpha", 0x33, undefined, 0x00, 0xFF);
+    const spacesErrorAlpha =new Config("spacesErrorAlpha", 0x88, undefined, 0x00, 0xFF);
+    const symbolAlpha =new Config("symbolAlpha", 0x44, undefined, 0x00, 0xFF);
+    const tokenAlpha =new Config("tokenAlpha", 0x33, undefined, 0x00, 0xFF);
+    const tokenActiveAlpha =new Config("tokenActiveAlpha", 0x66, undefined, 0x00, 0xFF);
 
     const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
