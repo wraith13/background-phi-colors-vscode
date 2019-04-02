@@ -1537,7 +1537,11 @@ export function deactivate(): void
      * EXACTLY WRONG INDENT
      *
      */
-    
+
+    // spaces indent
+	// tab indent
+  	// spaces and tab indent
+
     //    body spaces
 
     // trailling spaces        
