@@ -406,6 +406,11 @@ export module BackgroundPhiColors
         return showActive || showRegular || lineEnabled.get(lang);
     };
 
+    const windowDecorationCache =
+    {
+        strongTokens: <string[]>[],
+    };
+
     class DocumentDecorationCacheEntry
     {
         isDefaultIndentCharactorSpace: boolean = false;
@@ -413,6 +418,7 @@ export module BackgroundPhiColors
         indentUnitSize: number = 0;
         indentLevelMap: { cursor: number, length: number }[][] = [[]];
         indents: { index: number, text: string }[] = []; // これをここに持っておくのはメモリの消費量的には避けたいところだが、どうせタブ切り替えの度に必要になり、削ったところであまり意味のあるメモリ節約にならないのでキャッシュしておく。
+        strongTokens: string[] = [];
 
         public constructor(lang: string, text: string, tabSize: number)
         {
@@ -490,6 +496,7 @@ export module BackgroundPhiColors
 
     export const clearAllDecorationCache = (): void =>
     {
+        windowDecorationCache.strongTokens = [];
         documentDecorationCache.clear();
         editorDecorationCache.clear();
     };
