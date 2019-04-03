@@ -25,7 +25,8 @@
         "background",
         "phi",
         "color",
-        "indent"
+        "indent",
+        "rainbow"
     ],
     "activationEvents": [
         "*"
