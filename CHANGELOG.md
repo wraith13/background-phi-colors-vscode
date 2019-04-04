@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Added
 
 - Active Scope
+- settings validator for enum.
 
 ## 0.5.0 - 2019-04-02
 
