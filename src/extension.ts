@@ -4,6 +4,9 @@ import { phiColors } from 'phi-colors';
 const getTicks = () => new Date().getTime();
 const roundCenti = (value : number) : number => Math.round(value *100) /100;
 const percentToDisplayString = (value : number, locales?: string | string[]) : string =>`${roundCenti(value).toLocaleString(locales, { style: "percent" })}`;
+const isCompatibleArray = <valueT>(a: valueT[], b:valueT[]) =>
+    !a.some(i => b.indexOf(i) < 0) &&
+    !b.some(i => a.indexOf(i) < 0);
 
 export module Profiler
 {
@@ -212,6 +215,7 @@ export module BackgroundPhiColors
     const indentMode = new Config("indentMode", "full"); // "none", "light", "smart", "full"
     const lineEnabled = new Config("lineEnabled", true);
     const tokenMode = new Config("tokenMode", "smart"); // "none", "light", "smart", "full"
+    const activeScope = new Config("activeScope", "editor"); // "editor", "document", "window"
     const indentErrorEnabled = new Config("indentErrorEnabled", true);
     const traillingSpacesErrorEnabled = new Config("traillingSpacesErrorEnabled", true);
     const bodySpacesEnabled = new Config("bodySpacesEnabled", true);
@@ -307,6 +311,21 @@ export module BackgroundPhiColors
         context.subscriptions.push
         (
             //  コマンドの登録
+            vscode.commands.registerCommand
+            (
+                `${applicationKey}.activeScopeEditor`,
+                () => vscode.workspace.getConfiguration(applicationKey).update("activeScope", "editor", true)
+            ),
+            vscode.commands.registerCommand
+            (
+                `${applicationKey}.activeScopeDocument`,
+                () => vscode.workspace.getConfiguration(applicationKey).update("activeScope", "document", true)
+            ),
+            vscode.commands.registerCommand
+            (
+                `${applicationKey}.activeScopeWindow`,
+                () => vscode.workspace.getConfiguration(applicationKey).update("activeScope", "window", true)
+            ),
             vscode.commands.registerCommand(`${applicationKey}.overTheLimig`, () => activeTextEditor(overTheLimit)),
             vscode.commands.registerCommand(`${applicationKey}.pause`, () => activeTextEditor(pause)),
             vscode.commands.registerCommand
@@ -544,6 +563,7 @@ export module BackgroundPhiColors
             indentMode,
             lineEnabled,
             tokenMode,
+            activeScope,
             indentErrorEnabled,
             traillingSpacesErrorEnabled,
             bodySpacesEnabled,
@@ -696,6 +716,7 @@ export module BackgroundPhiColors
         {
             const lang = textEditor.document.languageId;
             const text = textEditor.document.getText();
+            const isActiveTextEditor = vscode.window.activeTextEditor === textEditor;
     
             //  clear
             Profiler.profile("updateDecoration.clear", () => Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []));
@@ -763,25 +784,65 @@ export module BackgroundPhiColors
                     {
                         const showActive = 0 <= ["smart", "full"].indexOf(tokenMode.get(lang));
                         const showRegular = 0 <= ["light", "full"].indexOf(tokenMode.get(lang));
-                        currentEditorDecorationCache.strongTokens = showActive ?
-                            regExpExecToArray
-                            (
-                                /\w+/gm,
-                                textEditor.document
-                                    .lineAt(textEditor.selection.active.line).text
-                            )
-                            .map(i => i[0]):
-                            [];
+                        if (showActive)
+                        {
+                            if (isActiveTextEditor || "editor" === activeScope.get(""))
+                            {
+                                currentEditorDecorationCache.strongTokens = regExpExecToArray
+                                (
+                                    /\w+/gm,
+                                    textEditor.document
+                                        .lineAt(textEditor.selection.active.line).text
+                                )
+                                .map(i => i[0]);
+                                switch(activeScope.get(""))
+                                {
+                                case "editor":
+                                    //currentEditorDecorationCache.strongTokens = currentEditorDecorationCache.strongTokens;
+                                    break;
+                                case "document":
+                                    if (!isCompatibleArray(currentEditorDecorationCache.strongTokens, currentDocumentDecorationCache.strongTokens))
+                                    {
+                                        currentDocumentDecorationCache.strongTokens = currentEditorDecorationCache.strongTokens;
+                                        vscode.window.visibleTextEditors.filter(i => textEditor !== i && textEditor.document === i.document).forEach(i => delayUpdateDecoration(i));
+                                    }
+                                    break;
+                                case "window":
+                                    if (!isCompatibleArray(currentEditorDecorationCache.strongTokens, windowDecorationCache.strongTokens))
+                                    {
+                                        windowDecorationCache.strongTokens = currentEditorDecorationCache.strongTokens;
+                                        vscode.window.visibleTextEditors.filter(i => textEditor !== i).forEach(i => delayUpdateDecoration(i));
+                                    }
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                switch(activeScope.get(""))
+                                {
+                                case "editor":
+                                    //currentEditorDecorationCache.strongTokens = currentEditorDecorationCache.strongTokens;
+                                    break;
+                                case "document":
+                                    currentEditorDecorationCache.strongTokens = currentDocumentDecorationCache.strongTokens;
+                                    break;
+                                case "window":
+                                    currentEditorDecorationCache.strongTokens = windowDecorationCache.strongTokens;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            currentEditorDecorationCache.strongTokens = [];
+                        }
                         
                         if
                         (
                             !previousEditorDecorationCache ||
                             (
                                 showActive &&
-                                (
-                                    previousEditorDecorationCache.strongTokens.some(i => currentEditorDecorationCache.strongTokens.indexOf(i) < 0) ||
-                                    currentEditorDecorationCache.strongTokens.some(i => previousEditorDecorationCache.strongTokens.indexOf(i) < 0)
-                                )
+                                !isCompatibleArray(currentEditorDecorationCache.strongTokens, previousEditorDecorationCache.strongTokens)
                             )
                         )
                         {

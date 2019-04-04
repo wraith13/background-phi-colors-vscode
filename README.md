@@ -71,6 +71,9 @@ Enjoy!
 
 ## Commands
 
+* `Background Phi Colors: Active Scrope: Editor` : TBD
+* `Background Phi Colors: Active Scrope: Document` : TBD
+* `Background Phi Colors: Active Scrope: Window` : TBD
 * `Background Phi Colors: Over the Limit` : TBD
 * `Background Phi Colors: Pause` : TBD
 * `Background Phi Colors: Pause All` : TBD
@@ -96,6 +99,7 @@ This extension contributes the following settings by [`settings.json`](https://c
 * `background-phi-colors.indentMode`: TBD
 * `background-phi-colors.lineEnabled`: TBD
 * `background-phi-colors.tokenMode`: TBD
+* `background-phi-colors.activeScope`: TBD
 * `background-phi-colors.indentErrorEnabled`: TBD
 * `background-phi-colors.traillingSpacesErrorEnabled`: TBD
 * `background-phi-colors.bodySpacesEnabled`: TBD
@@ -121,6 +125,9 @@ Command name on `keybindings.json` is diffarent from on Command Pallete. See bel
 
 |on Command Pallete|on keybindings.json|
 |-|-|
+|`Background Phi Colors: Active Scope: Editor`|`background-phi-colors.activeScopeEditor`|
+|`Background Phi Colors: Active Scope: Document`|`background-phi-colors.activeScopeDocument`|
+|`Background Phi Colors: Active Scope: Window`|`background-phi-colors.activeScopeWindow`|
 |`Background Phi Colors: Over the Limit`|`background-phi-colors.overTheLimig`|
 |`Background Phi Colors: Pause`|`background-phi-colors.pause`|
 |`Background Phi Colors: Pause All`|`background-phi-colors.pauseAll`|

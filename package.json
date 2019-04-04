@@ -35,6 +35,21 @@
     "contributes": {
         "commands": [
             {
+                "command": "background-phi-colors.activeScopeEditor",
+                "title": "Active Scope: Editor",
+                "category": "Background Phi Colors"
+            },
+            {
+                "command": "background-phi-colors.activeScopeDocument",
+                "title": "Active Scope: Document",
+                "category": "Background Phi Colors"
+            },
+            {
+                "command": "background-phi-colors.activeScopeWindow",
+                "title": "Active Scope: Window",
+                "category": "Background Phi Colors"
+            },
+            {
                 "command": "background-phi-colors.overTheLimig",
                 "title": "Over the Limit",
                 "category": "Background Phi Colors"
@@ -146,6 +161,12 @@
                         "default": "smart",
                         "enum": ["none", "light", "smart", "full"],
                         "overridable": true
+                    },
+                    "background-phi-colors.activeScope": {
+                        "type": "string",
+                        "default": "editor",
+                        "enum": ["editor", "document", "window"],
+                        "overridable": false
                     },
                     "background-phi-colors.indentErrorEnabled": {
                         "type": "boolean",
