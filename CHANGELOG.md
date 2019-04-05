@@ -11,6 +11,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Active Scope
 - settings validator for enum.
 
+### Changed
+
+- Improved token color hash function.
+
 ## 0.5.0 - 2019-04-02
 
 ### Added

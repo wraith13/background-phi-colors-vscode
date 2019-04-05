@@ -1434,7 +1434,7 @@ export module BackgroundPhiColors
         )
     );
     export const hash = (source: string): number =>
-        source.split("").map(i => i.codePointAt(0) || 0).reduce((a, b) => a *719 +b)
+        source.split("").map(i => i.codePointAt(0) || 0).reduce((a, b) => (a *173 +b +((a & 0x5555) >>> 5)) & 8191)
         %34; // ← 通常、こういうところの数字は素数にすることが望ましいがここについては https://wraith13.github.io/phi-ratio-coloring/phi-ratio-coloring.htm で類似色の出てくる周期をベース(8,13,21,...)に調整すること。
     export const updateTokesDecoration =
     (
