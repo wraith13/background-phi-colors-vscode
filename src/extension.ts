@@ -199,11 +199,11 @@ export module BackgroundPhiColors
         undefined !== value &&
         null !== value &&
         !Object.keys(value).some(key => !colorOrNullValidator(value[key]));
-    const makeEnumValidator = (values: string[]): (value: string) => boolean => (value: string) => 0 <= values.indexOf(value);
+    const makeEnumValidator = (object: {[key:string]: any }): (value: string) => boolean => (value: string) => undefined !== object[value];
 
-    const indentModeObject = { "none": null, "light": null, "smart": null, "full": null, };
-    const tokenModeObject = { "none": null, "light": null, "smart": null, "full": null, };
-    const activeScopeObject = { "editor": null, "document": null, "window": null, };
+    const indentModeObject = Object.freeze({ "none": null, "light": null, "smart": null, "full": null, });
+    const tokenModeObject = Object.freeze ({ "none": null, "light": null, "smart": null, "full": null, });
+    const activeScopeObject = Object.freeze ({ "editor": null, "document": null, "window": null, });
 
     const enabled = new Config("enabled", true);
     const enabledPanels = new Config("enabledPanels", false);
@@ -217,10 +217,10 @@ export module BackgroundPhiColors
     const symbolColorMap = new Config("symbolColorMap", <{[key: string]: string}>{}, colorMapValidator);
     const tokenBaseColor = new Config("tokenBaseColor", <string | null>null, colorOrNullValidator);
     const tokenColorMap = new Config("tokenColorMap", <{[key: string]: string}>{}, colorMapValidator);
-    const indentMode = new Config<keyof typeof indentModeObject>("indentMode", "full", makeEnumValidator(Object.keys(indentModeObject)));
+    const indentMode = new Config<keyof typeof indentModeObject>("indentMode", "full", makeEnumValidator(indentModeObject));
     const lineEnabled = new Config("lineEnabled", true);
-    const tokenMode = new Config<keyof typeof tokenModeObject>("tokenMode", "smart", makeEnumValidator(Object.keys(tokenModeObject)));
-    const activeScope = new Config<keyof typeof activeScopeObject>("activeScope", "editor", makeEnumValidator(Object.keys(activeScopeObject)));
+    const tokenMode = new Config<keyof typeof tokenModeObject>("tokenMode", "smart", makeEnumValidator(tokenModeObject));
+    const activeScope = new Config<keyof typeof activeScopeObject>("activeScope", "editor", makeEnumValidator(activeScopeObject));
     const indentErrorEnabled = new Config("indentErrorEnabled", true);
     const traillingSpacesErrorEnabled = new Config("traillingSpacesErrorEnabled", true);
     const bodySpacesEnabled = new Config("bodySpacesEnabled", true);
