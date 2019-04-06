@@ -492,9 +492,9 @@ export module BackgroundPhiColors
     class EditorDecorationCacheEntry
     {
         tabSize: number = 0;
-        indentIndex: number = 0;
+        indentIndex: number | undefined = 0;
         selection: vscode.Selection;
-        line: vscode.TextLine;
+        line: vscode.TextLine | undefined;
         strongTokens: string[] = [];
 
         public constructor(textEditor: vscode.TextEditor, tabSize: number, currentDocumentDecorationCache: DocumentDecorationCacheEntry)
@@ -502,7 +502,8 @@ export module BackgroundPhiColors
             this.selection = textEditor.selection;
             this.line = textEditor.document.lineAt(textEditor.selection.active.line);
             this.tabSize = tabSize;
-            if (isIndentInfoNeed(textEditor.document.languageId))
+            const isActiveTextEditor = vscode.window.activeTextEditor === textEditor;
+            if (isIndentInfoNeed(textEditor.document.languageId) && (isActiveTextEditor || "editor" === activeScope.get("")))
             {
                 const currentIndentSize = getIndentSize
                     (
@@ -516,7 +517,14 @@ export module BackgroundPhiColors
 
                 this.indentIndex = Math.floor(currentIndentSize /currentDocumentDecorationCache.indentUnitSize);
             }
+            else
+            {
+                this.indentIndex = undefined;
+                this.line = undefined;
+            }
         }
+
+        getLineNumber = () => undefined !== this.line ? this.line.lineNumber: undefined;
     }
     const editorDecorationCache = new Map<vscode.TextEditor, EditorDecorationCacheEntry>();
 
@@ -1105,39 +1113,8 @@ export module BackgroundPhiColors
                 {
                     if (showActive && previousEditorDecorationCache.indentIndex !== currentEditorDecorationCache.indentIndex)
                     {
-                        result.push
-                        (
-                            {
-                                startPosition: -1,
-                                length: -1,
-                                decorationParam: makeHueDecoration
-                                (
-                                    `indent:${previousEditorDecorationCache.indentIndex}`,
-                                    lang,
-                                    spaceBaseColor,
-                                    previousEditorDecorationCache.indentIndex,
-                                    spacesActiveAlpha
-                                )
-                            }
-                        );
-                        if (currentDocumentDecorationCache.indentLevelMap[currentEditorDecorationCache.indentIndex])
+                        if (undefined !== previousEditorDecorationCache.indentIndex)
                         {
-                            result = result.concat
-                            (
-                                currentDocumentDecorationCache.indentLevelMap[currentEditorDecorationCache.indentIndex]
-                                    .map(i => addIndentDecoration(i.cursor, i.length, currentEditorDecorationCache.indentIndex))
-                            );
-                        }
-                        if (showRegular)
-                        {
-                            if (currentDocumentDecorationCache.indentLevelMap[previousEditorDecorationCache.indentIndex])
-                            {
-                                result = result.concat
-                                (
-                                    currentDocumentDecorationCache.indentLevelMap[previousEditorDecorationCache.indentIndex]
-                                        .map(i => addIndentDecoration(i.cursor, i.length, previousEditorDecorationCache.indentIndex))
-                                );
-                            }
                             result.push
                             (
                                 {
@@ -1145,14 +1122,53 @@ export module BackgroundPhiColors
                                     length: -1,
                                     decorationParam: makeHueDecoration
                                     (
-                                        `indent:${currentEditorDecorationCache.indentIndex}`,
+                                        `indent:${previousEditorDecorationCache.indentIndex}`,
                                         lang,
                                         spaceBaseColor,
-                                        currentEditorDecorationCache.indentIndex,
-                                        spacesAlpha
+                                        previousEditorDecorationCache.indentIndex,
+                                        spacesActiveAlpha
                                     )
                                 }
                             );
+                        }
+                        if (undefined !== currentEditorDecorationCache.indentIndex && currentDocumentDecorationCache.indentLevelMap[currentEditorDecorationCache.indentIndex])
+                        {
+                            const indentIndex = currentEditorDecorationCache.indentIndex;
+                            result = result.concat
+                            (
+                                currentDocumentDecorationCache.indentLevelMap[currentEditorDecorationCache.indentIndex]
+                                    .map(i => addIndentDecoration(i.cursor, i.length, indentIndex))
+                            );
+                        }
+                        if (showRegular)
+                        {
+                            if (undefined !== previousEditorDecorationCache.indentIndex && currentDocumentDecorationCache.indentLevelMap[previousEditorDecorationCache.indentIndex])
+                            {
+                                const indentIndex = previousEditorDecorationCache.indentIndex;
+                                result = result.concat
+                                (
+                                    currentDocumentDecorationCache.indentLevelMap[previousEditorDecorationCache.indentIndex]
+                                        .map(i => addIndentDecoration(i.cursor, i.length, indentIndex))
+                                );
+                            }
+                            if (undefined !== currentEditorDecorationCache.indentIndex)
+                            {
+                                result.push
+                                (
+                                    {
+                                        startPosition: -1,
+                                        length: -1,
+                                        decorationParam: makeHueDecoration
+                                        (
+                                            `indent:${currentEditorDecorationCache.indentIndex}`,
+                                            lang,
+                                            spaceBaseColor,
+                                            currentEditorDecorationCache.indentIndex,
+                                            spacesAlpha
+                                        )
+                                    }
+                                );
+                            }
                         }
                     }
                 }
@@ -1288,29 +1304,32 @@ export module BackgroundPhiColors
             if
             (
                 !previousEditorDecorationCache ||
-                previousEditorDecorationCache.line.lineNumber !== currentEditorDecorationCache.line.lineNumber ||
+                previousEditorDecorationCache.getLineNumber() !== currentEditorDecorationCache.getLineNumber() ||
                 currentEditorDecorationCache.indentIndex !== previousEditorDecorationCache.indentIndex
             )
             {
-                result.push
-                (
-                    {
-                        range: currentEditorDecorationCache.line.range,
-                        startPosition: 0,
-                        length: 0,
-                        decorationParam: makeHueDecoration
-                        (
-                            `line`,
-                            lang,
-                            spaceBaseColor,
-                            currentEditorDecorationCache.indentIndex,
-                            spacesActiveAlpha,
-                            undefined,
-                            true
-                        )
-                    }
-                );
-                if (previousEditorDecorationCache && currentEditorDecorationCache.indentIndex !== previousEditorDecorationCache.indentIndex)
+                if (undefined !== currentEditorDecorationCache.line && undefined !== currentEditorDecorationCache.indentIndex)
+                {
+                    result.push
+                    (
+                        {
+                            range: currentEditorDecorationCache.line.range,
+                            startPosition: 0,
+                            length: 0,
+                            decorationParam: makeHueDecoration
+                            (
+                                `line`,
+                                lang,
+                                spaceBaseColor,
+                                currentEditorDecorationCache.indentIndex,
+                                spacesActiveAlpha,
+                                undefined,
+                                true
+                            )
+                        }
+                    );
+                }
+                if (previousEditorDecorationCache && currentEditorDecorationCache.indentIndex !== previousEditorDecorationCache.indentIndex && undefined !== previousEditorDecorationCache.indentIndex)
                 {
                     result.push
                     (
