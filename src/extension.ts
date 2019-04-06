@@ -7,6 +7,7 @@ const percentToDisplayString = (value : number, locales?: string | string[]) : s
 const isCompatibleArray = <valueT>(a: valueT[], b:valueT[]) =>
     !a.some(i => b.indexOf(i) < 0) &&
     !b.some(i => a.indexOf(i) < 0);
+const objctToMap = <valueT>(object: {[key:string]: valueT }) => new Map<string, valueT>(Object.keys(object).map(key => [key, object[key]]));
 
 export module Profiler
 {
@@ -245,6 +246,7 @@ export module BackgroundPhiColors
     const getProfilerOutputChannel = () => profilerOutputChannel ?
         profilerOutputChannel:
         (profilerOutputChannel = vscode.window.createOutputChannel("Background Phi Colors Profiler"));
+    let mapCache = new Cache((object: {[key:string]: string }) => object ? objctToMap(object): new Map());
 
     interface DecorationParam
     {
@@ -586,9 +588,10 @@ export module BackgroundPhiColors
         ]
         .forEach(i => i.clear());
 
+        mapCache.clear();
+
         Object.keys(decorations).forEach(i => decorations[i].decorator.dispose());
         decorations = { };
-
         clearAllDecorationCache();
 
         updateAllDecoration();
@@ -861,7 +864,7 @@ export module BackgroundPhiColors
                                     tabSize,
                                     showRegular,
                                     currentEditorDecorationCache.strongTokens,
-                                    tokenColorMap.get(lang) || { },
+                                    mapCache.get(tokenColorMap.get(lang)),
                                     undefined !== previousEditorDecorationCache ? previousEditorDecorationCache.strongTokens: undefined
                                 )
                             );
@@ -923,7 +926,7 @@ export module BackgroundPhiColors
                     }
                     if (!previousEditorDecorationCache && symbolEnabled.get(lang))
                     {
-                        entry = entry.concat(updateSymbolsDecoration(lang, text, textEditor, tabSize, symbolColorMap.get(lang) || { }));
+                        entry = entry.concat(updateSymbolsDecoration(lang, text, textEditor, tabSize, mapCache.get(symbolColorMap.get(lang))));
                     }
                     if (!previousEditorDecorationCache && bodySpacesEnabled.get(lang))
                     {
@@ -1357,7 +1360,7 @@ export module BackgroundPhiColors
         text: string,
         textEditor: vscode.TextEditor,
         tabSize: number,
-        symbolColorMap: {[key: string]: string}
+        symbolColorMap: Map<string, string>
     ): DecorationEntry[] => Profiler.profile
     (
         "updateSymbolsDecoration", () =>
@@ -1373,7 +1376,7 @@ export module BackgroundPhiColors
                 {
                     index: match.index,
                     token: match[0],
-                    specificColor: symbolColorMap[match[0]]
+                    specificColor: symbolColorMap.get(match[0])
                 }
             )
         )
@@ -1444,7 +1447,7 @@ export module BackgroundPhiColors
         tabSize: number,
         showRegular: boolean,
         strongTokens: string[],
-        tokenColorMap: {[key: string]: string},
+        tokenColorMap: Map<string, string>,
         previousStrongTokens?: string[],
     ): DecorationEntry[] => Profiler.profile
     (
@@ -1470,7 +1473,7 @@ export module BackgroundPhiColors
                     index: match.index,
                     token: match[0],
                     isActive: 0 <= strongTokens.indexOf(match[0]),
-                    specificColor: tokenColorMap[match[0]]
+                    specificColor: tokenColorMap.get(match[0])
                 }
             )
         )

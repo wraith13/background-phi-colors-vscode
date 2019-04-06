@@ -15,6 +15,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Improved token color hash function.
 
+### Fixed
+
+- Fixed an issue that does not work correctly with lines containing "toString", "hasOwnProperty", etc.
+
 ## 0.5.0 - 2019-04-02
 
 ### Added
