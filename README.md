@@ -14,7 +14,7 @@ This extension is too ambitious and may be very annoying.
 
 This extension colors the background in follow ways.
 
-- indenet level
+- indent level
 - error indent
 - tokens
 - symbols
