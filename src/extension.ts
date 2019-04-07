@@ -223,13 +223,13 @@ export module BackgroundPhiColors
     const tokenMode = new Config<keyof typeof tokenModeObject>("tokenMode", "smart", makeEnumValidator(Object.keys(tokenModeObject)));
     const activeScope = new Config<keyof typeof activeScopeObject>("activeScope", "editor", makeEnumValidator(Object.keys(activeScopeObject)));
     const indentErrorEnabled = new Config("indentErrorEnabled", true);
-    const traillingSpacesErrorEnabled = new Config("traillingSpacesErrorEnabled", true);
+    const trailingSpacesErrorEnabled = new Config("trailingSpacesErrorEnabled", true);
     const bodySpacesEnabled = new Config("bodySpacesEnabled", true);
-    const traillingSpacesEnabled = new Config("traillingSpacesEnabled", true);
+    const trailingSpacesEnabled = new Config("trailingSpacesEnabled", true);
     const symbolEnabled = new Config("symbolEnabled", false);
     const showIndentErrorInOverviewRulerLane = new Config("showIndentErrorInOverviewRulerLane", true);
     const showActiveTokenInOverviewRulerLane = new Config("showActiveTokenInOverviewRulerLane", true);
-    const showTraillingSpacesErrorInOverviewRulerLane = new Config("showTraillingSpacesErrorInOverviewRulerLane", true);
+    const showTrailingSpacesErrorInOverviewRulerLane = new Config("showTrailingSpacesErrorInOverviewRulerLane", true);
     const spacesAlpha =new Config("spacesAlpha", 0x11, undefined, 0x00, 0xFF);
     const spacesActiveAlpha =new Config("spacesActiveAlpha", 0x33, undefined, 0x00, 0xFF);
     const spacesErrorAlpha =new Config("spacesErrorAlpha", 0x88, undefined, 0x00, 0xFF);
@@ -304,11 +304,11 @@ export module BackgroundPhiColors
     const makeTrailingSpacesErrorDecorationParam = (lang: string) =>
     (
         {
-            name: "trailling-spaces",
+            name: "trailing-spaces",
             base: hslaCache.get(spaceErrorColor.get(lang)),
             hue: 0,
             alpha: spacesErrorAlpha.get(lang),
-            overviewRulerColor: showTraillingSpacesErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Right: undefined,
+            overviewRulerColor: showTrailingSpacesErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Right: undefined,
         }
     );
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
@@ -580,13 +580,13 @@ export module BackgroundPhiColors
             tokenMode,
             activeScope,
             indentErrorEnabled,
-            traillingSpacesErrorEnabled,
+            trailingSpacesErrorEnabled,
             bodySpacesEnabled,
-            traillingSpacesEnabled,
+            trailingSpacesEnabled,
             symbolEnabled,
             showIndentErrorInOverviewRulerLane,
             showActiveTokenInOverviewRulerLane,
-            showTraillingSpacesErrorInOverviewRulerLane,
+            showTrailingSpacesErrorInOverviewRulerLane,
             spacesAlpha,
             spacesActiveAlpha,
             spacesErrorAlpha,
@@ -940,9 +940,9 @@ export module BackgroundPhiColors
                     {
                         entry = entry.concat(updateBodySpacesDecoration(lang, text, textEditor, tabSize));
                     }
-                    if (!previousEditorDecorationCache && traillingSpacesEnabled.get(lang))
+                    if (!previousEditorDecorationCache && trailingSpacesEnabled.get(lang))
                     {
-                        entry = entry.concat(updateTrailSpacesDecoration(lang, text, textEditor, tabSize, traillingSpacesErrorEnabled.get(lang)));
+                        entry = entry.concat(updateTrailSpacesDecoration(lang, text, textEditor, tabSize, trailingSpacesErrorEnabled.get(lang)));
                     }
 
                     //  apply
@@ -1589,7 +1589,7 @@ export module BackgroundPhiColors
                         makeTrailingSpacesErrorDecorationParam(lang):
                         makeHueDecoration
                         (
-                            "trailling-spaces",
+                            "trailing-spaces",
                             lang,
                             spaceBaseColor,
                             match[2].length,
@@ -1639,5 +1639,5 @@ export function deactivate(): void
 
     //    body spaces
 
-    // trailling spaces        
+    // trailing spaces        
 

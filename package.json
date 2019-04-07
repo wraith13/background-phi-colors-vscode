@@ -173,7 +173,7 @@
                         "default": true,
                         "overridable": true
                     },
-                    "background-phi-colors.traillingSpacesErrorEnabled": {
+                    "background-phi-colors.trailingSpacesErrorEnabled": {
                         "type": "boolean",
                         "default": true,
                         "overridable": true
@@ -183,7 +183,7 @@
                         "default": true,
                         "overridable": true
                     },
-                    "background-phi-colors.traillingSpacesEnabled": {
+                    "background-phi-colors.trailingSpacesEnabled": {
                         "type": "boolean",
                         "default": true,
                         "overridable": true
@@ -203,7 +203,7 @@
                         "default": true,
                         "overridable": true
                     },
-                    "background-phi-colors.showTraillingSpacesErrorInOverviewRulerLane": {
+                    "background-phi-colors.showTrailingSpacesErrorInOverviewRulerLane": {
                         "type": "boolean",
                         "default": true,
                         "overridable": true

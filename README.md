@@ -19,7 +19,7 @@ This extension colors the background in follow ways.
 - tokens
 - symbols
 - spaces in body
-- trailling spaces
+- trailing spaces
 
 ### Indent: light
 
