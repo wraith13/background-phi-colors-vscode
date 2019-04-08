@@ -16,8 +16,9 @@ This extension colors the background in follow ways.
 
 - indent level
 - error indent
+- current line
 - tokens
-- symbols
+- symbols ( this is disabled by default )
 - spaces in body
 - trailing spaces
 
@@ -70,6 +71,8 @@ You can change [settings](#extension-settings) by `settings.json`. And you can a
 Enjoy!
 
 ## Commands
+
+Launch Command Palette(Mac:<kbd>F1</kbd> or <kbd>Shift</kbd>+<kbd>Command</kbd>+<kbd>P</kbd>, Windows and Linux: <kbd>F1</kbd> or <kbd>Shift</kbd>+<kbd>Ctrl</kbd>+<kbd>P</kbd>)
 
 * `Background Phi Colors: Active Scrope: Editor` : TBD
 * `Background Phi Colors: Active Scrope: Document` : TBD
