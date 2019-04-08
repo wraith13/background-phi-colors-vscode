@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Fixed
 
 - Fixed a misspell that `trailling` to `trailing`
+- Fixed an issue that `background-phi-colors.enabled` setting does not work properly.
 
 ## 0.6.0 - 2019-04-07
 

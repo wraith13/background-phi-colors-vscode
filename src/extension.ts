@@ -241,7 +241,7 @@ export module BackgroundPhiColors
     const isOverTheLimit: { [fileName: string]: boolean } = { };
     const isLimitNoticed: { [fileName: string]: boolean } = { };
     let isPaused: { [fileName: string]: boolean } = { };
-    let isPausedAll: boolean | undefined = false;
+    let isPausedAll: boolean | undefined = undefined;
     let profilerOutputChannel: vscode.OutputChannel | undefined = undefined;
     const getProfilerOutputChannel = () => profilerOutputChannel ?
         profilerOutputChannel:
