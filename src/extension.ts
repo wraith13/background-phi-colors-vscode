@@ -240,8 +240,7 @@ export module BackgroundPhiColors
     const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
     const isLimitNoticed: { [fileName: string]: boolean } = { };
-    let isPaused: { [fileName: string]: boolean } = { };
-    let isPausedAll: boolean | undefined = undefined;
+    let isPausedAll: boolean = false;
     let profilerOutputChannel: vscode.OutputChannel | undefined = undefined;
     const getProfilerOutputChannel = () => profilerOutputChannel ?
         profilerOutputChannel:
@@ -339,10 +338,8 @@ export module BackgroundPhiColors
             (
                 `${applicationKey}.pauseAll`, () =>
                 {
-                    isPausedAll = undefined !== isPausedAll ?
-                        !isPausedAll:
-                        enabled.get("");
-                    isPaused = { };
+                    isPausedAll = !isPausedAll;
+                    editorDecorationCache.forEach(i => i.isPaused = false);
                     updateAllDecoration();
                 }
             ),
@@ -414,15 +411,15 @@ export module BackgroundPhiColors
 
     export const pause = (textEditor: vscode.TextEditor) =>
     {
-        isPaused[textEditor.document.fileName] =
-            undefined !== isPaused[textEditor.document.fileName] ?
-                !isPaused[textEditor.document.fileName]:
-                (
-                    undefined !== isPausedAll ?
-                        !isPausedAll:
-                        enabled.get("")
-                );
-        delayUpdateDecoration(textEditor);
+        const currentEditorDecorationCache = editorDecorationCache.get(textEditor);
+        if (currentEditorDecorationCache)
+        {
+            currentEditorDecorationCache.isPaused = !currentEditorDecorationCache.isPaused;
+            if (!currentEditorDecorationCache.isPaused)
+            {
+                delayUpdateDecoration(textEditor);
+            }
+        }
     };
 
     const isIndentInfoNeed = (lang: string) =>
@@ -496,6 +493,7 @@ export module BackgroundPhiColors
         selection: vscode.Selection;
         line: vscode.TextLine | undefined;
         strongTokens: string[] = [];
+        isPaused: boolean = false;
 
         public constructor(textEditor: vscode.TextEditor, tabSize: number, currentDocumentDecorationCache: DocumentDecorationCacheEntry)
         {
@@ -724,7 +722,6 @@ export module BackgroundPhiColors
         textEditor.document.positionAt(startPosition +length)
     );
 
-    const inverseKeepUndefined = (v: boolean | undefined) => undefined === v ? v: !v;
     const updateDecoration = (textEditor: vscode.TextEditor) => Profiler.profile
     (
         "updateDecoration",
@@ -739,16 +736,11 @@ export module BackgroundPhiColors
     
             if
             (
-                [
-                    inverseKeepUndefined(isPaused[textEditor.document.fileName]),
-                    inverseKeepUndefined(isPausedAll),
-                    enabled.get(lang)
-                ]
-                .filter(i => undefined !== i)[0] &&
+                enabled.get(lang) &&
                 (textEditor.viewColumn || enabledPanels.get(lang))
             )
             {
-                if (false === isPaused[textEditor.document.fileName] || text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
+                if (text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
                 {
                     const previousEditorDecorationCache = editorDecorationCache.get(textEditor);
                     const tabSize =
