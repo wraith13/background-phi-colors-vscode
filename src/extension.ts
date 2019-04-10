@@ -339,7 +339,7 @@ export module BackgroundPhiColors
                 `${applicationKey}.pauseAll`, () =>
                 {
                     isPausedAll = !isPausedAll;
-                    editorDecorationCache.forEach(i => i.isPaused = false);
+                    editorDecorationCache.forEach(i => i.isPaused = undefined);
                     updateAllDecoration();
                 }
             ),
@@ -414,7 +414,10 @@ export module BackgroundPhiColors
         const currentEditorDecorationCache = editorDecorationCache.get(textEditor);
         if (currentEditorDecorationCache)
         {
-            currentEditorDecorationCache.isPaused = !currentEditorDecorationCache.isPaused;
+            currentEditorDecorationCache.isPaused =
+                undefined === currentEditorDecorationCache.isPaused ?
+                    !isPausedAll:
+                    !currentEditorDecorationCache.isPaused;
             if (!currentEditorDecorationCache.isPaused)
             {
                 delayUpdateDecoration(textEditor);
@@ -493,9 +496,15 @@ export module BackgroundPhiColors
         selection: vscode.Selection;
         line: vscode.TextLine | undefined;
         strongTokens: string[] = [];
-        isPaused: boolean = false;
+        isPaused: boolean | undefined;
 
-        public constructor(textEditor: vscode.TextEditor, tabSize: number, currentDocumentDecorationCache: DocumentDecorationCacheEntry)
+        public constructor
+        (
+            textEditor: vscode.TextEditor,
+            tabSize: number,
+            currentDocumentDecorationCache: DocumentDecorationCacheEntry,
+            previousEditorDecorationCache? :EditorDecorationCacheEntry
+        )
         {
             this.selection = textEditor.selection;
             this.line = textEditor.document.lineAt(textEditor.selection.active.line);
@@ -519,6 +528,10 @@ export module BackgroundPhiColors
             {
                 this.indentIndex = undefined;
                 this.line = undefined;
+            }
+            if (previousEditorDecorationCache)
+            {
+                this.isPaused = previousEditorDecorationCache.isPaused;
             }
         }
 
@@ -730,19 +743,18 @@ export module BackgroundPhiColors
             const lang = textEditor.document.languageId;
             const text = textEditor.document.getText();
             const isActiveTextEditor = vscode.window.activeTextEditor === textEditor;
-    
+            const previousEditorDecorationCache = editorDecorationCache.get(textEditor);
+            const isPaused = previousEditorDecorationCache &&
+                (undefined === previousEditorDecorationCache.isPaused ? isPausedAll: previousEditorDecorationCache.isPaused);
+            const isEnabled = enabled.get(lang) && (textEditor.viewColumn || enabledPanels.get(lang));
+
             //  clear
             Profiler.profile("updateDecoration.clear", () => Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []));
     
-            if
-            (
-                enabled.get(lang) &&
-                (textEditor.viewColumn || enabledPanels.get(lang))
-            )
+            if (isEnabled && !isPaused)
             {
                 if (text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
                 {
-                    const previousEditorDecorationCache = editorDecorationCache.get(textEditor);
                     const tabSize =
                         undefined !== previousEditorDecorationCache ?
                             previousEditorDecorationCache.tabSize:
@@ -756,7 +768,7 @@ export module BackgroundPhiColors
                                 )
                             );
                     const currentDocumentDecorationCache = documentDecorationCache.get(textEditor.document) || new DocumentDecorationCacheEntry(lang, text, tabSize);
-                    const currentEditorDecorationCache = new EditorDecorationCacheEntry(textEditor, tabSize, currentDocumentDecorationCache);
+                    const currentEditorDecorationCache = new EditorDecorationCacheEntry(textEditor, tabSize, currentDocumentDecorationCache, previousEditorDecorationCache);
 
                     let entry: DecorationEntry[] = [];
 
@@ -981,7 +993,7 @@ export module BackgroundPhiColors
                     }
                 }
             }
-            else
+            if (!isEnabled)
             {
                 //  apply(for clear)
                 Profiler.profile
