@@ -194,13 +194,13 @@ export module BackgroundPhiColors
         public clear = this.cache.clear;
     }
     
-    const colorValidator = (value: string) => /^#[0-9A-Fa-f]{6}$/.test(value);
-    const colorOrNullValidator = (value: string | null) => null === value || colorValidator(value);
-    const colorMapValidator = (value: {[key: string]: string}) =>
+    const colorValidator = (value: string): boolean => /^#[0-9A-Fa-f]{6}$/.test(value);
+    const colorOrNullValidator = (value: string | null): boolean => null === value || colorValidator(value);
+    const colorMapValidator = (value: {[key: string]: string}): boolean =>
         undefined !== value &&
         null !== value &&
         !Object.keys(value).some(key => !colorOrNullValidator(value[key]));
-    const makeEnumValidator = (valueList: string[]): (value: string) => boolean => (value: string) => 0 <= valueList.indexOf(value);
+    const makeEnumValidator = (valueList: string[]): (value: string) => boolean => (value: string): boolean => 0 <= valueList.indexOf(value);
 
     const indentModeObject = Object.freeze({ "none": null, "light": null, "smart": null, "full": null, });
     const tokenModeObject = Object.freeze ({ "none": null, "light": null, "smart": null, "full": null, });
@@ -273,7 +273,7 @@ export module BackgroundPhiColors
         alpha: Config<number>,
         overviewRulerLane?: vscode.OverviewRulerLane,
         isWholeLine?: boolean
-    ) =>
+    ): DecorationParam =>
     (
         {
             name,
@@ -290,24 +290,24 @@ export module BackgroundPhiColors
         }
     );
 
-    const makeIndentErrorDecorationParam = (lang: string) =>
+    const makeIndentErrorDecorationParam = (lang: string): DecorationParam =>
     (
         {
             name: "indenet:error",
             base: hslaCache.get(spaceErrorColor.get(lang)),
             hue: 0,
             alpha: spacesErrorAlpha.get(lang),
-            overviewRulerColor: showIndentErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Left: undefined,
+            overviewRulerLane: showIndentErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Left: undefined,
         }
     );
-    const makeTrailingSpacesErrorDecorationParam = (lang: string) =>
+    const makeTrailingSpacesErrorDecorationParam = (lang: string): DecorationParam =>
     (
         {
             name: "trailing-spaces",
             base: hslaCache.get(spaceErrorColor.get(lang)),
             hue: 0,
             alpha: spacesErrorAlpha.get(lang),
-            overviewRulerColor: showTrailingSpacesErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Right: undefined,
+            overviewRulerLane: showTrailingSpacesErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Right: undefined,
         }
     );
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
@@ -1485,7 +1485,7 @@ export module BackgroundPhiColors
             match =>
                 undefined === previousStrongTokens ||
                 (
-                    (0 <= previousStrongTokens.indexOf(match[0])) !== (0 <= strongTokens.indexOf(match[0])) 
+                    (0 <= previousStrongTokens.indexOf(match[0])) !== (0 <= strongTokens.indexOf(match[0]))
                 )
         )
         .map

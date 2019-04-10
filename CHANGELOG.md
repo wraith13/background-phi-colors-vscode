@@ -10,6 +10,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Changed the behavior of `Pause` command and `Pause All` command.
 
+### Fixed
+
+- Fixed an issue that indentation error and trailing space not displayed on overview ruler.
+
 ## 0.7.0 - 2019-04-08
 
 ### Fixed
