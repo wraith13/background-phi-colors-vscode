@@ -517,8 +517,7 @@ export module BackgroundPhiColors
                         this.line
                             .text
                             .substr(0, textEditor.selection.active.character)
-                            .replace(/[^ \t]+.*$/, ""
-                        ),
+                            .replace(/[^ \t]+.*$/, ""),
                         tabSize
                     );
 
@@ -692,7 +691,19 @@ export module BackgroundPhiColors
     export const gcd = (a: number, b: number) : number => b ? gcd(b, a % b): a;
 
     export const getIndentSize = (text: string, tabSize: number): number =>
-        text.replace(/\t/g, (s, offset) => s.repeat(tabSize -(offset %tabSize))).length;
+    {
+        let delta = 0;
+        return text.replace
+        (
+            /\t/g,
+            (s, offset) =>
+            {
+                const length = tabSize -((offset +delta) %tabSize);
+                delta += (length -1);
+                return s.repeat(length);
+            }
+        ).length;
+    };
 
     export const getIndentUnit =
     (
@@ -1257,7 +1268,7 @@ export module BackgroundPhiColors
                                                 }
                                                 else
                                                 {
-                                                    const spaces = Math.min(text.length -text.replace(/$ +/, "").length, currentDocumentDecorationCache.indentUnitSize);
+                                                    const spaces = Math.min(text.length -text.replace(/^ +/, "").length, currentDocumentDecorationCache.indentUnitSize);
                                                     length = spaces;
                                                     if (showIndentError)
                                                     {
@@ -1565,7 +1576,7 @@ export module BackgroundPhiColors
                 )
             )
         )
-        .reduce((a, b) => a.concat(b))
+        .reduce((a, b) => a.concat(b), [])
     );
     export const updateTrailSpacesDecoration =
     (

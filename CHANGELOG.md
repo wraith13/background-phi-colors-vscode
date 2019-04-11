@@ -12,7 +12,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Fixed
 
-- Fixed an issue that indentation error and trailing space not displayed on overview ruler.
+- Fixed an issue that disastrous situation around indent by tab character.
+- Fixed some issues that indentation error and trailing space not displayed on overview ruler.
 
 ## 0.7.0 - 2019-04-08
 
