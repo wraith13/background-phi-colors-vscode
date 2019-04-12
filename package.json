@@ -198,14 +198,32 @@
                         "default": true,
                         "overridable": true
                     },
+                    "background-phi-colors.indentErrorInOverviewRulerLane": {
+                        "type": "string",
+                        "default": "left",
+                        "enum": ["left", "center", "right", "full"],
+                        "overridable": true
+                    },
                     "background-phi-colors.showActiveTokenInOverviewRuler": {
                         "type": "boolean",
                         "default": true,
                         "overridable": true
                     },
+                    "background-phi-colors.activeTokenInOverviewRulerLane": {
+                        "type": "string",
+                        "default": "center",
+                        "enum": ["left", "center", "right", "full"],
+                        "overridable": true
+                    },
                     "background-phi-colors.showTrailingSpacesErrorInOverviewRuler": {
                         "type": "boolean",
                         "default": true,
+                        "overridable": true
+                    },
+                    "background-phi-colors.trailingSpacesErrorInOverviewRulerLane": {
+                        "type": "string",
+                        "default": "right",
+                        "enum": ["left", "center", "right", "full"],
                         "overridable": true
                     },
                     "background-phi-colors.spacesAlpha": {

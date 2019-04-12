@@ -6,6 +6,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## 1.0.0 - 2019-04-??
 
+### Added
+
+- `background-phi-colors.indentErrorInOverviewRulerLane` setting.
+- `background-phi-colors.activeTokenInOverviewRulerLane` setting.
+- `background-phi-colors.trailingSpacesErrorInOverviewRulerLane` setting.
+
 ### Changed
 
 - Changed `background-phi-colors.showIndentErrorInOverviewRulerLane` setting name to `background-phi-colors.showIndentErrorInOverviewRuler`.
