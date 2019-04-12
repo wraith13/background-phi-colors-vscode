@@ -227,9 +227,9 @@ export module BackgroundPhiColors
     const bodySpacesEnabled = new Config("bodySpacesEnabled", true);
     const trailingSpacesEnabled = new Config("trailingSpacesEnabled", true);
     const symbolEnabled = new Config("symbolEnabled", false);
-    const showIndentErrorInOverviewRulerLane = new Config("showIndentErrorInOverviewRulerLane", true);
-    const showActiveTokenInOverviewRulerLane = new Config("showActiveTokenInOverviewRulerLane", true);
-    const showTrailingSpacesErrorInOverviewRulerLane = new Config("showTrailingSpacesErrorInOverviewRulerLane", true);
+    const showIndentErrorInOverviewRuler = new Config("showIndentErrorInOverviewRuler", true);
+    const showActiveTokenInOverviewRuler = new Config("showActiveTokenInOverviewRuler", true);
+    const showTrailingSpacesErrorInOverviewRuler = new Config("showTrailingSpacesErrorInOverviewRuler", true);
     const spacesAlpha =new Config("spacesAlpha", 0x11, undefined, 0x00, 0xFF);
     const spacesActiveAlpha =new Config("spacesActiveAlpha", 0x33, undefined, 0x00, 0xFF);
     const spacesErrorAlpha =new Config("spacesErrorAlpha", 0x88, undefined, 0x00, 0xFF);
@@ -297,7 +297,7 @@ export module BackgroundPhiColors
             base: hslaCache.get(spaceErrorColor.get(lang)),
             hue: 0,
             alpha: spacesErrorAlpha.get(lang),
-            overviewRulerLane: showIndentErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Left: undefined,
+            overviewRulerLane: showIndentErrorInOverviewRuler.get(lang) ? vscode.OverviewRulerLane.Left: undefined,
         }
     );
     const makeTrailingSpacesErrorDecorationParam = (lang: string): DecorationParam =>
@@ -307,7 +307,7 @@ export module BackgroundPhiColors
             base: hslaCache.get(spaceErrorColor.get(lang)),
             hue: 0,
             alpha: spacesErrorAlpha.get(lang),
-            overviewRulerLane: showTrailingSpacesErrorInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Right: undefined,
+            overviewRulerLane: showTrailingSpacesErrorInOverviewRuler.get(lang) ? vscode.OverviewRulerLane.Right: undefined,
         }
     );
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
@@ -594,9 +594,9 @@ export module BackgroundPhiColors
             bodySpacesEnabled,
             trailingSpacesEnabled,
             symbolEnabled,
-            showIndentErrorInOverviewRulerLane,
-            showActiveTokenInOverviewRulerLane,
-            showTrailingSpacesErrorInOverviewRulerLane,
+            showIndentErrorInOverviewRuler,
+            showActiveTokenInOverviewRuler,
+            showTrailingSpacesErrorInOverviewRuler,
             spacesAlpha,
             spacesActiveAlpha,
             spacesErrorAlpha,
@@ -912,7 +912,7 @@ export module BackgroundPhiColors
                                                         tokenBaseColor,
                                                         hash(i),
                                                         tokenActiveAlpha,
-                                                        showActiveTokenInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Center: undefined,
+                                                        showActiveTokenInOverviewRuler.get(lang) ? vscode.OverviewRulerLane.Center: undefined,
                                                     )
                                                 }
                                             )
@@ -1526,7 +1526,7 @@ export module BackgroundPhiColors
                         tokenBaseColor,
                         i.specificColor || hash(i.token),
                         i.isActive ? tokenActiveAlpha: tokenAlpha,
-                        i.isActive && showActiveTokenInOverviewRulerLane.get(lang) ? vscode.OverviewRulerLane.Center: undefined,
+                        i.isActive && showActiveTokenInOverviewRuler.get(lang) ? vscode.OverviewRulerLane.Center: undefined,
                     )
                 }
             )

@@ -108,9 +108,9 @@ This extension contributes the following settings by [`settings.json`](https://c
 * `background-phi-colors.bodySpacesEnabled`: TBD
 * `background-phi-colors.traillingSpacesEnabled`: TBD
 * `background-phi-colors.symbolEnabled`: TBD
-* `background-phi-colors.showIndentErrorInOverviewRulerLane`: TBD
-* `background-phi-colors.showActiveTokenInOverviewRulerLane`: TBD
-* `background-phi-colors.showTraillingSpacesErrorInOverviewRulerLane`: TBD
+* `background-phi-colors.showIndentErrorInOverviewRuler`: TBD
+* `background-phi-colors.showActiveTokenInOverviewRuler`: TBD
+* `background-phi-colors.showTraillingSpacesErrorInOverviewRuler`: TBD
 * `background-phi-colors.spacesAlpha`: TBD
 * `background-phi-colors.spacesActiveAlpha`: TBD
 * `background-phi-colors.spacesErrorAlpha`: TBD
