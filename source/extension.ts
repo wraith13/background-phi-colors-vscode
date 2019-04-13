@@ -344,7 +344,6 @@ export module BackgroundPhiColors
                 `${applicationKey}.activeScopeWindow`,
                 () => vscode.workspace.getConfiguration(applicationKey).update("activeScope", "window", true)
             ),
-            vscode.commands.registerCommand(`${applicationKey}.overTheLimig`, () => activeTextEditor(overTheLimit)),
             vscode.commands.registerCommand(`${applicationKey}.pause`, () => activeTextEditor(pause)),
             vscode.commands.registerCommand
             (
@@ -355,6 +354,7 @@ export module BackgroundPhiColors
                     updateAllDecoration();
                 }
             ),
+            vscode.commands.registerCommand(`${applicationKey}.overTheLimig`, () => activeTextEditor(overTheLimit)),
             vscode.commands.registerCommand
             (
                 `${applicationKey}.startProfile`, () =>

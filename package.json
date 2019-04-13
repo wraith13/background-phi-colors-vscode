@@ -50,11 +50,6 @@
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.overTheLimig",
-                "title": "Over the Limit",
-                "category": "Background Phi Colors"
-            },
-            {
                 "command": "background-phi-colors.pause",
                 "title": "Pause",
                 "category": "Background Phi Colors"
@@ -62,6 +57,11 @@
             {
                 "command": "background-phi-colors.pauseAll",
                 "title": "Pause All",
+                "category": "Background Phi Colors"
+            },
+            {
+                "command": "background-phi-colors.overTheLimig",
+                "title": "Over the Limit",
                 "category": "Background Phi Colors"
             },
             {
