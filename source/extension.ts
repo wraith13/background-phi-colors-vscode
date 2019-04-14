@@ -252,6 +252,7 @@ export module BackgroundPhiColors
     const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
     const isLimitNoticed: { [fileName: string]: boolean } = { };
+    let isMutedAll: boolean | undefined = undefined;
     let isPausedAll: boolean = false;
     let profilerOutputChannel: vscode.OutputChannel | undefined = undefined;
     const getProfilerOutputChannel = () => profilerOutputChannel ?
@@ -344,6 +345,16 @@ export module BackgroundPhiColors
                 `${applicationKey}.activeScopeWindow`,
                 () => vscode.workspace.getConfiguration(applicationKey).update("activeScope", "window", true)
             ),
+            vscode.commands.registerCommand(`${applicationKey}.mute`, () => activeTextEditor(mute)),
+            vscode.commands.registerCommand
+            (
+                `${applicationKey}.muteAll`, () =>
+                {
+                    isMutedAll = !isMutedAll;
+                    editorDecorationCache.forEach(i => i.isMuted = undefined);
+                    updateAllDecoration();
+                }
+            ),
             vscode.commands.registerCommand(`${applicationKey}.pause`, () => activeTextEditor(pause)),
             vscode.commands.registerCommand
             (
@@ -415,10 +426,17 @@ export module BackgroundPhiColors
     };
     const activeTextEditor = (f: (textEditor: vscode.TextEditor) => void) => valueThen(vscode.window.activeTextEditor, f);
 
-    export const overTheLimit = (textEditor: vscode.TextEditor) =>
+    export const mute = (textEditor: vscode.TextEditor) =>
     {
-        isOverTheLimit[textEditor.document.fileName] = true;
-        delayUpdateDecoration(textEditor);
+        const currentEditorDecorationCache = editorDecorationCache.get(textEditor);
+        if (currentEditorDecorationCache)
+        {
+            currentEditorDecorationCache.isMuted =
+                undefined === currentEditorDecorationCache.isMuted ?
+                    !isMutedAll:
+                    !currentEditorDecorationCache.isMuted;
+            delayUpdateDecoration(textEditor);
+        }
     };
 
     export const pause = (textEditor: vscode.TextEditor) =>
@@ -435,6 +453,12 @@ export module BackgroundPhiColors
                 delayUpdateDecoration(textEditor);
             }
         }
+    };
+
+    export const overTheLimit = (textEditor: vscode.TextEditor) =>
+    {
+        isOverTheLimit[textEditor.document.fileName] = true;
+        delayUpdateDecoration(textEditor);
     };
 
     const isIndentInfoNeed = (lang: string) =>
@@ -508,7 +532,9 @@ export module BackgroundPhiColors
         selection: vscode.Selection;
         line: vscode.TextLine | undefined;
         strongTokens: string[] = [];
+        isMuted: boolean | undefined;
         isPaused: boolean | undefined;
+        isCleared: boolean = false;
 
         public constructor
         (
@@ -542,7 +568,9 @@ export module BackgroundPhiColors
             }
             if (previousEditorDecorationCache)
             {
+                this.isMuted = previousEditorDecorationCache.isMuted;
                 this.isPaused = previousEditorDecorationCache.isPaused;
+                //this.isCleared = previousEditorDecorationCache.isCleared; このフラグをリセットするべきタイミングがちょうどこの constructor が呼ばれるタイミングなので、これは引き継がない。
             }
         }
 
@@ -770,14 +798,20 @@ export module BackgroundPhiColors
             const text = textEditor.document.getText();
             const isActiveTextEditor = vscode.window.activeTextEditor === textEditor;
             const previousEditorDecorationCache = editorDecorationCache.get(textEditor);
+            const isMuted = previousEditorDecorationCache && undefined !== previousEditorDecorationCache.isMuted ?
+                previousEditorDecorationCache.isMuted:
+                isMutedAll;
             const isPaused = previousEditorDecorationCache &&
                 (undefined === previousEditorDecorationCache.isPaused ? isPausedAll: previousEditorDecorationCache.isPaused);
-            const isEnabled = enabled.get(lang) && (textEditor.viewColumn || enabledPanels.get(lang));
+            const isCleared = previousEditorDecorationCache && previousEditorDecorationCache.isCleared;
+            const isEnabled = undefined !== isMuted ?
+                !isMuted:
+                (enabled.get(lang) && (textEditor.viewColumn || enabledPanels.get(lang)));
 
             //  clear
             Profiler.profile("updateDecoration.clear", () => Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []));
     
-            if (isEnabled && !isPaused)
+            if (isEnabled && (!isPaused || isCleared))
             {
                 if (text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
                 {
@@ -796,6 +830,8 @@ export module BackgroundPhiColors
                     const currentDocumentDecorationCache = documentDecorationCache.get(textEditor.document) || new DocumentDecorationCacheEntry(lang, text, tabSize);
                     const currentEditorDecorationCache = new EditorDecorationCacheEntry(textEditor, tabSize, currentDocumentDecorationCache, previousEditorDecorationCache);
 
+                    const validPreviousEditorDecorationCache = isCleared ? undefined: previousEditorDecorationCache;
+
                     let entry: DecorationEntry[] = [];
 
                     //  update
@@ -808,7 +844,7 @@ export module BackgroundPhiColors
                             textEditor,
                             currentDocumentDecorationCache,
                             currentEditorDecorationCache,
-                            previousEditorDecorationCache
+                            validPreviousEditorDecorationCache
                         )
                     );
                     if (lineEnabled.get(lang))
@@ -822,7 +858,7 @@ export module BackgroundPhiColors
                                 textEditor,
                                 currentDocumentDecorationCache,
                                 currentEditorDecorationCache,
-                                previousEditorDecorationCache
+                                validPreviousEditorDecorationCache
                             )
                         );
                     }
@@ -885,10 +921,10 @@ export module BackgroundPhiColors
                         
                         if
                         (
-                            !previousEditorDecorationCache ||
+                            !validPreviousEditorDecorationCache ||
                             (
                                 showActive &&
-                                !isCompatibleArray(currentEditorDecorationCache.strongTokens, previousEditorDecorationCache.strongTokens)
+                                !isCompatibleArray(currentEditorDecorationCache.strongTokens, validPreviousEditorDecorationCache.strongTokens)
                             )
                         )
                         {
@@ -903,15 +939,15 @@ export module BackgroundPhiColors
                                     showRegular,
                                     currentEditorDecorationCache.strongTokens,
                                     mapCache.get(tokenColorMap.get(lang)),
-                                    undefined !== previousEditorDecorationCache ? previousEditorDecorationCache.strongTokens: undefined
+                                    undefined !== validPreviousEditorDecorationCache ? validPreviousEditorDecorationCache.strongTokens: undefined
                                 )
                             );
 
-                            if (previousEditorDecorationCache)
+                            if (validPreviousEditorDecorationCache)
                             {
                                 entry = entry.concat
                                 (
-                                    previousEditorDecorationCache.strongTokens
+                                    validPreviousEditorDecorationCache.strongTokens
                                         .filter(i => currentEditorDecorationCache.strongTokens.indexOf(i) < 0)
                                         .map
                                         (
@@ -938,7 +974,7 @@ export module BackgroundPhiColors
                                     entry = entry.concat
                                     (
                                         currentEditorDecorationCache.strongTokens
-                                            .filter(i => previousEditorDecorationCache.strongTokens.indexOf(i) < 0)
+                                            .filter(i => validPreviousEditorDecorationCache.strongTokens.indexOf(i) < 0)
                                             .map
                                             (
                                                 i =>
@@ -962,15 +998,15 @@ export module BackgroundPhiColors
                             }
                         }
                     }
-                    if (!previousEditorDecorationCache && symbolEnabled.get(lang))
+                    if (!validPreviousEditorDecorationCache && symbolEnabled.get(lang))
                     {
                         entry = entry.concat(updateSymbolsDecoration(lang, text, textEditor, tabSize, mapCache.get(symbolColorMap.get(lang))));
                     }
-                    if (!previousEditorDecorationCache && bodySpacesEnabled.get(lang))
+                    if (!validPreviousEditorDecorationCache && bodySpacesEnabled.get(lang))
                     {
                         entry = entry.concat(updateBodySpacesDecoration(lang, text, textEditor, tabSize));
                     }
-                    if (!previousEditorDecorationCache && trailingSpacesEnabled.get(lang))
+                    if (!validPreviousEditorDecorationCache && trailingSpacesEnabled.get(lang))
                     {
                         entry = entry.concat(updateTrailSpacesDecoration(lang, text, textEditor, tabSize, trailingSpacesErrorEnabled.get(lang)));
                     }
@@ -986,7 +1022,7 @@ export module BackgroundPhiColors
                             {
                                 const currentDecorations = entry.map(i => JSON.stringify(i.decorationParam));
                                 Object.keys(decorations)
-                                    .filter(i => !previousEditorDecorationCache || 0 <= currentDecorations.indexOf(i))
+                                    .filter(i => !validPreviousEditorDecorationCache || 0 <= currentDecorations.indexOf(i))
                                     .map(i => decorations[i])
                                     .forEach
                                     (
@@ -1037,6 +1073,11 @@ export module BackgroundPhiColors
                         }
                     }
                 );
+
+                if (previousEditorDecorationCache)
+                {
+                    previousEditorDecorationCache.isCleared = true;
+                }
             }
         }
     );

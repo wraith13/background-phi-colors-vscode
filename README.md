@@ -77,6 +77,8 @@ Launch Command Palette(Mac:<kbd>F1</kbd> or <kbd>Shift</kbd>+<kbd>Command</kbd>+
 * `Background Phi Colors: Active Scrope: Editor` : TBD
 * `Background Phi Colors: Active Scrope: Document` : TBD
 * `Background Phi Colors: Active Scrope: Window` : TBD
+* `Background Phi Colors: Mute` : TBD
+* `Background Phi Colors: Mute All` : TBD
 * `Background Phi Colors: Pause` : TBD
 * `Background Phi Colors: Pause All` : TBD
 * `Background Phi Colors: Over the Limit` : TBD

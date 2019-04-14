@@ -51,6 +51,16 @@
                 "category": "Background Phi Colors"
             },
             {
+                "command": "background-phi-colors.mute",
+                "title": "Mute",
+                "category": "Background Phi Colors"
+            },
+            {
+                "command": "background-phi-colors.muteAll",
+                "title": "Mute All",
+                "category": "Background Phi Colors"
+            },
+            {
                 "command": "background-phi-colors.pause",
                 "title": "Pause",
                 "category": "Background Phi Colors"

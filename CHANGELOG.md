@@ -8,6 +8,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Added
 
+- `Mute` command and `Mute All` command.
 - `background-phi-colors.indentErrorInOverviewRulerLane` setting.
 - `background-phi-colors.activeTokenInOverviewRulerLane` setting.
 - `background-phi-colors.trailingSpacesErrorInOverviewRulerLane` setting.
