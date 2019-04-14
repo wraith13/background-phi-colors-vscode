@@ -111,8 +111,11 @@ This extension contributes the following settings by [`settings.json`](https://c
 * `background-phi-colors.traillingSpacesEnabled`: TBD
 * `background-phi-colors.symbolEnabled`: TBD
 * `background-phi-colors.showIndentErrorInOverviewRuler`: TBD
+* `background-phi-colors.indentErrorInOverviewRulerLane`: TBD
 * `background-phi-colors.showActiveTokenInOverviewRuler`: TBD
+* `background-phi-colors.activeTokenInOverviewRulerLane`: TBD
 * `background-phi-colors.showTraillingSpacesErrorInOverviewRuler`: TBD
+* `background-phi-colors.traillingSpacesErrorInOverviewRulerLane`: TBD
 * `background-phi-colors.spacesAlpha`: TBD
 * `background-phi-colors.spacesActiveAlpha`: TBD
 * `background-phi-colors.spacesErrorAlpha`: TBD
