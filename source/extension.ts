@@ -352,6 +352,8 @@ export module BackgroundPhiColors
                 {
                     isMutedAll = !isMutedAll;
                     editorDecorationCache.forEach(i => i.isMuted = undefined);
+                    isPausedAll = false;
+                    editorDecorationCache.forEach(i => i.isPaused = undefined);
                     updateAllDecoration();
                 }
             ),
@@ -435,6 +437,7 @@ export module BackgroundPhiColors
                 undefined === currentEditorDecorationCache.isMuted ?
                     !isMutedAll:
                     !currentEditorDecorationCache.isMuted;
+            currentEditorDecorationCache.isPaused = undefined;
             delayUpdateDecoration(textEditor);
         }
     };
