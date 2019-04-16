@@ -461,7 +461,7 @@ export module BackgroundPhiColors
     export const overTheLimit = (textEditor: vscode.TextEditor) =>
     {
         isOverTheLimit[textEditor.document.fileName] = true;
-        delayUpdateDecoration(textEditor);
+        vscode.window.visibleTextEditors.filter(i => i.document === textEditor.document).forEach(i => delayUpdateDecoration(i));
     };
 
     const isIndentInfoNeed = (lang: string) =>

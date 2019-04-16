@@ -4,6 +4,12 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.0.0 - 2019-04-??
+
+### Fixed
+
+- Fixed an issue that `background-phi-colors.overTheLimit` command is not effective immediately for all editors.
+
 ## 0.9.0 - 2019-04-15
 
 ### Added
