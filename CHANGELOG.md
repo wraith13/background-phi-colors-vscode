@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## 1.0.0 - 2019-04-??
 
+### Changed
+
+- Changed stop profile message.
+
 ### Fixed
 
 - Fixed an issue that `background-phi-colors.overTheLimit` command is not effective immediately for all editors.

@@ -394,7 +394,7 @@ export module BackgroundPhiColors
                     if (Profiler.getIsProfiling())
                     {
                         Profiler.stop();
-                        outputChannel.appendLine(`⏲ Stop Profile! - ${new Date()}`);
+                        outputChannel.appendLine(`🏁 Stop Profile! - ${new Date()}`);
                         outputChannel.appendLine(`📊 Profile Report`);
                         const total = Profiler.getReport().map(i => i.ticks).reduce((p, c) => p +c);
                         outputChannel.appendLine(`- Total: ${total.toLocaleString()}ms ( ${percentToDisplayString(1)} )`);
