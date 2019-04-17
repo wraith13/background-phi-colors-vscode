@@ -345,10 +345,10 @@ export module BackgroundPhiColors
                 `${applicationKey}.activeScopeWindow`,
                 () => vscode.workspace.getConfiguration(applicationKey).update("activeScope", "window", true)
             ),
-            vscode.commands.registerCommand(`${applicationKey}.mute`, () => activeTextEditor(mute)),
+            vscode.commands.registerCommand(`${applicationKey}.toggleMute`, () => activeTextEditor(toggleMute)),
             vscode.commands.registerCommand
             (
-                `${applicationKey}.muteAll`, () =>
+                `${applicationKey}.toggleMuteAll`, () =>
                 {
                     isMutedAll = !isMutedAll;
                     editorDecorationCache.forEach(i => i.isMuted = undefined);
@@ -357,10 +357,10 @@ export module BackgroundPhiColors
                     updateAllDecoration();
                 }
             ),
-            vscode.commands.registerCommand(`${applicationKey}.pause`, () => activeTextEditor(pause)),
+            vscode.commands.registerCommand(`${applicationKey}.togglePause`, () => activeTextEditor(togglePause)),
             vscode.commands.registerCommand
             (
-                `${applicationKey}.pauseAll`, () =>
+                `${applicationKey}.togglePauseAll`, () =>
                 {
                     isPausedAll = !isPausedAll;
                     editorDecorationCache.forEach(i => i.isPaused = undefined);
@@ -428,7 +428,7 @@ export module BackgroundPhiColors
     };
     const activeTextEditor = (f: (textEditor: vscode.TextEditor) => void) => valueThen(vscode.window.activeTextEditor, f);
 
-    export const mute = (textEditor: vscode.TextEditor) =>
+    export const toggleMute = (textEditor: vscode.TextEditor) =>
     {
         const currentEditorDecorationCache = editorDecorationCache.get(textEditor);
         if (currentEditorDecorationCache)
@@ -442,7 +442,7 @@ export module BackgroundPhiColors
         }
     };
 
-    export const pause = (textEditor: vscode.TextEditor) =>
+    export const togglePause = (textEditor: vscode.TextEditor) =>
     {
         const currentEditorDecorationCache = editorDecorationCache.get(textEditor);
         if (currentEditorDecorationCache)

@@ -77,10 +77,10 @@ Launch Command Palette(Mac:<kbd>F1</kbd> or <kbd>Shift</kbd>+<kbd>Command</kbd>+
 * `Background Phi Colors: Active Scrope: Editor` : TBD
 * `Background Phi Colors: Active Scrope: Document` : TBD
 * `Background Phi Colors: Active Scrope: Window` : TBD
-* `Background Phi Colors: Mute` : TBD
-* `Background Phi Colors: Mute All` : TBD
-* `Background Phi Colors: Pause` : TBD
-* `Background Phi Colors: Pause All` : TBD
+* `Background Phi Colors: Toggle Mute` : TBD
+* `Background Phi Colors: Toggle Mute All` : TBD
+* `Background Phi Colors: Toggle Pause` : TBD
+* `Background Phi Colors: Toggle Pause All` : TBD
 * `Background Phi Colors: Over the Limit` : TBD
 * `Background Phi Colors: Start Profile` : TBD
 * `Background Phi Colors: Stop Profile` : TBD
@@ -136,9 +136,11 @@ Command name on `keybindings.json` is diffarent from on Command Pallete. See bel
 |`Background Phi Colors: Active Scope: Editor`|`background-phi-colors.activeScopeEditor`|
 |`Background Phi Colors: Active Scope: Document`|`background-phi-colors.activeScopeDocument`|
 |`Background Phi Colors: Active Scope: Window`|`background-phi-colors.activeScopeWindow`|
+|`Background Phi Colors: Toggle Mute`|`background-phi-colors.toggleMute`|
+|`Background Phi Colors: Toggle Mute All`|`background-phi-colors.toggleMuteAll`|
+|`Background Phi Colors: Toggle Pause`|`background-phi-colors.togglePause`|
+|`Background Phi Colors: Toggle Pause All`|`background-phi-colors.togglePauseAll`|
 |`Background Phi Colors: Over the Limit`|`background-phi-colors.overTheLimig`|
-|`Background Phi Colors: Pause`|`background-phi-colors.pause`|
-|`Background Phi Colors: Pause All`|`background-phi-colors.pauseAll`|
 |`Background Phi Colors: Start Profile`|`background-phi-colors.startProfile`|
 |`Background Phi Colors: Stop Profile`|`background-phi-colors.stopProfile`|
 

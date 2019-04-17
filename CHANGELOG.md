@@ -9,6 +9,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Changed
 
 - Changed stop profile message.
+- Changed `Mute` command title to `Toggle Mute`.
+- Changed `Mute All` command title to `Toggle Mute All`.
+- Changed `Pause` command title to `Toggle Pause`.
+- Changed `Pause All` command title to `Toggle Pause All`.
 
 ### Fixed
 
