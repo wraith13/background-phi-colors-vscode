@@ -51,23 +51,23 @@
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.mute",
-                "title": "Mute",
+                "command": "background-phi-colors.toggleMute",
+                "title": "Toggle Mute",
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.muteAll",
-                "title": "Mute All",
+                "command": "background-phi-colors.toggleMuteAll",
+                "title": "Toggle Mute All",
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.pause",
-                "title": "Pause",
+                "command": "background-phi-colors.togglePause",
+                "title": "Toggle Pause",
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.pauseAll",
-                "title": "Pause All",
+                "command": "background-phi-colors.togglePauseAll",
+                "title": "Toggle Pause All",
                 "category": "Background Phi Colors"
             },
             {
