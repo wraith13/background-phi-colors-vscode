@@ -1,6 +1,19 @@
 import * as vscode from 'vscode';
 import { phiColors } from 'phi-colors';
 
+import localeEn from "../package.nls.json";
+//import localeJa from "../package.nls.ja.json";
+
+interface LocaleEntry
+{
+    [key : string] : string;
+}
+const localeTableKey = <string>JSON.parse(<string>process.env.VSCODE_NLS_CONFIG).locale;
+const localeTable = Object.assign(localeEn, ((<{[key : string] : LocaleEntry}>{
+//    ja : localeJa
+})[localeTableKey] || { }));
+const localeString = (key : string) : string => localeTable[key] || key;
+
 const getTicks = () => new Date().getTime();
 const roundCenti = (value : number) : number => Math.round(value *100) /100;
 const percentToDisplayString = (value : number, locales?: string | string[]) : string =>`${roundCenti(value).toLocaleString(locales, { style: "percent" })}`;
@@ -376,11 +389,11 @@ export module BackgroundPhiColors
                     outputChannel.show();
                     if (Profiler.getIsProfiling())
                     {
-                        outputChannel.appendLine(`🚫 You have already started the profile.`);
+                        outputChannel.appendLine(localeString("🚫 You have already started the profile."));
                     }
                     else
                     {
-                        outputChannel.appendLine(`⏱ Start Profile! - ${new Date()}`);
+                        outputChannel.appendLine(`${localeString("⏱ Start Profile!")} - ${new Date()}`);
                         Profiler.start();
                     }
                 }
@@ -394,15 +407,15 @@ export module BackgroundPhiColors
                     if (Profiler.getIsProfiling())
                     {
                         Profiler.stop();
-                        outputChannel.appendLine(`🏁 Stop Profile! - ${new Date()}`);
-                        outputChannel.appendLine(`📊 Profile Report`);
+                        outputChannel.appendLine(`${localeString("🏁 Stop Profile!")} - ${new Date()}`);
+                        outputChannel.appendLine(localeString("📊 Profile Report"));
                         const total = Profiler.getReport().map(i => i.ticks).reduce((p, c) => p +c);
                         outputChannel.appendLine(`- Total: ${total.toLocaleString()}ms ( ${percentToDisplayString(1)} )`);
                         Profiler.getReport().forEach(i => outputChannel.appendLine(`- ${i.name}: ${i.ticks.toLocaleString()}ms ( ${percentToDisplayString(i.ticks / total)} )`));
                     }
                     else
                     {
-                        outputChannel.appendLine(`🚫 Profile has not been started.`);
+                        outputChannel.appendLine(localeString("🚫 Profile has not been started."));
                     }
                 }
             ),
@@ -1045,11 +1058,16 @@ export module BackgroundPhiColors
                     if (!isLimitNoticed[textEditor.document.fileName])
                     {
                         isLimitNoticed[textEditor.document.fileName] = true;
-                        vscode.window.showWarningMessage(`${textEditor.document.fileName} is too large! background-phi-colors has been disabled. But you can over the limit!`, "Close", "Over the limit").then
+                        vscode.window.showWarningMessage
+                        (
+                            localeString("%1 is too large! background-phi-colors has been disabled. But you can over the limit!").replace("%1", textEditor.document.fileName),
+                            localeString("Close"),
+                            localeString("Over the limit")
+                        ).then
                         (
                             i =>
                             {
-                                if ("Over the limit" === i)
+                                if (localeString("Over the limit") === i)
                                 {
                                     overTheLimit(textEditor);
                                 }
