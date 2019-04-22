@@ -261,6 +261,7 @@ export module BackgroundPhiColors
     const symbolAlpha =new Config("symbolAlpha", 0x44, undefined, 0x00, 0xFF);
     const tokenAlpha =new Config("tokenAlpha", 0x33, undefined, 0x00, 0xFF);
     const tokenActiveAlpha =new Config("tokenActiveAlpha", 0x66, undefined, 0x00, 0xFF);
+    const indenConfig =new Config("indent", <string | null>null, value => null === value || "\t" === value || /^ +$/.test(value));
 
     const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
@@ -507,32 +508,41 @@ export module BackgroundPhiColors
                 {
                     if (isIndentInfoNeed(lang))
                     {
-                        let totalSpaces = 0;
-                        let totalTabs = 0;
                         const indentSizeDistribution:{ [key: number]: number } = { };
                         this.indents = getIndents(text);
-                        this.indents.forEach
-                        (
-                            indent =>
-                            {
-                                const length = indent.text.length;
-                                const tabs = indent.text.replace(/ /g, "").length;
-                                const spaces = length -tabs;
-                                totalSpaces += spaces;
-                                totalTabs += tabs;
-                                const indentSize = getIndentSize(indent.text, tabSize);
-                                if (indentSizeDistribution[indentSize])
+                        const indentUnitConfig = indenConfig.get(lang);
+                        if (null === indentUnitConfig)
+                        {
+                            let totalSpaces = 0;
+                            let totalTabs = 0;
+                            this.indents.forEach
+                            (
+                                indent =>
                                 {
-                                    ++indentSizeDistribution[indentSize];
+                                    const length = indent.text.length;
+                                    const tabs = indent.text.replace(/ /g, "").length;
+                                    const spaces = length -tabs;
+                                    totalSpaces += spaces;
+                                    totalTabs += tabs;
+                                    const indentSize = getIndentSize(indent.text, tabSize);
+                                    if (indentSizeDistribution[indentSize])
+                                    {
+                                        ++indentSizeDistribution[indentSize];
+                                    }
+                                    else
+                                    {
+                                        indentSizeDistribution[indentSize] = 1;
+                                    }
                                 }
-                                else
-                                {
-                                    indentSizeDistribution[indentSize] = 1;
-                                }
-                            }
-                        );
-                        this.isDefaultIndentCharactorSpace = totalTabs *tabSize <= totalSpaces;
-                        this.indentUnit = getIndentUnit(indentSizeDistribution, tabSize, this.isDefaultIndentCharactorSpace);
+                            );
+                            this.isDefaultIndentCharactorSpace = totalTabs *tabSize <= totalSpaces;
+                            this.indentUnit = getIndentUnit(indentSizeDistribution, tabSize, this.isDefaultIndentCharactorSpace);
+                        }
+                        else
+                        {
+                            this.indentUnit = indentUnitConfig;
+                            this.isDefaultIndentCharactorSpace = /^ +$/.test(indentUnitConfig);
+                        }
                         this.indentUnitSize = getIndentSize(this.indentUnit, tabSize);
                     }
                 }
@@ -662,6 +672,7 @@ export module BackgroundPhiColors
             symbolAlpha,
             tokenAlpha,
             tokenActiveAlpha,
+            indenConfig,
         ]
         .forEach(i => i.clear());
 

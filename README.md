@@ -122,6 +122,7 @@ This extension contributes the following settings by [`settings.json`](https://c
 * `background-phi-colors.symbolAlpha`: TBD
 * `background-phi-colors.tokenAlpha`: TBD
 * `background-phi-colors.tokenActiveAlpha`: TBD
+* `background-phi-colors.indent`: TBD
 
 ## Keyboard shortcut Settings
 

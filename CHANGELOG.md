@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## 1.0.0 - 2019-04-??
 
+### Added
+
+- `background-phi-colors.indent` setting.
+
 ### Changed
 
 - Changed stop profile message.

@@ -311,6 +311,12 @@
                         "maximum": 255,
                         "overridable": true,
                         "description": "%background-phi-colors.tokenActiveAlpha.description%"
+                    },
+                    "background-phi-colors.indent": {
+                        "type": ["string", "null"],
+                        "default": null,
+                        "overridable": true,
+                        "description": "%background-phi-colors.indent.description%"
                     }
                 }
             }
