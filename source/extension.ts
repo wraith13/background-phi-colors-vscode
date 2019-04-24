@@ -227,6 +227,21 @@ export module BackgroundPhiColors
             "full": vscode.OverviewRulerLane.Full,
         }
     );
+    const indentObject = Object.freeze
+    (
+        {
+            "auto": null,
+            "tab": "\t",
+            "1 space": " ",
+            "2 spaces": "  ",
+            "3 spaces": "   ",
+            "4 spaces": "    ",
+            "5 spaces": "     ",
+            "6 spaces": "      ",
+            "7 spaces": "       ",
+            "8 spaces": "        ",
+        }
+    );
 
     const enabled = new Config("enabled", true);
     const enabledPanels = new Config("enabledPanels", false);
@@ -261,7 +276,7 @@ export module BackgroundPhiColors
     const symbolAlpha =new Config("symbolAlpha", 0x44, undefined, 0x00, 0xFF);
     const tokenAlpha =new Config("tokenAlpha", 0x33, undefined, 0x00, 0xFF);
     const tokenActiveAlpha =new Config("tokenActiveAlpha", 0x66, undefined, 0x00, 0xFF);
-    const indenConfig =new Config("indent", <string | null>null, value => null === value || "\t" === value || /^ +$/.test(value));
+    const indentConfig =new Config<keyof typeof indentObject>("indent", "auto", makeEnumValidator(Object.keys(indentObject)));
 
     const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
@@ -510,7 +525,7 @@ export module BackgroundPhiColors
                     {
                         const indentSizeDistribution:{ [key: number]: number } = { };
                         this.indents = getIndents(text);
-                        const indentUnitConfig = indenConfig.get(lang);
+                        const indentUnitConfig = indentObject[indentConfig.get(lang)];
                         if (null === indentUnitConfig)
                         {
                             let totalSpaces = 0;
@@ -672,7 +687,7 @@ export module BackgroundPhiColors
             symbolAlpha,
             tokenAlpha,
             tokenActiveAlpha,
-            indenConfig,
+            indentConfig,
         ]
         .forEach(i => i.clear());
 
