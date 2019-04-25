@@ -42,7 +42,7 @@
     "background-phi-colors.symbolAlpha.description": "Symbols background color opacity. ( 0 - 255)",
     "background-phi-colors.tokenAlpha.description": "Tokens background color opacity. ( 0 - 255)",
     "background-phi-colors.tokenActiveAlpha.description": "Active tokens background color opacity. ( 0 - 255)",
-    "background-phi-colors.indent.description": "TBD",
+    "background-phi-colors.indent.description": "Indent unit.",
     "🚫 You have already started the profile.": "🚫 You have already started the profile.",
     "⏱ Start Profile!": "⏱ Start Profile!",
     "🏁 Stop Profile!": "🏁 Stop Profile!",
