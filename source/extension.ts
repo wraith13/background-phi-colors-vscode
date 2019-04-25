@@ -258,7 +258,7 @@ export module BackgroundPhiColors
     const indentMode = new Config<keyof typeof indentModeObject>("indentMode", "full", makeEnumValidator(Object.keys(indentModeObject)));
     const lineEnabled = new Config("lineEnabled", true);
     const tokenMode = new Config<keyof typeof tokenModeObject>("tokenMode", "smart", makeEnumValidator(Object.keys(tokenModeObject)));
-    const activeScope = new Config<keyof typeof activeScopeObject>("activeScope", "editor", makeEnumValidator(Object.keys(activeScopeObject)));
+    const activeScope = new Config<keyof typeof activeScopeObject>("activeScope", "window", makeEnumValidator(Object.keys(activeScopeObject)));
     const indentErrorEnabled = new Config("indentErrorEnabled", true);
     const trailingSpacesErrorEnabled = new Config("trailingSpacesErrorEnabled", true);
     const bodySpacesEnabled = new Config("bodySpacesEnabled", true);

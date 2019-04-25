@@ -190,7 +190,7 @@
                     },
                     "background-phi-colors.activeScope": {
                         "type": "string",
-                        "default": "editor",
+                        "default": "window",
                         "enum": ["editor", "document", "window"],
                         "overridable": false,
                         "description": "%background-phi-colors.activeScope.description%"

@@ -12,6 +12,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Changed
 
+- Changed default value of `background-phi-colors.activeScope` setting from "editor" to "window".
 - Changed stop profile message.
 - Changed `Mute` command title to `Toggle Mute`.
 - Changed `Mute All` command title to `Toggle Mute All`.
