@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { phiColors } from 'phi-colors';
 
 import localeEn from "../package.nls.json";
-//import localeJa from "../package.nls.ja.json";
+import localeJa from "../package.nls.ja.json";
 
 interface LocaleEntry
 {
@@ -10,7 +10,7 @@ interface LocaleEntry
 }
 const localeTableKey = <string>JSON.parse(<string>process.env.VSCODE_NLS_CONFIG).locale;
 const localeTable = Object.assign(localeEn, ((<{[key : string] : LocaleEntry}>{
-//    ja : localeJa
+    ja : localeJa
 })[localeTableKey] || { }));
 const localeString = (key : string) : string => localeTable[key] || key;
 

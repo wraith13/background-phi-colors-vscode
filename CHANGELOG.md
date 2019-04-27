@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Added
 
 - `background-phi-colors.indent` setting.
+- support 🇯🇵 Japanese.
 
 ### Changed
 
