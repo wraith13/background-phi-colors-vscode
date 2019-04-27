@@ -18,6 +18,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Changed `Mute All` command title to `Toggle Mute All`.
 - Changed `Pause` command title to `Toggle Pause`.
 - Changed `Pause All` command title to `Toggle Pause All`.
+- Merged `background-phi-colors.showIndentErrorInOverviewRuler` setting into `background-phi-colors.indentErrorInOverviewRulerLane` setting.
+- Merged `background-phi-colors.showActiveTokenInOverviewRuler` setting into `background-phi-colors.activeTokenInOverviewRulerLane` setting.
+- Merged `background-phi-colors.showTrailingSpacesErrorInOverviewRuler` setting into `background-phi-colors.trailingSpacesErrorInOverviewRulerLane` setting.
 
 ### Fixed
 

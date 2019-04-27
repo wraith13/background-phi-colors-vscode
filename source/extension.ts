@@ -221,6 +221,7 @@ export module BackgroundPhiColors
     const laneObject = Object.freeze
     (
         {
+            "none": undefined,
             "left": vscode.OverviewRulerLane.Left,
             "center": vscode.OverviewRulerLane.Center,
             "right": vscode.OverviewRulerLane.Right,
@@ -264,11 +265,8 @@ export module BackgroundPhiColors
     const bodySpacesEnabled = new Config("bodySpacesEnabled", true);
     const trailingSpacesEnabled = new Config("trailingSpacesEnabled", true);
     const symbolEnabled = new Config("symbolEnabled", false);
-    const showIndentErrorInOverviewRuler = new Config("showIndentErrorInOverviewRuler", true);
     const indentErrorInOverviewRulerLane = new Config<keyof typeof laneObject>("indentErrorInOverviewRulerLane", "left", makeEnumValidator(Object.keys(laneObject)));
-    const showActiveTokenInOverviewRuler = new Config("showActiveTokenInOverviewRuler", true);
     const activeTokenInOverviewRulerLane = new Config<keyof typeof laneObject>("activeTokenInOverviewRulerLane", "center", makeEnumValidator(Object.keys(laneObject)));
-    const showTrailingSpacesErrorInOverviewRuler = new Config("showTrailingSpacesErrorInOverviewRuler", true);
     const trailingSpacesErrorInOverviewRulerLane = new Config<keyof typeof laneObject>("trailingSpacesErrorInOverviewRulerLane", "right", makeEnumValidator(Object.keys(laneObject)));
     const spacesAlpha =new Config("spacesAlpha", 0x11, undefined, 0x00, 0xFF);
     const spacesActiveAlpha =new Config("spacesActiveAlpha", 0x33, undefined, 0x00, 0xFF);
@@ -339,7 +337,7 @@ export module BackgroundPhiColors
             base: hslaCache.get(spaceErrorColor.get(lang)),
             hue: 0,
             alpha: spacesErrorAlpha.get(lang),
-            overviewRulerLane: showIndentErrorInOverviewRuler.get(lang) ? laneObject[indentErrorInOverviewRulerLane.get(lang)]: undefined,
+            overviewRulerLane: laneObject[indentErrorInOverviewRulerLane.get(lang)],
         }
     );
     const makeTrailingSpacesErrorDecorationParam = (lang: string): DecorationParam =>
@@ -349,7 +347,7 @@ export module BackgroundPhiColors
             base: hslaCache.get(spaceErrorColor.get(lang)),
             hue: 0,
             alpha: spacesErrorAlpha.get(lang),
-            overviewRulerLane: showTrailingSpacesErrorInOverviewRuler.get(lang) ? laneObject[trailingSpacesErrorInOverviewRulerLane.get(lang)]: undefined,
+            overviewRulerLane: laneObject[trailingSpacesErrorInOverviewRulerLane.get(lang)],
         }
     );
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
@@ -675,11 +673,8 @@ export module BackgroundPhiColors
             bodySpacesEnabled,
             trailingSpacesEnabled,
             symbolEnabled,
-            showIndentErrorInOverviewRuler,
             indentErrorInOverviewRulerLane,
-            showActiveTokenInOverviewRuler,
             activeTokenInOverviewRulerLane,
-            showTrailingSpacesErrorInOverviewRuler,
             trailingSpacesErrorInOverviewRulerLane,
             spacesAlpha,
             spacesActiveAlpha,
@@ -1005,7 +1000,7 @@ export module BackgroundPhiColors
                                                         tokenBaseColor,
                                                         hash(i),
                                                         tokenActiveAlpha,
-                                                        showActiveTokenInOverviewRuler.get(lang) ? laneObject[activeTokenInOverviewRulerLane.get(lang)]: undefined,
+                                                        laneObject[activeTokenInOverviewRulerLane.get(lang)],
                                                     )
                                                 }
                                             )
@@ -1629,7 +1624,7 @@ export module BackgroundPhiColors
                         tokenBaseColor,
                         i.specificColor || hash(i.token),
                         i.isActive ? tokenActiveAlpha: tokenAlpha,
-                        i.isActive && showActiveTokenInOverviewRuler.get(lang) ? laneObject[activeTokenInOverviewRulerLane.get(lang)]: undefined,
+                        i.isActive ? laneObject[activeTokenInOverviewRulerLane.get(lang)]: undefined,
                     )
                 }
             )

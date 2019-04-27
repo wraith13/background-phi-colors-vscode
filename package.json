@@ -225,42 +225,24 @@
                         "overridable": true,
                         "description": "%background-phi-colors.symbolEnabled.description%"
                     },
-                    "background-phi-colors.showIndentErrorInOverviewRuler": {
-                        "type": "boolean",
-                        "default": true,
-                        "overridable": true,
-                        "description": "%background-phi-colors.showIndentErrorInOverviewRuler.description%"
-                    },
                     "background-phi-colors.indentErrorInOverviewRulerLane": {
                         "type": "string",
                         "default": "left",
-                        "enum": ["left", "center", "right", "full"],
+                        "enum": ["none", "left", "center", "right", "full"],
                         "overridable": true,
                         "description": "%background-phi-colors.indentErrorInOverviewRulerLane.description%"
-                    },
-                    "background-phi-colors.showActiveTokenInOverviewRuler": {
-                        "type": "boolean",
-                        "default": true,
-                        "overridable": true,
-                        "description": "%background-phi-colors.showActiveTokenInOverviewRuler.description%"
                     },
                     "background-phi-colors.activeTokenInOverviewRulerLane": {
                         "type": "string",
                         "default": "center",
-                        "enum": ["left", "center", "right", "full"],
+                        "enum": ["none", "left", "center", "right", "full"],
                         "overridable": true,
                         "description": "%background-phi-colors.activeTokenInOverviewRulerLane.description%"
-                    },
-                    "background-phi-colors.showTrailingSpacesErrorInOverviewRuler": {
-                        "type": "boolean",
-                        "default": true,
-                        "overridable": true,
-                        "description": "%background-phi-colors.showTrailingSpacesErrorInOverviewRuler.description%"
                     },
                     "background-phi-colors.trailingSpacesErrorInOverviewRulerLane": {
                         "type": "string",
                         "default": "right",
-                        "enum": ["left", "center", "right", "full"],
+                        "enum": ["none", "left", "center", "right", "full"],
                         "overridable": true,
                         "description": "%background-phi-colors.trailingSpacesErrorInOverviewRulerLane.description%"
                     },
