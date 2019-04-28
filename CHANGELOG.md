@@ -22,6 +22,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Merged `background-phi-colors.showIndentErrorInOverviewRuler` setting into `background-phi-colors.indentErrorInOverviewRulerLane` setting.
 - Merged `background-phi-colors.showActiveTokenInOverviewRuler` setting into `background-phi-colors.activeTokenInOverviewRulerLane` setting.
 - Merged `background-phi-colors.showTrailingSpacesErrorInOverviewRuler` setting into `background-phi-colors.trailingSpacesErrorInOverviewRulerLane` setting.
+- Changed to keep the active editor until the next valid editor is focused.
 
 ### Fixed
 

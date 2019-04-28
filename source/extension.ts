@@ -286,6 +286,7 @@ export module BackgroundPhiColors
         profilerOutputChannel:
         (profilerOutputChannel = vscode.window.createOutputChannel("Background Phi Colors Profiler"));
     let mapCache = new Cache((object: {[key:string]: string }) => object ? objctToMap(object): new Map());
+    let lastActiveTextEditor: vscode.TextEditor | undefined = undefined;
 
     interface DecorationParam
     {
@@ -586,7 +587,7 @@ export module BackgroundPhiColors
             this.selection = textEditor.selection;
             this.line = textEditor.document.lineAt(textEditor.selection.active.line);
             this.tabSize = tabSize;
-            const isActiveTextEditor = vscode.window.activeTextEditor === textEditor;
+            const isActiveTextEditor = lastActiveTextEditor === textEditor;
             if (isIndentInfoNeed(textEditor.document.languageId) && (isActiveTextEditor || "editor" === activeScope.get("")))
             {
                 const currentIndentSize = getIndentSize
@@ -833,7 +834,6 @@ export module BackgroundPhiColors
         {
             const lang = textEditor.document.languageId;
             const text = textEditor.document.getText();
-            const isActiveTextEditor = vscode.window.activeTextEditor === textEditor;
             const previousEditorDecorationCache = editorDecorationCache.get(textEditor);
             const isMuted = previousEditorDecorationCache && undefined !== previousEditorDecorationCache.isMuted ?
                 previousEditorDecorationCache.isMuted:
@@ -844,6 +844,11 @@ export module BackgroundPhiColors
             const isEnabled = undefined !== isMuted ?
                 !isMuted:
                 (enabled.get(lang) && (textEditor.viewColumn || enabledPanels.get(lang)));
+            if (isEnabled && vscode.window.activeTextEditor === textEditor)
+            {
+                lastActiveTextEditor = vscode.window.activeTextEditor;
+            }
+            const isActiveTextEditor = lastActiveTextEditor === textEditor;
 
             //  clear
             Profiler.profile("updateDecoration.clear", () => Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []));
