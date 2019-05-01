@@ -74,16 +74,16 @@ Enjoy!
 
 Launch Command Palette(Mac:<kbd>F1</kbd> or <kbd>Shift</kbd>+<kbd>Command</kbd>+<kbd>P</kbd>, Windows and Linux: <kbd>F1</kbd> or <kbd>Shift</kbd>+<kbd>Ctrl</kbd>+<kbd>P</kbd>)
 
-* `Background Phi Colors: Active Scrope: Editor` : TBD
-* `Background Phi Colors: Active Scrope: Document` : TBD
-* `Background Phi Colors: Active Scrope: Window` : TBD
-* `Background Phi Colors: Toggle Mute` : TBD
-* `Background Phi Colors: Toggle Mute All` : TBD
-* `Background Phi Colors: Toggle Pause` : TBD
-* `Background Phi Colors: Toggle Pause All` : TBD
-* `Background Phi Colors: Over the Limit` : TBD
-* `Background Phi Colors: Start Profile` : TBD
-* `Background Phi Colors: Stop Profile` : TBD
+* `Background Phi Colors: Active Scrope: Editor` : sets active scope to editor. ( Each editor is highlighted independently. )
+* `Background Phi Colors: Active Scrope: Document` : sets active scope to document. ( Highlight are shared in the same document editors. )
+* `Background Phi Colors: Active Scrope: Window` : sets active scope to window. ( Highlight are shared in the all editors. )
+* `Background Phi Colors: Toggle Mute` : disables background coloring for the text editor in focus. Execute this command again to enable. This command overrides the `background-phi-colors.enabled` setting.
+* `Background Phi Colors: Toggle Mute All` : disables background coloring for all text editors. Execute this command again to enable. This command overrides the `background-phi-colors.enabled` setting.
+* `Background Phi Colors: Toggle Pause` : keeps the current highlighting of the focused text editor even as you move the cursor. Execute this command again not to keep.
+* `Background Phi Colors: Toggle Pause All` : keeps the current highlighting of all text editors as you move the cursor. Execute this command again not to keep.
+* `Background Phi Colors: Over the Limit` : forces it to work if this extension stopped by the file size limit. ⚠ Keep in mind that VS Code may become extremely heavy depending on the machine performance and text files. If it gets too heavy, please quit or kill VS Code once.
+* `Background Phi Colors: Start Profile` : starts a self profile.
+* `Background Phi Colors: Stop Profile` : stops a self profile, and report a profile.
 
 ## Extension Settings
 
