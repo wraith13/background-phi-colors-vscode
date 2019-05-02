@@ -2,11 +2,9 @@
 
 [![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/wraith13.background-phi-colors.svg) ![installs](https://vsmarketplacebadge.apphb.com/installs/wraith13.background-phi-colors.svg) ![rating](https://vsmarketplacebadge.apphb.com/rating/wraith13.background-phi-colors.svg)](https://marketplace.visualstudio.com/items?itemName=wraith13.background-phi-colors)
 
-This extension colors the background in various ways.
+This extension colors the background in various ways. It is too ambitious and may be very annoying.
 
-⚠ This extension is still PREVIEW version!
-
-This extension is too ambitious and may be very annoying.
+This extension just colors the background of all text files. However, this always means that the search will be fully automatic. It will improve code recognition. Unfortunately, this extension is probably not for everyone, and the ratings will vary widely depending on the person. But for those who like it, it will be a very powerful extension.
 
 ![demo](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/demo.gif)
 
@@ -120,6 +118,17 @@ This extension contributes the following settings by [`settings.json`](https://c
 * `background-phi-colors.tokenAlpha`: tokens background color opacity. ( 0 - 255)
 * `background-phi-colors.tokenActiveAlpha`: active tokens background color opacity. ( 0 - 255)
 * `background-phi-colors.indent`: indent unit.
+
+### setting example
+
+```json
+"background-phi-colors.tokenColorMap":
+{
+    "if": null,
+    "else": null,
+    "wraith13": "#0000FF"
+}
+```
 
 ### Language specific settings
 
