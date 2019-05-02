@@ -133,7 +133,10 @@
                         "description": "%backgroundPhiColors.baseColor.description%"
                     },
                     "backgroundPhiColors.spaceBaseColor": {
-                        "type": ["string", "null"],
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "default": null,
                         "overridable": true,
                         "description": "%backgroundPhiColors.spaceBaseColor.description%"
@@ -145,33 +148,44 @@
                         "description": "%backgroundPhiColors.spaceErrorColor.description%"
                     },
                     "backgroundPhiColors.symbolBaseColor": {
-                        "type": ["string", "null"],
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "default": null,
                         "overridable": true,
                         "description": "%backgroundPhiColors.symbolBaseColor.description%"
                     },
                     "backgroundPhiColors.symbolColorMap": {
                         "type": "object",
-                        "default": { },
+                        "default": {},
                         "overridable": true,
                         "description": "%backgroundPhiColors.symbolColorMap.description%"
                     },
                     "backgroundPhiColors.tokenBaseColor": {
-                        "type": ["string", "null"],
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "default": null,
                         "overridable": true,
                         "description": "%backgroundPhiColors.tokenBaseColor.description%"
                     },
                     "backgroundPhiColors.tokenColorMap": {
                         "type": "object",
-                        "default": { },
+                        "default": {},
                         "overridable": true,
                         "description": "%backgroundPhiColors.tokenColorMap.description%"
                     },
                     "backgroundPhiColors.indentMode": {
                         "type": "string",
                         "default": "full",
-                        "enum": ["none", "light", "smart", "full"],
+                        "enum": [
+                            "none",
+                            "light",
+                            "smart",
+                            "full"
+                        ],
                         "overridable": true,
                         "description": "%backgroundPhiColors.indentMode.description%"
                     },
@@ -184,14 +198,23 @@
                     "backgroundPhiColors.tokenMode": {
                         "type": "string",
                         "default": "smart",
-                        "enum": ["none", "light", "smart", "full"],
+                        "enum": [
+                            "none",
+                            "light",
+                            "smart",
+                            "full"
+                        ],
                         "overridable": true,
                         "description": "%backgroundPhiColors.tokenMode.description%"
                     },
                     "backgroundPhiColors.activeScope": {
                         "type": "string",
                         "default": "window",
-                        "enum": ["editor", "document", "window"],
+                        "enum": [
+                            "editor",
+                            "document",
+                            "window"
+                        ],
                         "overridable": false,
                         "description": "%backgroundPhiColors.activeScope.description%"
                     },
@@ -228,21 +251,39 @@
                     "backgroundPhiColors.indentErrorInOverviewRulerLane": {
                         "type": "string",
                         "default": "left",
-                        "enum": ["none", "left", "center", "right", "full"],
+                        "enum": [
+                            "none",
+                            "left",
+                            "center",
+                            "right",
+                            "full"
+                        ],
                         "overridable": true,
                         "description": "%backgroundPhiColors.indentErrorInOverviewRulerLane.description%"
                     },
                     "backgroundPhiColors.activeTokenInOverviewRulerLane": {
                         "type": "string",
                         "default": "center",
-                        "enum": ["none", "left", "center", "right", "full"],
+                        "enum": [
+                            "none",
+                            "left",
+                            "center",
+                            "right",
+                            "full"
+                        ],
                         "overridable": true,
                         "description": "%backgroundPhiColors.activeTokenInOverviewRulerLane.description%"
                     },
                     "backgroundPhiColors.trailingSpacesErrorInOverviewRulerLane": {
                         "type": "string",
                         "default": "right",
-                        "enum": ["none", "left", "center", "right", "full"],
+                        "enum": [
+                            "none",
+                            "left",
+                            "center",
+                            "right",
+                            "full"
+                        ],
                         "overridable": true,
                         "description": "%backgroundPhiColors.trailingSpacesErrorInOverviewRulerLane.description%"
                     },
@@ -297,8 +338,7 @@
                     "backgroundPhiColors.indent": {
                         "type": "string",
                         "default": "auto",
-                        "enum":
-                        [
+                        "enum": [
                             "auto",
                             "tab",
                             "1 space",
@@ -329,7 +369,7 @@
         "@types/node": "^8.10.42",
         "tslint": "^5.13.1",
         "typescript": "^3.4.0",
-        "vscode": "^1.1.30"
+        "vscode": "^1.1.33"
     },
     "dependencies": {
         "phi-colors": "^1.0.0"
