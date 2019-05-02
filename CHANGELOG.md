@@ -8,20 +8,21 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Added
 
-- `background-phi-colors.indent` setting.
+- `indent` setting.
 - support 🇯🇵 Japanese.
 
 ### Changed
 
-- Changed default value of `background-phi-colors.activeScope` setting from "editor" to "window".
+- Changed `background-phi-colors.` prefix of all commands and all settings to `backgroundPhiColors.`.
+- Changed default value of `activeScope` setting from "editor" to "window".
 - Changed stop profile message.
 - Changed `Mute` command title to `Toggle Mute`.
 - Changed `Mute All` command title to `Toggle Mute All`.
 - Changed `Pause` command title to `Toggle Pause`.
 - Changed `Pause All` command title to `Toggle Pause All`.
-- Merged `background-phi-colors.showIndentErrorInOverviewRuler` setting into `background-phi-colors.indentErrorInOverviewRulerLane` setting.
-- Merged `background-phi-colors.showActiveTokenInOverviewRuler` setting into `background-phi-colors.activeTokenInOverviewRulerLane` setting.
-- Merged `background-phi-colors.showTrailingSpacesErrorInOverviewRuler` setting into `background-phi-colors.trailingSpacesErrorInOverviewRulerLane` setting.
+- Merged `showIndentErrorInOverviewRuler` setting into `indentErrorInOverviewRulerLane` setting.
+- Merged `showActiveTokenInOverviewRuler` setting into `activeTokenInOverviewRulerLane` setting.
+- Merged `showTrailingSpacesErrorInOverviewRuler` setting into `trailingSpacesErrorInOverviewRulerLane` setting.
 - Changed to keep the active editor until the next valid editor is focused.
 
 ### Fixed

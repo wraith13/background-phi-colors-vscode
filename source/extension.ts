@@ -115,7 +115,7 @@ export module Profiler
 
 export module BackgroundPhiColors
 {
-    const applicationKey = "background-phi-colors";
+    const applicationKey = "backgroundPhiColors";
     class Cache<keyT, valueT>
     {
         cache: { [key: string]: valueT } = { };
@@ -1086,7 +1086,7 @@ export module BackgroundPhiColors
                         isLimitNoticed[textEditor.document.fileName] = true;
                         vscode.window.showWarningMessage
                         (
-                            localeString("%1 is too large! background-phi-colors has been disabled. But you can over the limit!").replace("%1", textEditor.document.fileName),
+                            localeString("%1 is too large! Background Phi Colors has been disabled. But you can over the limit!").replace("%1", textEditor.document.fileName),
                             localeString("Close"),
                             localeString("Over the limit")
                         ).then

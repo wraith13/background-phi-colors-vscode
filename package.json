@@ -36,265 +36,265 @@
     "contributes": {
         "commands": [
             {
-                "command": "background-phi-colors.activeScopeEditor",
-                "title": "%background-phi-colors.activeScopeEditor.title%",
+                "command": "backgroundPhiColors.activeScopeEditor",
+                "title": "%backgroundPhiColors.activeScopeEditor.title%",
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.activeScopeDocument",
-                "title": "%background-phi-colors.activeScopeDocument.title%",
+                "command": "backgroundPhiColors.activeScopeDocument",
+                "title": "%backgroundPhiColors.activeScopeDocument.title%",
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.activeScopeWindow",
-                "title": "%background-phi-colors.activeScopeWindow.title%",
+                "command": "backgroundPhiColors.activeScopeWindow",
+                "title": "%backgroundPhiColors.activeScopeWindow.title%",
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.toggleMute",
-                "title": "%background-phi-colors.toggleMute.title%",
+                "command": "backgroundPhiColors.toggleMute",
+                "title": "%backgroundPhiColors.toggleMute.title%",
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.toggleMuteAll",
-                "title": "%background-phi-colors.toggleMuteAll.title%",
+                "command": "backgroundPhiColors.toggleMuteAll",
+                "title": "%backgroundPhiColors.toggleMuteAll.title%",
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.togglePause",
-                "title": "%background-phi-colors.togglePause.title%",
+                "command": "backgroundPhiColors.togglePause",
+                "title": "%backgroundPhiColors.togglePause.title%",
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.togglePauseAll",
-                "title": "%background-phi-colors.togglePauseAll.title%",
+                "command": "backgroundPhiColors.togglePauseAll",
+                "title": "%backgroundPhiColors.togglePauseAll.title%",
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.overTheLimig",
-                "title": "%background-phi-colors.overTheLimig.title%",
+                "command": "backgroundPhiColors.overTheLimig",
+                "title": "%backgroundPhiColors.overTheLimig.title%",
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.startProfile",
-                "title": "%background-phi-colors.startProfile.title%",
+                "command": "backgroundPhiColors.startProfile",
+                "title": "%backgroundPhiColors.startProfile.title%",
                 "category": "Background Phi Colors"
             },
             {
-                "command": "background-phi-colors.stopProfile",
-                "title": "%background-phi-colors.stopProfile.title%",
+                "command": "backgroundPhiColors.stopProfile",
+                "title": "%backgroundPhiColors.stopProfile.title%",
                 "category": "Background Phi Colors"
             }
         ],
         "configuration": [
             {
-                "title": "background-phi-colors",
+                "title": "Background Phi Colors",
                 "properties": {
-                    "background-phi-colors.enabled": {
+                    "backgroundPhiColors.enabled": {
                         "type": "boolean",
                         "default": true,
                         "overridable": true,
-                        "description": "%background-phi-colors.enabled.description%"
+                        "description": "%backgroundPhiColors.enabled.description%"
                     },
-                    "background-phi-colors.enabledPanels": {
+                    "backgroundPhiColors.enabledPanels": {
                         "type": "boolean",
                         "default": false,
                         "overridable": true,
-                        "description": "%background-phi-colors.enabledPanels.description%"
+                        "description": "%backgroundPhiColors.enabledPanels.description%"
                     },
-                    "background-phi-colors.fileSizeLimit": {
+                    "backgroundPhiColors.fileSizeLimit": {
                         "type": "number",
                         "default": 102400,
                         "minimum": 10240,
                         "maximum": 10485760,
                         "overridable": true,
-                        "description": "%background-phi-colors.fileSizeLimit.description%"
+                        "description": "%backgroundPhiColors.fileSizeLimit.description%"
                     },
-                    "background-phi-colors.basicDelay": {
+                    "backgroundPhiColors.basicDelay": {
                         "type": "number",
                         "default": 10,
                         "minimum": 1,
                         "maximum": 1500,
                         "overridable": true,
-                        "description": "%background-phi-colors.basicDelay.description%"
+                        "description": "%backgroundPhiColors.basicDelay.description%"
                     },
-                    "background-phi-colors.additionalDelay": {
+                    "backgroundPhiColors.additionalDelay": {
                         "type": "number",
                         "default": 200,
                         "minimum": 50,
                         "maximum": 1500,
                         "overridable": true,
-                        "description": "%background-phi-colors.additionalDelay.description%"
+                        "description": "%backgroundPhiColors.additionalDelay.description%"
                     },
-                    "background-phi-colors.baseColor": {
+                    "backgroundPhiColors.baseColor": {
                         "type": "string",
                         "default": "#5679C9",
                         "overridable": true,
-                        "description": "%background-phi-colors.baseColor.description%"
+                        "description": "%backgroundPhiColors.baseColor.description%"
                     },
-                    "background-phi-colors.spaceBaseColor": {
+                    "backgroundPhiColors.spaceBaseColor": {
                         "type": ["string", "null"],
                         "default": null,
                         "overridable": true,
-                        "description": "%background-phi-colors.spaceBaseColor.description%"
+                        "description": "%backgroundPhiColors.spaceBaseColor.description%"
                     },
-                    "background-phi-colors.spaceErrorColor": {
+                    "backgroundPhiColors.spaceErrorColor": {
                         "type": "string",
                         "default": "#DD4444",
                         "overridable": true,
-                        "description": "%background-phi-colors.spaceErrorColor.description%"
+                        "description": "%backgroundPhiColors.spaceErrorColor.description%"
                     },
-                    "background-phi-colors.symbolBaseColor": {
+                    "backgroundPhiColors.symbolBaseColor": {
                         "type": ["string", "null"],
                         "default": null,
                         "overridable": true,
-                        "description": "%background-phi-colors.symbolBaseColor.description%"
+                        "description": "%backgroundPhiColors.symbolBaseColor.description%"
                     },
-                    "background-phi-colors.symbolColorMap": {
+                    "backgroundPhiColors.symbolColorMap": {
                         "type": "object",
                         "default": { },
                         "overridable": true,
-                        "description": "%background-phi-colors.symbolColorMap.description%"
+                        "description": "%backgroundPhiColors.symbolColorMap.description%"
                     },
-                    "background-phi-colors.tokenBaseColor": {
+                    "backgroundPhiColors.tokenBaseColor": {
                         "type": ["string", "null"],
                         "default": null,
                         "overridable": true,
-                        "description": "%background-phi-colors.tokenBaseColor.description%"
+                        "description": "%backgroundPhiColors.tokenBaseColor.description%"
                     },
-                    "background-phi-colors.tokenColorMap": {
+                    "backgroundPhiColors.tokenColorMap": {
                         "type": "object",
                         "default": { },
                         "overridable": true,
-                        "description": "%background-phi-colors.tokenColorMap.description%"
+                        "description": "%backgroundPhiColors.tokenColorMap.description%"
                     },
-                    "background-phi-colors.indentMode": {
+                    "backgroundPhiColors.indentMode": {
                         "type": "string",
                         "default": "full",
                         "enum": ["none", "light", "smart", "full"],
                         "overridable": true,
-                        "description": "%background-phi-colors.indentMode.description%"
+                        "description": "%backgroundPhiColors.indentMode.description%"
                     },
-                    "background-phi-colors.lineEnabled": {
+                    "backgroundPhiColors.lineEnabled": {
                         "type": "boolean",
                         "default": true,
                         "overridable": true,
-                        "description": "%background-phi-colors.lineEnabled.description%"
+                        "description": "%backgroundPhiColors.lineEnabled.description%"
                     },
-                    "background-phi-colors.tokenMode": {
+                    "backgroundPhiColors.tokenMode": {
                         "type": "string",
                         "default": "smart",
                         "enum": ["none", "light", "smart", "full"],
                         "overridable": true,
-                        "description": "%background-phi-colors.tokenMode.description%"
+                        "description": "%backgroundPhiColors.tokenMode.description%"
                     },
-                    "background-phi-colors.activeScope": {
+                    "backgroundPhiColors.activeScope": {
                         "type": "string",
                         "default": "window",
                         "enum": ["editor", "document", "window"],
                         "overridable": false,
-                        "description": "%background-phi-colors.activeScope.description%"
+                        "description": "%backgroundPhiColors.activeScope.description%"
                     },
-                    "background-phi-colors.indentErrorEnabled": {
+                    "backgroundPhiColors.indentErrorEnabled": {
                         "type": "boolean",
                         "default": true,
                         "overridable": true,
-                        "description": "%background-phi-colors.indentErrorEnabled.description%"
+                        "description": "%backgroundPhiColors.indentErrorEnabled.description%"
                     },
-                    "background-phi-colors.trailingSpacesErrorEnabled": {
+                    "backgroundPhiColors.trailingSpacesErrorEnabled": {
                         "type": "boolean",
                         "default": true,
                         "overridable": true,
-                        "description": "%background-phi-colors.trailingSpacesErrorEnabled.description%"
+                        "description": "%backgroundPhiColors.trailingSpacesErrorEnabled.description%"
                     },
-                    "background-phi-colors.bodySpacesEnabled": {
+                    "backgroundPhiColors.bodySpacesEnabled": {
                         "type": "boolean",
                         "default": true,
                         "overridable": true,
-                        "description": "%background-phi-colors.bodySpacesEnabled.description%"
+                        "description": "%backgroundPhiColors.bodySpacesEnabled.description%"
                     },
-                    "background-phi-colors.trailingSpacesEnabled": {
+                    "backgroundPhiColors.trailingSpacesEnabled": {
                         "type": "boolean",
                         "default": true,
                         "overridable": true,
-                        "description": "%background-phi-colors.trailingSpacesEnabled.description%"
+                        "description": "%backgroundPhiColors.trailingSpacesEnabled.description%"
                     },
-                    "background-phi-colors.symbolEnabled": {
+                    "backgroundPhiColors.symbolEnabled": {
                         "type": "boolean",
                         "default": false,
                         "overridable": true,
-                        "description": "%background-phi-colors.symbolEnabled.description%"
+                        "description": "%backgroundPhiColors.symbolEnabled.description%"
                     },
-                    "background-phi-colors.indentErrorInOverviewRulerLane": {
+                    "backgroundPhiColors.indentErrorInOverviewRulerLane": {
                         "type": "string",
                         "default": "left",
                         "enum": ["none", "left", "center", "right", "full"],
                         "overridable": true,
-                        "description": "%background-phi-colors.indentErrorInOverviewRulerLane.description%"
+                        "description": "%backgroundPhiColors.indentErrorInOverviewRulerLane.description%"
                     },
-                    "background-phi-colors.activeTokenInOverviewRulerLane": {
+                    "backgroundPhiColors.activeTokenInOverviewRulerLane": {
                         "type": "string",
                         "default": "center",
                         "enum": ["none", "left", "center", "right", "full"],
                         "overridable": true,
-                        "description": "%background-phi-colors.activeTokenInOverviewRulerLane.description%"
+                        "description": "%backgroundPhiColors.activeTokenInOverviewRulerLane.description%"
                     },
-                    "background-phi-colors.trailingSpacesErrorInOverviewRulerLane": {
+                    "backgroundPhiColors.trailingSpacesErrorInOverviewRulerLane": {
                         "type": "string",
                         "default": "right",
                         "enum": ["none", "left", "center", "right", "full"],
                         "overridable": true,
-                        "description": "%background-phi-colors.trailingSpacesErrorInOverviewRulerLane.description%"
+                        "description": "%backgroundPhiColors.trailingSpacesErrorInOverviewRulerLane.description%"
                     },
-                    "background-phi-colors.spacesAlpha": {
+                    "backgroundPhiColors.spacesAlpha": {
                         "type": "number",
                         "default": 17,
                         "minimum": 0,
                         "maximum": 255,
                         "overridable": true,
-                        "description": "%background-phi-colors.spacesAlpha.description%"
+                        "description": "%backgroundPhiColors.spacesAlpha.description%"
                     },
-                    "background-phi-colors.spacesActiveAlpha": {
+                    "backgroundPhiColors.spacesActiveAlpha": {
                         "type": "number",
                         "default": 51,
                         "minimum": 0,
                         "maximum": 255,
                         "overridable": true,
-                        "description": "%background-phi-colors.spacesActiveAlpha.description%"
+                        "description": "%backgroundPhiColors.spacesActiveAlpha.description%"
                     },
-                    "background-phi-colors.spacesErrorAlpha": {
+                    "backgroundPhiColors.spacesErrorAlpha": {
                         "type": "number",
                         "default": 136,
                         "minimum": 0,
                         "maximum": 255,
                         "overridable": true,
-                        "description": "%background-phi-colors.spacesErrorAlpha.description%"
+                        "description": "%backgroundPhiColors.spacesErrorAlpha.description%"
                     },
-                    "background-phi-colors.symbolAlpha": {
+                    "backgroundPhiColors.symbolAlpha": {
                         "type": "number",
                         "default": 68,
                         "minimum": 0,
                         "maximum": 255,
                         "overridable": true,
-                        "description": "%background-phi-colors.symbolAlpha.description%"
+                        "description": "%backgroundPhiColors.symbolAlpha.description%"
                     },
-                    "background-phi-colors.tokenAlpha": {
+                    "backgroundPhiColors.tokenAlpha": {
                         "type": "number",
                         "default": 51,
                         "minimum": 0,
                         "maximum": 255,
                         "overridable": true,
-                        "description": "%background-phi-colors.tokenAlpha.description%"
+                        "description": "%backgroundPhiColors.tokenAlpha.description%"
                     },
-                    "background-phi-colors.tokenActiveAlpha": {
+                    "backgroundPhiColors.tokenActiveAlpha": {
                         "type": "number",
                         "default": 102,
                         "minimum": 0,
                         "maximum": 255,
                         "overridable": true,
-                        "description": "%background-phi-colors.tokenActiveAlpha.description%"
+                        "description": "%backgroundPhiColors.tokenActiveAlpha.description%"
                     },
-                    "background-phi-colors.indent": {
+                    "backgroundPhiColors.indent": {
                         "type": "string",
                         "default": "auto",
                         "enum":
@@ -311,7 +311,7 @@
                             "8 spaces"
                         ],
                         "overridable": true,
-                        "description": "%background-phi-colors.indent.description%"
+                        "description": "%backgroundPhiColors.indent.description%"
                     }
                 }
             }
