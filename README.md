@@ -32,6 +32,10 @@ This extension colors the background in follow ways.
 
 ![indent full](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/indent.full.png)
 
+### Current line
+
+![Current line](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/current.line.png)
+
 ### Token: light
 
 ![token light](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/token.light.png)
