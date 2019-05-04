@@ -753,15 +753,8 @@ export module BackgroundPhiColors
                     tokenMode
                 ]
                 .map(i => i.get(lang))
-                .some
-                (
-                    i =>
-                    [
-                        "none",
-                        "light"
-                    ]
-                    .indexOf(i) < 0
-                )
+                .some(i => 0 <= ["smart", "full"].indexOf(i)) ||
+                lineEnabled.get(lang)
             )
             {
                 delayUpdateDecoration(textEditor);

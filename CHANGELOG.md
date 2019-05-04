@@ -28,6 +28,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Fixed
 
 - Fixed an issue that `background-phi-colors.overTheLimit` command is not effective immediately for all editors.
+- Fixed an issue that the background color was not updated when the cursor moved when only the `lineEnabled` setting was true.
 
 ## 0.9.0 - 2019-04-15
 
