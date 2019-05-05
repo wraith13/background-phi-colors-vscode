@@ -1,6 +1,6 @@
 # Background Phi Colors README
 
-[![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/wraith13.background-phi-colors.svg) ![installs](https://vsmarketplacebadge.apphb.com/installs/wraith13.background-phi-colors.svg) ![rating](https://vsmarketplacebadge.apphb.com/rating/wraith13.background-phi-colors.svg)](https://marketplace.visualstudio.com/items?itemName=wraith13.background-phi-colors)
+[![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/wraith13.background-phi-colors.svg) ![installs](https://vsmarketplacebadge.apphb.com/installs/wraith13.background-phi-colors.svg) ![rating](https://vsmarketplacebadge.apphb.com/rating/wraith13.background-phi-colors.svg)](https://marketplace.visualstudio.com/items?itemName=wraith13.background-phi-colors) [🇯🇵 Japanese / 日本語](https://qiita.com/wraith13/items/5da436536d6a98bd8924)
 
 This extension colors the background in various ways. It is too ambitious and may be very annoying.
 

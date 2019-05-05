@@ -4,10 +4,11 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## 1.0.0 - 2019-04-??
+## 1.0.0 - 2019-05-05
 
 ### Added
 
+- 🎊 General availability release of Background Phi Colors. 🎉
 - `indent` setting.
 - support 🇯🇵 Japanese.
 
