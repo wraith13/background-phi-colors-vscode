@@ -102,15 +102,12 @@ export module Profiler
             .map
             (
                 name =>
-                (
-                    {
-                        name,
-                        ticks: profileScore[name]
-                    }
-                )
+                ({
+                    name,
+                    ticks: profileScore[name]
+                })
             )
             .sort((a, b) => b.ticks -a.ticks);
-
 }
 
 export module BackgroundPhiColors
@@ -332,25 +329,21 @@ export module BackgroundPhiColors
     );
 
     const makeIndentErrorDecorationParam = (lang: string): DecorationParam =>
-    (
-        {
-            name: "indenet:error",
-            base: hslaCache.get(spaceErrorColor.get(lang)),
-            hue: 0,
-            alpha: spacesErrorAlpha.get(lang),
-            overviewRulerLane: laneObject[indentErrorInOverviewRulerLane.get(lang)],
-        }
-    );
+    ({
+        name: "indenet:error",
+        base: hslaCache.get(spaceErrorColor.get(lang)),
+        hue: 0,
+        alpha: spacesErrorAlpha.get(lang),
+        overviewRulerLane: laneObject[indentErrorInOverviewRulerLane.get(lang)],
+    });
     const makeTrailingSpacesErrorDecorationParam = (lang: string): DecorationParam =>
-    (
-        {
-            name: "trailing-spaces",
-            base: hslaCache.get(spaceErrorColor.get(lang)),
-            hue: 0,
-            alpha: spacesErrorAlpha.get(lang),
-            overviewRulerLane: laneObject[trailingSpacesErrorInOverviewRulerLane.get(lang)],
-        }
-    );
+    ({
+        name: "trailing-spaces",
+        base: hslaCache.get(spaceErrorColor.get(lang)),
+        hue: 0,
+        alpha: spacesErrorAlpha.get(lang),
+        overviewRulerLane: laneObject[trailingSpacesErrorInOverviewRulerLane.get(lang)],
+    });
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
 
     export const initialize = (context: vscode.ExtensionContext): void =>
@@ -987,21 +980,19 @@ export module BackgroundPhiColors
                                         .map
                                         (
                                             i =>
-                                            (
-                                                {
-                                                    startPosition: -1,
-                                                    length: -1,
-                                                    decorationParam: makeHueDecoration
-                                                    (
-                                                        `token:${i}`,
-                                                        lang,
-                                                        tokenBaseColor,
-                                                        hash(i),
-                                                        tokenActiveAlpha,
-                                                        laneObject[activeTokenInOverviewRulerLane.get(lang)],
-                                                    )
-                                                }
-                                            )
+                                            ({
+                                                startPosition: -1,
+                                                length: -1,
+                                                decorationParam: makeHueDecoration
+                                                (
+                                                    `token:${i}`,
+                                                    lang,
+                                                    tokenBaseColor,
+                                                    hash(i),
+                                                    tokenActiveAlpha,
+                                                    laneObject[activeTokenInOverviewRulerLane.get(lang)],
+                                                )
+                                            })
                                         )
                                 );
                                 if (showRegular)
@@ -1013,20 +1004,18 @@ export module BackgroundPhiColors
                                             .map
                                             (
                                                 i =>
-                                                (
-                                                    {
-                                                        startPosition: -1,
-                                                        length: -1,
-                                                        decorationParam: makeHueDecoration
-                                                        (
-                                                            `token:${i}`,
-                                                            lang,
-                                                            tokenBaseColor,
-                                                            hash(i),
-                                                            tokenAlpha,
-                                                        )
-                                                    }
-                                                )
+                                                ({
+                                                    startPosition: -1,
+                                                    length: -1,
+                                                    decorationParam: makeHueDecoration
+                                                    (
+                                                        `token:${i}`,
+                                                        lang,
+                                                        tokenBaseColor,
+                                                        hash(i),
+                                                        tokenAlpha,
+                                                    )
+                                                })
                                             )
                                     );
                                 }
@@ -1179,12 +1168,10 @@ export module BackgroundPhiColors
         .map
         (
             match =>
-            (
-                {
-                    index: match.index,
-                    text: match[1]
-                }
-            )
+            ({
+                index: match.index,
+                text: match[1]
+            })
         )
     );
 
@@ -1227,20 +1214,18 @@ export module BackgroundPhiColors
                         if (undefined !== previousEditorDecorationCache.indentIndex)
                         {
                             result.push
-                            (
-                                {
-                                    startPosition: -1,
-                                    length: -1,
-                                    decorationParam: makeHueDecoration
-                                    (
-                                        `indent:${previousEditorDecorationCache.indentIndex}`,
-                                        lang,
-                                        spaceBaseColor,
-                                        previousEditorDecorationCache.indentIndex,
-                                        spacesActiveAlpha
-                                    )
-                                }
-                            );
+                            ({
+                                startPosition: -1,
+                                length: -1,
+                                decorationParam: makeHueDecoration
+                                (
+                                    `indent:${previousEditorDecorationCache.indentIndex}`,
+                                    lang,
+                                    spaceBaseColor,
+                                    previousEditorDecorationCache.indentIndex,
+                                    spacesActiveAlpha
+                                )
+                            });
                         }
                         if (undefined !== currentEditorDecorationCache.indentIndex && currentDocumentDecorationCache.indentLevelMap[currentEditorDecorationCache.indentIndex])
                         {
@@ -1265,20 +1250,18 @@ export module BackgroundPhiColors
                             if (undefined !== currentEditorDecorationCache.indentIndex)
                             {
                                 result.push
-                                (
-                                    {
-                                        startPosition: -1,
-                                        length: -1,
-                                        decorationParam: makeHueDecoration
-                                        (
-                                            `indent:${currentEditorDecorationCache.indentIndex}`,
-                                            lang,
-                                            spaceBaseColor,
-                                            currentEditorDecorationCache.indentIndex,
-                                            spacesAlpha
-                                        )
-                                    }
-                                );
+                                ({
+                                    startPosition: -1,
+                                    length: -1,
+                                    decorationParam: makeHueDecoration
+                                    (
+                                        `indent:${currentEditorDecorationCache.indentIndex}`,
+                                        lang,
+                                        spaceBaseColor,
+                                        currentEditorDecorationCache.indentIndex,
+                                        spacesAlpha
+                                    )
+                                });
                             }
                         }
                     }
@@ -1292,13 +1275,11 @@ export module BackgroundPhiColors
                         {
                             const showIndentError = indentErrorEnabled.get(lang);
                             const addErrorIndentDecoration = (cursor: number, length: number, indent: number): DecorationEntry =>
-                            (
-                                {
-                                    startPosition: cursor,
-                                    length,
-                                    decorationParam: makeIndentErrorDecorationParam(lang)
-                                }
-                            );
+                            ({
+                                startPosition: cursor,
+                                length,
+                                decorationParam: makeIndentErrorDecorationParam(lang)
+                            });
                             const addIndentLevelMap = (cursor: number, length: number, indent: number) =>
                             {
                                 if (undefined === currentDocumentDecorationCache.indentLevelMap[indent])
@@ -1422,43 +1403,39 @@ export module BackgroundPhiColors
                 if (undefined !== currentEditorDecorationCache.line && undefined !== currentEditorDecorationCache.indentIndex)
                 {
                     result.push
-                    (
-                        {
-                            range: currentEditorDecorationCache.line.range,
-                            startPosition: 0,
-                            length: 0,
-                            decorationParam: makeHueDecoration
-                            (
-                                `line`,
-                                lang,
-                                spaceBaseColor,
-                                currentEditorDecorationCache.indentIndex,
-                                spacesActiveAlpha,
-                                undefined,
-                                true
-                            )
-                        }
-                    );
+                    ({
+                        range: currentEditorDecorationCache.line.range,
+                        startPosition: 0,
+                        length: 0,
+                        decorationParam: makeHueDecoration
+                        (
+                            `line`,
+                            lang,
+                            spaceBaseColor,
+                            currentEditorDecorationCache.indentIndex,
+                            spacesActiveAlpha,
+                            undefined,
+                            true
+                        )
+                    });
                 }
                 if (previousEditorDecorationCache && currentEditorDecorationCache.indentIndex !== previousEditorDecorationCache.indentIndex && undefined !== previousEditorDecorationCache.indentIndex)
                 {
                     result.push
-                    (
-                        {
-                            startPosition: -1,
-                            length: -1,
-                            decorationParam: makeHueDecoration
-                            (
-                                `line`,
-                                lang,
-                                spaceBaseColor,
-                                previousEditorDecorationCache.indentIndex,
-                                spacesActiveAlpha,
-                                undefined,
-                                true
-                            )
-                        }
-                    );
+                    ({
+                        startPosition: -1,
+                        length: -1,
+                        decorationParam: makeHueDecoration
+                        (
+                            `line`,
+                            lang,
+                            spaceBaseColor,
+                            previousEditorDecorationCache.indentIndex,
+                            spacesActiveAlpha,
+                            undefined,
+                            true
+                        )
+                    });
                 }
             }
             return result;
@@ -1502,68 +1479,64 @@ export module BackgroundPhiColors
         .map
         (
             match =>
-            (
-                {
-                    index: match.index,
-                    token: match[0],
-                    specificColor: symbolColorMap.get(match[0])
-                }
-            )
+            ({
+                index: match.index,
+                token: match[0],
+                specificColor: symbolColorMap.get(match[0])
+            })
         )
         .filter(i => null !== i.specificColor)
         .map
         (
             i =>
-            (
-                {
-                    startPosition: i.index,
-                    length: i.token.length,
-                    decorationParam: makeHueDecoration
+            ({
+                startPosition: i.index,
+                length: i.token.length,
+                decorationParam: makeHueDecoration
+                (
+                    "symbols",
+                    lang,
+                    symbolBaseColor,
+                    i.specificColor ||
                     (
-                        "symbols",
-                        lang,
-                        symbolBaseColor,
-                        i.specificColor ||
-                        (
-                            <{ [key: string]: number }>
-                            {
-                                "!": 1,
-                                ".": 2,
-                                ",": 3,
-                                ":": 4,
-                                ";": 5,
-                                "(": 6,
-                                ")": 6,
-                                "[": 7,
-                                "]": 7,
-                                "{": 8,
-                                "}": 8,
-                                "<": 9,
-                                ">": 9,
-                                "\"": 10,
-                                "\'": 11,
-                                "\`": 12,
-                                "\#": 13,
-                                "\$": 14,
-                                "\%": 15,
-                                "\&": 16,
-                                "\=": 17,
-                                "\-": 18,
-                                "\+": 19,
-                                "\*": 20,
-                                "\@": 21,
-                                "\\": 22,
-                                "\/": 23,
-                                "\|": 24,
-                                "\?": 25,
-                                "\^": 26,
-                                "\~": 27,
-                            }
-                        )[i.token],
-                        symbolAlpha
-                    )
-                }
-            )
+                        <{ [key: string]: number }>
+                        {
+                            "!": 1,
+                            ".": 2,
+                            ",": 3,
+                            ":": 4,
+                            ";": 5,
+                            "(": 6,
+                            ")": 6,
+                            "[": 7,
+                            "]": 7,
+                            "{": 8,
+                            "}": 8,
+                            "<": 9,
+                            ">": 9,
+                            "\"": 10,
+                            "\'": 11,
+                            "\`": 12,
+                            "\#": 13,
+                            "\$": 14,
+                            "\%": 15,
+                            "\&": 16,
+                            "\=": 17,
+                            "\-": 18,
+                            "\+": 19,
+                            "\*": 20,
+                            "\@": 21,
+                            "\\": 22,
+                            "\/": 23,
+                            "\|": 24,
+                            "\?": 25,
+                            "\^": 26,
+                            "\~": 27,
+                        }
+                    )[i.token],
+                    symbolAlpha
+                )
+            })
         )
     );
     export const hash = (source: string): number =>
@@ -1598,34 +1571,30 @@ export module BackgroundPhiColors
         .map
         (
             match =>
-            (
-                {
-                    index: match.index,
-                    token: match[0],
-                    isActive: 0 <= strongTokens.indexOf(match[0]),
-                    specificColor: tokenColorMap.get(match[0])
-                }
-            )
+            ({
+                index: match.index,
+                token: match[0],
+                isActive: 0 <= strongTokens.indexOf(match[0]),
+                specificColor: tokenColorMap.get(match[0])
+            })
         )
         .filter(i => (showRegular || i.isActive) && null !== i.specificColor)
         .map
         (
             i =>
-            (
-                {
-                    startPosition: i.index,
-                    length: i.token.length,
-                    decorationParam: makeHueDecoration
-                    (
-                        `token:${i.token}`,
-                        lang,
-                        tokenBaseColor,
-                        i.specificColor || hash(i.token),
-                        i.isActive ? tokenActiveAlpha: tokenAlpha,
-                        i.isActive ? laneObject[activeTokenInOverviewRulerLane.get(lang)]: undefined,
-                    )
-                }
-            )
+            ({
+                startPosition: i.index,
+                length: i.token.length,
+                decorationParam: makeHueDecoration
+                (
+                    `token:${i.token}`,
+                    lang,
+                    tokenBaseColor,
+                    i.specificColor || hash(i.token),
+                    i.isActive ? tokenActiveAlpha: tokenAlpha,
+                    i.isActive ? laneObject[activeTokenInOverviewRulerLane.get(lang)]: undefined,
+                )
+            })
         )
     );
     export const updateBodySpacesDecoration =
@@ -1652,24 +1621,22 @@ export module BackgroundPhiColors
             .map
             (
                 match =>
-                (
-                    {
-                        startPosition: prematch.index +prematch[1].length +prematch[2].length +match.index,
-                        length: match[0].length,
-                        decorationParam: makeHueDecoration
-                        (
-                            "body-spaces",
-                            lang,
-                            spaceBaseColor,
-                            match[0].startsWith("\t") ?
-                                //  tabs
-                                ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
-                                //  spaces
-                                match[0].length -1,
-                            spacesActiveAlpha
-                        )
-                    }
-                )
+                ({
+                    startPosition: prematch.index +prematch[1].length +prematch[2].length +match.index,
+                    length: match[0].length,
+                    decorationParam: makeHueDecoration
+                    (
+                        "body-spaces",
+                        lang,
+                        spaceBaseColor,
+                        match[0].startsWith("\t") ?
+                            //  tabs
+                            ((match[0].length *tabSize) -((prematch[1].length +prematch[2].length +match.index) %tabSize)) -1:
+                            //  spaces
+                            match[0].length -1,
+                        spacesActiveAlpha
+                    )
+                })
             )
         )
         .reduce((a, b) => a.concat(b), [])
@@ -1692,22 +1659,20 @@ export module BackgroundPhiColors
         .map
         (
             match =>
-            (
-                {
-                    startPosition: match.index +match[1].length,
-                    length: match[2].length,
-                    decorationParam: showError ?
-                        makeTrailingSpacesErrorDecorationParam(lang):
-                        makeHueDecoration
-                        (
-                            "trailing-spaces",
-                            lang,
-                            spaceBaseColor,
-                            match[2].length,
-                            spacesAlpha
-                        )
-                }
-            )
+            ({
+                startPosition: match.index +match[1].length,
+                length: match[2].length,
+                decorationParam: showError ?
+                    makeTrailingSpacesErrorDecorationParam(lang):
+                    makeHueDecoration
+                    (
+                        "trailing-spaces",
+                        lang,
+                        spaceBaseColor,
+                        match[2].length,
+                        spacesAlpha
+                    )
+            })
         )
     );
 
@@ -1717,14 +1682,12 @@ export module BackgroundPhiColors
         overviewRulerLane?: vscode.OverviewRulerLane,
         isWholeLine?: boolean
     ) => vscode.window.createTextEditorDecorationType
-    (
-        {
-            backgroundColor: backgroundColor,
-            overviewRulerColor: undefined !== overviewRulerLane ? backgroundColor: undefined,
-            overviewRulerLane: overviewRulerLane,
-            isWholeLine,
-        }
-    );
+    ({
+        backgroundColor: backgroundColor,
+        overviewRulerColor: undefined !== overviewRulerLane ? backgroundColor: undefined,
+        overviewRulerLane: overviewRulerLane,
+        isWholeLine,
+    });
 }
 
 export function activate(context: vscode.ExtensionContext): void
