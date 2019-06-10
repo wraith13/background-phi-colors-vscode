@@ -4,6 +4,12 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.0.1 - 2019-06-10
+
+### Fixed
+
+- Fixed an issue that [WS-2018-0588](https://github.com/unshiftio/querystringify/pull/19).
+
 ## 1.0.0 - 2019-05-05
 
 ### Added
