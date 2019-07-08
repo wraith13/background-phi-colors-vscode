@@ -4,6 +4,22 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 2.0.0 - 2019-07-09
+
+### Added
+
+- `backgroundPhiColors.enabledProfile` setting.
+- `backgroundPhiColors.reportProfile` command.
+
+### Changed
+
+- Improved profile report.
+
+### Removed
+
+- `backgroundPhiColors.startProfile` command.
+- `backgroundPhiColors.stopProfile` command.
+
 ## 1.0.1 - 2019-06-10
 
 ### Fixed

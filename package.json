@@ -75,13 +75,8 @@
                 "category": "Background Phi Colors"
             },
             {
-                "command": "backgroundPhiColors.startProfile",
-                "title": "%backgroundPhiColors.startProfile.title%",
-                "category": "Background Phi Colors"
-            },
-            {
-                "command": "backgroundPhiColors.stopProfile",
-                "title": "%backgroundPhiColors.stopProfile.title%",
+                "command": "backgroundPhiColors.reportProfile",
+                "title": "%backgroundPhiColors.reportProfile.title%",
                 "category": "Background Phi Colors"
             }
         ],
@@ -351,6 +346,12 @@
                         ],
                         "overridable": true,
                         "description": "%backgroundPhiColors.indent.description%"
+                    },
+                    "backgroundPhiColors.enabledProfile": {
+                        "type": "boolean",
+                        "default": true,
+                        "overridable": false,
+                        "description": "%backgroundPhiColors.enabledProfile.description%"
                     }
                 }
             }

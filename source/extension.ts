@@ -27,6 +27,8 @@ export module Profiler
     let profileScore: { [scope: string]: number } = { };
     let entryStack: ProfileEntry[] = [ ];
     let isProfiling = false;
+    let startAt = 0;
+    let endAt = 0;
     
     export class ProfileEntry
     {
@@ -92,11 +94,14 @@ export module Profiler
         isProfiling = true;
         profileScore = { };
         entryStack = [ ];
+        startAt = getTicks();
     };
     export const stop = () =>
     {
         isProfiling = false;
+        endAt = getTicks();
     };
+    export const getOverall = () => (isProfiling ? getTicks(): endAt) - startAt;
     export const getReport = () =>
         Object.keys(profileScore)
             .map
@@ -272,6 +277,7 @@ export module BackgroundPhiColors
     const tokenAlpha =new Config("tokenAlpha", 0x33, undefined, 0x00, 0xFF);
     const tokenActiveAlpha =new Config("tokenActiveAlpha", 0x66, undefined, 0x00, 0xFF);
     const indentConfig =new Config<keyof typeof indentObject>("indent", "auto", makeEnumValidator(Object.keys(indentObject)));
+    const enabledProfile = new Config("enabledProfile", true);
 
     const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
@@ -427,6 +433,31 @@ export module BackgroundPhiColors
                     }
                 }
             ),
+            vscode.commands.registerCommand
+            (
+                `${applicationKey}.reportProfile`, () =>
+                {
+                    const outputChannel = getProfilerOutputChannel();
+                    outputChannel.show();
+                    if (Profiler.getIsProfiling())
+                    {
+                        outputChannel.appendLine(`${localeString("📊 Profile Report")} - ${new Date()}`);
+                        const overall = Profiler.getOverall();
+                        const total = Profiler.getReport().map(i => i.ticks).reduce((p, c) => p +c);
+                        outputChannel.appendLine(localeString("⚖ Overview"));
+                        outputChannel.appendLine(`- Overall: ${overall.toLocaleString()}ms ( ${percentToDisplayString(1)} )`);
+                        outputChannel.appendLine(`- Busy: ${total.toLocaleString()}ms ( ${percentToDisplayString(total / overall)} )`);
+                        outputChannel.appendLine(localeString("🔬 Busy Details"));
+                        outputChannel.appendLine(`- Total: ${total.toLocaleString()}ms ( ${percentToDisplayString(1)} )`);
+                        Profiler.getReport().forEach(i => outputChannel.appendLine(`- ${i.name}: ${i.ticks.toLocaleString()}ms ( ${percentToDisplayString(i.ticks / total)} )`));
+                        outputChannel.appendLine("");
+                    }
+                    else
+                    {
+                        outputChannel.appendLine(localeString("🚫 Profile has not been started."));
+                    }
+                }
+            ),
 
             //  イベントリスナーの登録
             vscode.workspace.onDidChangeConfiguration(() => onDidChangeConfiguration()),
@@ -437,7 +468,23 @@ export module BackgroundPhiColors
             vscode.window.onDidChangeTextEditorSelection(() => onDidChangeTextEditorSelection()),
         );
 
+        startOrStopProfile();
         updateAllDecoration();
+    };
+
+    const startOrStopProfile = () =>
+    {
+        if (Profiler.getIsProfiling() !== enabledProfile.get(""))
+        {
+            if (enabledProfile.get(""))
+            {
+                Profiler.start();
+            }
+            else
+            {
+                Profiler.stop();
+            }
+        }
     };
 
     const valueThen = <valueT>(value: valueT | undefined, f: (value: valueT) => void) =>
@@ -677,6 +724,7 @@ export module BackgroundPhiColors
             tokenAlpha,
             tokenActiveAlpha,
             indentConfig,
+            enabledProfile,
         ]
         .forEach(i => i.clear());
 
@@ -686,6 +734,7 @@ export module BackgroundPhiColors
         decorations = { };
         clearAllDecorationCache();
 
+        startOrStopProfile();
         updateAllDecoration();
     };
 

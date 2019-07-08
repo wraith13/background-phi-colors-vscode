@@ -84,8 +84,7 @@ Launch Command Palette(Mac:<kbd>F1</kbd> or <kbd>Shift</kbd>+<kbd>Command</kbd>+
 * `Background Phi Colors: Toggle Pause` : keeps the current highlighting of the focused text editor even as you move the cursor. Execute this command again not to keep.
 * `Background Phi Colors: Toggle Pause All` : keeps the current highlighting of all text editors as you move the cursor. Execute this command again not to keep.
 * `Background Phi Colors: Over the Limit` : forces it to work if this extension stopped by the file size limit. ⚠ Keep in mind that VS Code may become extremely heavy depending on the machine performance and text files. If it gets too heavy, please quit or kill VS Code once.
-* `Background Phi Colors: Start Profile` : starts a self profile.
-* `Background Phi Colors: Stop Profile` : stops a self profile, and report a profile.
+* `Background Phi Colors: Report Profile` : report a profile.
 
 ## Extension Settings
 
@@ -122,6 +121,7 @@ This extension contributes the following settings by [`settings.json`](https://c
 * `backgroundPhiColors.tokenAlpha`: tokens background color opacity. ( 0 - 255)
 * `backgroundPhiColors.tokenActiveAlpha`: active tokens background color opacity. ( 0 - 255)
 * `backgroundPhiColors.indent`: indent unit.
+* `backgroundPhiColors.enabledProfile`: enables that self-profiler.
 
 ### setting example
 
@@ -158,8 +158,7 @@ Command name on `keybindings.json` is diffarent from on Command Pallete. See bel
 |`Background Phi Colors: Toggle Pause`|`backgroundPhiColors.togglePause`|
 |`Background Phi Colors: Toggle Pause All`|`backgroundPhiColors.togglePauseAll`|
 |`Background Phi Colors: Over the Limit`|`backgroundPhiColors.overTheLimig`|
-|`Background Phi Colors: Start Profile`|`backgroundPhiColors.startProfile`|
-|`Background Phi Colors: Stop Profile`|`backgroundPhiColors.stopProfile`|
+|`Background Phi Colors: Report Profile`|`backgroundPhiColors.reportProfile`|
 
 ## Release Notes
 
