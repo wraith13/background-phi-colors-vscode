@@ -373,6 +373,6 @@
         "querystringify": "=2.0.0"
     },
     "dependencies": {
-        "phi-colors": "^1.0.0"
+        "phi-colors": "^1.0.1"
     }
 }
