@@ -221,30 +221,26 @@ export module BackgroundPhiColors
     const tokenModeObject = Object.freeze ({ "none": null, "light": null, "smart": null, "full": null, });
     const activeScopeObject = Object.freeze ({ "editor": null, "document": null, "window": null, });
     const laneObject = Object.freeze
-    (
-        {
-            "none": undefined,
-            "left": vscode.OverviewRulerLane.Left,
-            "center": vscode.OverviewRulerLane.Center,
-            "right": vscode.OverviewRulerLane.Right,
-            "full": vscode.OverviewRulerLane.Full,
-        }
-    );
+    ({
+        "none": undefined,
+        "left": vscode.OverviewRulerLane.Left,
+        "center": vscode.OverviewRulerLane.Center,
+        "right": vscode.OverviewRulerLane.Right,
+        "full": vscode.OverviewRulerLane.Full,
+    });
     const indentObject = Object.freeze
-    (
-        {
-            "auto": null,
-            "tab": "\t",
-            "1 space": " ",
-            "2 spaces": "  ",
-            "3 spaces": "   ",
-            "4 spaces": "    ",
-            "5 spaces": "     ",
-            "6 spaces": "      ",
-            "7 spaces": "       ",
-            "8 spaces": "        ",
-        }
-    );
+    ({
+        "auto": null,
+        "tab": "\t",
+        "1 space": " ",
+        "2 spaces": "  ",
+        "3 spaces": "   ",
+        "4 spaces": "    ",
+        "5 spaces": "     ",
+        "6 spaces": "      ",
+        "7 spaces": "       ",
+        "8 spaces": "        ",
+    });
 
     const enabled = new Config("enabled", true);
     const enabledPanels = new Config("enabledPanels", false);
