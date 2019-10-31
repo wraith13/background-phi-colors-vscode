@@ -243,10 +243,10 @@ export module BackgroundPhiColors
     });
     const showOverTheLimitMessageModeObject = Object.freeze
     ({
-        "none": null,
-        "until 16x": null,
-        "until 256x": null,
-        "always": null,
+        "none": (rate: number) => false,
+        "until 16x": (rate: number) => rate <= 16,
+        "until 256x": (rate: number) => rate <= 256,
+        "always": (rate: number) => true,
     });
 
     const enabled = new Config("enabled", true);
@@ -1117,7 +1117,11 @@ export module BackgroundPhiColors
                 {
                     clearDecorationCache(textEditor.document);
 
-                    if (!isLimitNoticed[textEditor.document.fileName])
+                    if
+                    (
+                        showOverTheLimitMessageModeObject[showOverTheLimitMessageMode.get(lang)](text.length / Math.min(fileSizeLimit.get(lang), 1024)) && // ここの Math.min は基本的に要らないんだけど、万が一にも fileSizeLimit が 0 になってゼロ除算を発生させない為の保険
+                        !isLimitNoticed[textEditor.document.fileName]
+                    )
                     {
                         isLimitNoticed[textEditor.document.fileName] = true;
                         vscode.window.showWarningMessage
