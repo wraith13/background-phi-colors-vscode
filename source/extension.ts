@@ -241,6 +241,13 @@ export module BackgroundPhiColors
         "7 spaces": "       ",
         "8 spaces": "        ",
     });
+    const showOverTheLimitMessageModeObject = Object.freeze
+    ({
+        "none": null,
+        "until 16x": null,
+        "until 256x": null,
+        "always": null,
+    });
 
     const enabled = new Config("enabled", true);
     const enabledPanels = new Config("enabledPanels", false);
@@ -274,6 +281,7 @@ export module BackgroundPhiColors
     const tokenActiveAlpha =new Config("tokenActiveAlpha", 0x66, undefined, 0x00, 0xFF);
     const indentConfig =new Config<keyof typeof indentObject>("indent", "auto", makeEnumValidator(Object.keys(indentObject)));
     const enabledProfile = new Config("enabledProfile", true);
+    const showOverTheLimitMessageMode = new Config<keyof typeof showOverTheLimitMessageModeObject>("showOverTheLimitMessageMode", "until 256x", makeEnumValidator(Object.keys(showOverTheLimitMessageModeObject)));
 
     const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
@@ -721,6 +729,7 @@ export module BackgroundPhiColors
             tokenActiveAlpha,
             indentConfig,
             enabledProfile,
+            showOverTheLimitMessageMode,
         ]
         .forEach(i => i.clear());
 
