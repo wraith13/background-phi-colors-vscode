@@ -352,6 +352,18 @@
                         "default": true,
                         "overridable": false,
                         "description": "%backgroundPhiColors.enabledProfile.description%"
+                    },
+                    "backgroundPhiColors.showOverTheLimitMessageMode": {
+                        "type": "string",
+                        "default": "until 256x",
+                        "enum": [
+                            "none",
+                            "until 16x",
+                            "until 256x",
+                            "always"
+                        ],
+                        "overridable": true,
+                        "description": "%backgroundPhiColors.showOverTheLimitMessageMode.description%"
                     }
                 }
             }
