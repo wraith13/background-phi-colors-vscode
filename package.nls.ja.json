@@ -40,6 +40,7 @@
     "backgroundPhiColors.tokenActiveAlpha.description": "アクティブなトークンの背景色の不透明度。( 0 - 255)",
     "backgroundPhiColors.indent.description": "インデント単位",
     "backgroundPhiColors.enabledProfile.description": "自己プロファイラを有効にする。",
+    "backgroundPhiColors.showOverTheLimitMessageMode.description": "`none`: 常にメッセージを非表示, `until 16x`: 制限サイズの16倍までメッセージを表示, `until 256x`: 制限サイズの16倍までメッセージを表示, `always`: 常にメッセージを表示",
     "📊 Profile Report": "📊 プロファイル報告",
     "⚖ Overview": "⚖ 概要",
     "🔬 Busy Details": "🔬 Busy 内訳",
