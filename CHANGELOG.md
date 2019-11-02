@@ -4,7 +4,11 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## 2.0.1 - 20??-??-??
+## 2.1.0 - 2019-11-??
+
+### Added
+
+- `backgroundPhiColors.overTheLimitMessageShowMode` setting.
 
 ### Changed
 

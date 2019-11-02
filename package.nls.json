@@ -40,7 +40,7 @@
     "backgroundPhiColors.tokenActiveAlpha.description": "Active tokens background color opacity. ( 0 - 255)",
     "backgroundPhiColors.indent.description": "Indent unit.",
     "backgroundPhiColors.enabledProfile.description": "Enables that self-profiler.",
-    "backgroundPhiColors.showOverTheLimitMessageMode.description": "`none`: never show, `until 16x`: show message until 16 times the limit size, `until 256x`: show message until 256 times the limit size, `always`: always show message",
+    "backgroundPhiColors.overTheLimitMessageShowMode.description": "Over the limit message show mode. `none`: never show message, `until 16x`: show message until 16 times the limit size, `until 256x`: show message until 256 times the limit size, `always`: always show message",
     "📊 Profile Report": "📊 Profile Report",
     "⚖ Overview": "⚖ Overview",
     "🔬 Busy Details": "🔬 Busy Details",

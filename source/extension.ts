@@ -241,7 +241,7 @@ export module BackgroundPhiColors
         "7 spaces": "       ",
         "8 spaces": "        ",
     });
-    const showOverTheLimitMessageModeObject = Object.freeze
+    const overTheLimitMessageShowModeObject = Object.freeze
     ({
         "none": (rate: number) => false,
         "until 16x": (rate: number) => rate <= 16,
@@ -281,7 +281,7 @@ export module BackgroundPhiColors
     const tokenActiveAlpha =new Config("tokenActiveAlpha", 0x66, undefined, 0x00, 0xFF);
     const indentConfig =new Config<keyof typeof indentObject>("indent", "auto", makeEnumValidator(Object.keys(indentObject)));
     const enabledProfile = new Config("enabledProfile", true);
-    const showOverTheLimitMessageMode = new Config<keyof typeof showOverTheLimitMessageModeObject>("showOverTheLimitMessageMode", "until 256x", makeEnumValidator(Object.keys(showOverTheLimitMessageModeObject)));
+    const overTheLimitMessageShowMode = new Config<keyof typeof overTheLimitMessageShowModeObject>("overTheLimitMessageShowMode", "until 256x", makeEnumValidator(Object.keys(overTheLimitMessageShowModeObject)));
 
     const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
@@ -729,7 +729,7 @@ export module BackgroundPhiColors
             tokenActiveAlpha,
             indentConfig,
             enabledProfile,
-            showOverTheLimitMessageMode,
+            overTheLimitMessageShowMode,
         ]
         .forEach(i => i.clear());
 
@@ -1119,7 +1119,7 @@ export module BackgroundPhiColors
 
                     if
                     (
-                        showOverTheLimitMessageModeObject[showOverTheLimitMessageMode.get(lang)](text.length / Math.min(fileSizeLimit.get(lang), 1024)) && // ここの Math.min は基本的に要らないんだけど、万が一にも fileSizeLimit が 0 になってゼロ除算を発生させない為の保険
+                        overTheLimitMessageShowModeObject[overTheLimitMessageShowMode.get(lang)](text.length / Math.min(fileSizeLimit.get(lang), 1024)) && // ここの Math.min は基本的に要らないんだけど、万が一にも fileSizeLimit が 0 になってゼロ除算を発生させない為の保険
                         !isLimitNoticed[textEditor.document.fileName]
                     )
                     {

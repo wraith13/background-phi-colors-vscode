@@ -122,6 +122,7 @@ This extension contributes the following settings by [`settings.json`](https://c
 * `backgroundPhiColors.tokenActiveAlpha`: active tokens background color opacity. ( 0 - 255)
 * `backgroundPhiColors.indent`: indent unit.
 * `backgroundPhiColors.enabledProfile`: enables that self-profiler.
+* `backgroundPhiColors.overTheLimitMessageShowMode.description`: over the limit message mode. `none`: never show message, `until 16x`: show message until 16 times the limit size, `until 256x`: show message until 256 times the limit size, `always`: always show message,
 
 ### setting example
 

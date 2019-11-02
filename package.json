@@ -353,7 +353,7 @@
                         "overridable": false,
                         "description": "%backgroundPhiColors.enabledProfile.description%"
                     },
-                    "backgroundPhiColors.showOverTheLimitMessageMode": {
+                    "backgroundPhiColors.overTheLimitMessageShowMode": {
                         "type": "string",
                         "default": "until 256x",
                         "enum": [
@@ -363,7 +363,7 @@
                             "always"
                         ],
                         "overridable": true,
-                        "description": "%backgroundPhiColors.showOverTheLimitMessageMode.description%"
+                        "description": "%backgroundPhiColors.overTheLimitMessageShowMode.description%"
                     }
                 }
             }
