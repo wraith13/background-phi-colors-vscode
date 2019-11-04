@@ -153,7 +153,7 @@ export module BackgroundPhiColors
             {
                 // settings.json をテキストとして直接編集してる時はともかく GUI での編集時に無駄にエラー表示が行われてしまうので、エンドユーザーに対するエラー表示は行わない。
                 //vscode.window.showErrorMessage(`${rawKey} setting value is invalid! Please check your settings.`);
-                console.error(`${rawKey} setting value is invalid! Please check your settings.`);
+                console.error(`"${rawKey}" setting value(${JSON.stringify(value)}) is invalid! Please check your settings.`);
                 result = this.defaultValue;
             }
             else
@@ -208,6 +208,21 @@ export module BackgroundPhiColors
         public get = this.cache.get;
         public clear = this.cache.clear;
     }
+    class ConfigMap<valueT, mapObjectT extends { [key: string]: valueT }>
+    {
+        public constructor
+        (
+            public name: string,
+            public defaultValue: keyof mapObjectT,
+            public mapObject: mapObjectT
+        )
+        {
+        }
+
+        config = new Config<keyof mapObjectT>(this.name, this.defaultValue, (value: string) =>0 <= Object.keys(this.mapObject).indexOf(value));
+        public get = (key: string) => this.mapObject[this.config.cache.get(key)];
+        public clear = this.config.cache.clear;
+    }
     
     const colorValidator = (value: string): boolean => /^#[0-9A-Fa-f]{6}$/.test(value);
     const colorOrNullValidator = (value: string | null): boolean => null === value || colorValidator(value);
@@ -215,7 +230,7 @@ export module BackgroundPhiColors
         undefined !== value &&
         null !== value &&
         !Object.keys(value).some(key => !colorOrNullValidator(value[key]));
-    const makeEnumValidator = (valueList: string[]): (value: string) => boolean => (value: string): boolean => 0 <= valueList.indexOf(value);
+    const makeEnumValidator = <ObjectT>(mapObject: ObjectT): (value: string) => boolean => (value: string): boolean => 0 <= Object.keys(mapObject).indexOf(value);
 
     const indentModeObject = Object.freeze({ "none": null, "light": null, "smart": null, "full": null, });
     const tokenModeObject = Object.freeze ({ "none": null, "light": null, "smart": null, "full": null, });
@@ -261,27 +276,27 @@ export module BackgroundPhiColors
     const symbolColorMap = new Config("symbolColorMap", <{[key: string]: string}>{}, colorMapValidator);
     const tokenBaseColor = new Config("tokenBaseColor", <string | null>null, colorOrNullValidator);
     const tokenColorMap = new Config("tokenColorMap", <{[key: string]: string}>{}, colorMapValidator);
-    const indentMode = new Config<keyof typeof indentModeObject>("indentMode", "full", makeEnumValidator(Object.keys(indentModeObject)));
+    const indentMode = new Config<keyof typeof indentModeObject>("indentMode", "full", makeEnumValidator(indentModeObject));
     const lineEnabled = new Config("lineEnabled", true);
-    const tokenMode = new Config<keyof typeof tokenModeObject>("tokenMode", "smart", makeEnumValidator(Object.keys(tokenModeObject)));
-    const activeScope = new Config<keyof typeof activeScopeObject>("activeScope", "window", makeEnumValidator(Object.keys(activeScopeObject)));
+    const tokenMode = new Config<keyof typeof tokenModeObject>("tokenMode", "smart", makeEnumValidator(tokenModeObject));
+    const activeScope = new Config<keyof typeof activeScopeObject>("activeScope", "window", makeEnumValidator(activeScopeObject));
     const indentErrorEnabled = new Config("indentErrorEnabled", true);
     const trailingSpacesErrorEnabled = new Config("trailingSpacesErrorEnabled", true);
     const bodySpacesEnabled = new Config("bodySpacesEnabled", true);
     const trailingSpacesEnabled = new Config("trailingSpacesEnabled", true);
     const symbolEnabled = new Config("symbolEnabled", false);
-    const indentErrorInOverviewRulerLane = new Config<keyof typeof laneObject>("indentErrorInOverviewRulerLane", "left", makeEnumValidator(Object.keys(laneObject)));
-    const activeTokenInOverviewRulerLane = new Config<keyof typeof laneObject>("activeTokenInOverviewRulerLane", "center", makeEnumValidator(Object.keys(laneObject)));
-    const trailingSpacesErrorInOverviewRulerLane = new Config<keyof typeof laneObject>("trailingSpacesErrorInOverviewRulerLane", "right", makeEnumValidator(Object.keys(laneObject)));
-    const spacesAlpha =new Config("spacesAlpha", 0x11, undefined, 0x00, 0xFF);
-    const spacesActiveAlpha =new Config("spacesActiveAlpha", 0x33, undefined, 0x00, 0xFF);
-    const spacesErrorAlpha =new Config("spacesErrorAlpha", 0x88, undefined, 0x00, 0xFF);
-    const symbolAlpha =new Config("symbolAlpha", 0x44, undefined, 0x00, 0xFF);
-    const tokenAlpha =new Config("tokenAlpha", 0x33, undefined, 0x00, 0xFF);
-    const tokenActiveAlpha =new Config("tokenActiveAlpha", 0x66, undefined, 0x00, 0xFF);
-    const indentConfig =new Config<keyof typeof indentObject>("indent", "auto", makeEnumValidator(Object.keys(indentObject)));
+    const indentErrorInOverviewRulerLane = new ConfigMap("indentErrorInOverviewRulerLane", "left", laneObject);
+    const activeTokenInOverviewRulerLane = new ConfigMap("activeTokenInOverviewRulerLane", "center", laneObject);
+    const trailingSpacesErrorInOverviewRulerLane = new ConfigMap("trailingSpacesErrorInOverviewRulerLane", "right", laneObject);
+    const spacesAlpha = new Config("spacesAlpha", 0x11, undefined, 0x00, 0xFF);
+    const spacesActiveAlpha = new Config("spacesActiveAlpha", 0x33, undefined, 0x00, 0xFF);
+    const spacesErrorAlpha = new Config("spacesErrorAlpha", 0x88, undefined, 0x00, 0xFF);
+    const symbolAlpha = new Config("symbolAlpha", 0x44, undefined, 0x00, 0xFF);
+    const tokenAlpha = new Config("tokenAlpha", 0x33, undefined, 0x00, 0xFF);
+    const tokenActiveAlpha = new Config("tokenActiveAlpha", 0x66, undefined, 0x00, 0xFF);
+    const indentConfig = new ConfigMap("indent", "auto", indentObject);
     const enabledProfile = new Config("enabledProfile", true);
-    const overTheLimitMessageShowMode = new Config<keyof typeof overTheLimitMessageShowModeObject>("overTheLimitMessageShowMode", "until 256x", makeEnumValidator(Object.keys(overTheLimitMessageShowModeObject)));
+    const overTheLimitMessageShowMode = new ConfigMap("overTheLimitMessageShowMode", "until 256x", overTheLimitMessageShowModeObject);
 
     const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
@@ -344,7 +359,7 @@ export module BackgroundPhiColors
         base: hslaCache.get(spaceErrorColor.get(lang)),
         hue: 0,
         alpha: spacesErrorAlpha.get(lang),
-        overviewRulerLane: laneObject[indentErrorInOverviewRulerLane.get(lang)],
+        overviewRulerLane: indentErrorInOverviewRulerLane.get(lang),
     });
     const makeTrailingSpacesErrorDecorationParam = (lang: string): DecorationParam =>
     ({
@@ -352,7 +367,7 @@ export module BackgroundPhiColors
         base: hslaCache.get(spaceErrorColor.get(lang)),
         hue: 0,
         alpha: spacesErrorAlpha.get(lang),
-        overviewRulerLane: laneObject[trailingSpacesErrorInOverviewRulerLane.get(lang)],
+        overviewRulerLane: trailingSpacesErrorInOverviewRulerLane.get(lang),
     });
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
 
@@ -568,7 +583,7 @@ export module BackgroundPhiColors
                     {
                         const indentSizeDistribution:{ [key: number]: number } = { };
                         this.indents = getIndents(text);
-                        const indentUnitConfig = indentObject[indentConfig.get(lang)];
+                        const indentUnitConfig = indentConfig.get(lang);
                         if (null === indentUnitConfig)
                         {
                             let totalSpaces = 0;
@@ -1044,7 +1059,7 @@ export module BackgroundPhiColors
                                                     tokenBaseColor,
                                                     hash(i),
                                                     tokenActiveAlpha,
-                                                    laneObject[activeTokenInOverviewRulerLane.get(lang)],
+                                                    activeTokenInOverviewRulerLane.get(lang),
                                                 )
                                             })
                                         )
@@ -1119,7 +1134,7 @@ export module BackgroundPhiColors
 
                     if
                     (
-                        overTheLimitMessageShowModeObject[overTheLimitMessageShowMode.get(lang)](text.length / Math.min(fileSizeLimit.get(lang), 1024)) && // ここの Math.min は基本的に要らないんだけど、万が一にも fileSizeLimit が 0 になってゼロ除算を発生させない為の保険
+                        overTheLimitMessageShowMode.get(lang)(text.length / Math.min(fileSizeLimit.get(lang), 1024)) && // ここの Math.min は基本的に要らないんだけど、万が一にも fileSizeLimit が 0 になってゼロ除算を発生させない為の保険
                         !isLimitNoticed[textEditor.document.fileName]
                     )
                     {
@@ -1650,7 +1665,7 @@ export module BackgroundPhiColors
                     tokenBaseColor,
                     i.specificColor || hash(i.token),
                     i.isActive ? tokenActiveAlpha: tokenAlpha,
-                    i.isActive ? laneObject[activeTokenInOverviewRulerLane.get(lang)]: undefined,
+                    i.isActive ? activeTokenInOverviewRulerLane.get(lang): undefined,
                 )
             })
         )
