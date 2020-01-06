@@ -1,9 +1,7 @@
 import * as vscode from 'vscode';
 import { phiColors } from 'phi-colors';
-
 import localeEn from "../package.nls.json";
 import localeJa from "../package.nls.ja.json";
-
 interface LocaleEntry
 {
     [key : string] : string;
@@ -13,7 +11,6 @@ const localeTable = Object.assign(localeEn, ((<{[key : string] : LocaleEntry}>{
     ja : localeJa
 })[localeTableKey] || { }));
 const localeString = (key : string) : string => localeTable[key] || key;
-
 const getTicks = () => new Date().getTime();
 const roundCenti = (value : number) : number => Math.round(value *100) /100;
 const percentToDisplayString = (value : number, locales?: string | string[]) : string =>`${roundCenti(value).toLocaleString(locales, { style: "percent" })}`;
@@ -21,7 +18,6 @@ const isCompatibleArray = <valueT>(a: valueT[], b:valueT[]) =>
     !a.some(i => b.indexOf(i) < 0) &&
     !b.some(i => a.indexOf(i) < 0);
 const objctToMap = <valueT>(object: {[key:string]: valueT }) => new Map<string, valueT>(Object.keys(object).map(key => [key, object[key]]));
-
 export module Profiler
 {
     let profileScore: { [scope: string]: number } = { };
@@ -29,12 +25,10 @@ export module Profiler
     let isProfiling = false;
     let startAt = 0;
     let endAt = 0;
-    
     export class ProfileEntry
     {
         startTicks: number;
         childrenTicks: number;
-
         public constructor(public name: string)
         {
             this.childrenTicks = 0;
@@ -86,9 +80,7 @@ export module Profiler
             entry.end();
         }
     };
-
     export const getIsProfiling = () => isProfiling;
-
     export const start = () =>
     {
         isProfiling = true;
@@ -114,7 +106,6 @@ export module Profiler
             )
             .sort((a, b) => b.ticks -a.ticks);
 }
-
 export module BackgroundPhiColors
 {
     const applicationKey = "backgroundPhiColors";
@@ -123,9 +114,7 @@ export module BackgroundPhiColors
         cache: { [key: string]: valueT } = { };
         public constructor(public loader: (key: keyT) => valueT)
         {
-
         }
-
         public get = (key: keyT): valueT => this.getCore(key, JSON.stringify(key));
         private getCore = (key: keyT, keyJson: string): valueT => undefined === this.cache[keyJson] ?
             (this.cache[keyJson] = this.loader(key)):
@@ -143,9 +132,7 @@ export module BackgroundPhiColors
             public maxValue?: valueT
         )
         {
-
         }
-
         regulate = (rawKey: string, value: valueT): valueT =>
         {
             let result = value;
@@ -170,7 +157,6 @@ export module BackgroundPhiColors
             }
             return result;
         }
-
         cache = new Cache
         (
             (lang: string): valueT =>
@@ -204,7 +190,6 @@ export module BackgroundPhiColors
                 return result;
             }
         );
-
         public get = this.cache.get;
         public clear = this.cache.clear;
     }
@@ -218,12 +203,10 @@ export module BackgroundPhiColors
         )
         {
         }
-
         config = new Config<keyof mapObjectT>(this.name, this.defaultValue, (value: string) =>0 <= Object.keys(this.mapObject).indexOf(value));
         public get = (key: string) => this.mapObject[this.config.cache.get(key)];
         public clear = this.config.cache.clear;
     }
-    
     const colorValidator = (value: string): boolean => /^#[0-9A-Fa-f]{6}$/.test(value);
     const colorOrNullValidator = (value: string | null): boolean => null === value || colorValidator(value);
     const colorMapValidator = (value: {[key: string]: string}): boolean =>
@@ -231,7 +214,6 @@ export module BackgroundPhiColors
         null !== value &&
         !Object.keys(value).some(key => !colorOrNullValidator(value[key]));
     const makeEnumValidator = <ObjectT>(mapObject: ObjectT): (value: string) => boolean => (value: string): boolean => 0 <= Object.keys(mapObject).indexOf(value);
-
     const indentModeObject = Object.freeze({ "none": null, "light": null, "smart": null, "full": null, });
     const tokenModeObject = Object.freeze ({ "none": null, "light": null, "smart": null, "full": null, });
     const activeScopeObject = Object.freeze ({ "editor": null, "document": null, "window": null, });
@@ -263,7 +245,6 @@ export module BackgroundPhiColors
         "until 256x": (rate: number) => rate <= 256,
         "always": (rate: number) => true,
     });
-
     const enabled = new Config("enabled", true);
     const enabledPanels = new Config("enabledPanels", false);
     const fileSizeLimit = new Config("fileSizeLimit", 100 *1024, undefined, 10 *1024, 10 *1024 *1024);
@@ -297,7 +278,6 @@ export module BackgroundPhiColors
     const indentConfig = new ConfigMap("indent", "auto", indentObject);
     const enabledProfile = new Config("enabledProfile", true);
     const overTheLimitMessageShowMode = new ConfigMap("overTheLimitMessageShowMode", "until 256x", overTheLimitMessageShowModeObject);
-
     const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
     const isLimitNoticed: { [fileName: string]: boolean } = { };
@@ -309,7 +289,6 @@ export module BackgroundPhiColors
         (profilerOutputChannel = vscode.window.createOutputChannel("Background Phi Colors Profiler"));
     let mapCache = new Cache((object: {[key:string]: string }) => object ? objctToMap(object): new Map());
     let lastActiveTextEditor: vscode.TextEditor | undefined = undefined;
-
     interface DecorationParam
     {
         name: string;
@@ -352,7 +331,6 @@ export module BackgroundPhiColors
             isWholeLine,
         }
     );
-
     const makeIndentErrorDecorationParam = (lang: string): DecorationParam =>
     ({
         name: "indenet:error",
@@ -370,7 +348,6 @@ export module BackgroundPhiColors
         overviewRulerLane: trailingSpacesErrorInOverviewRulerLane.get(lang),
     });
     let decorations: { [decorationParamJson: string]: { decorator: vscode.TextEditorDecorationType, rangesOrOptions: vscode.Range[] } } = { };
-
     export const initialize = (context: vscode.ExtensionContext): void =>
     {
         context.subscriptions.push
@@ -477,7 +454,6 @@ export module BackgroundPhiColors
                     }
                 }
             ),
-
             //  イベントリスナーの登録
             vscode.workspace.onDidChangeConfiguration(() => onDidChangeConfiguration()),
             vscode.workspace.onDidChangeWorkspaceFolders(() => onDidChangeWorkspaceFolders()),
@@ -486,11 +462,9 @@ export module BackgroundPhiColors
             vscode.window.onDidChangeActiveTextEditor(() => onDidChangeActiveTextEditor()),
             vscode.window.onDidChangeTextEditorSelection(() => onDidChangeTextEditorSelection()),
         );
-
         startOrStopProfile();
         updateAllDecoration();
     };
-
     const startOrStopProfile = () =>
     {
         if (Profiler.getIsProfiling() !== enabledProfile.get(""))
@@ -505,7 +479,6 @@ export module BackgroundPhiColors
             }
         }
     };
-
     const valueThen = <valueT>(value: valueT | undefined, f: (value: valueT) => void) =>
     {
         if (value)
@@ -514,7 +487,6 @@ export module BackgroundPhiColors
         }
     };
     const activeTextEditor = (f: (textEditor: vscode.TextEditor) => void) => valueThen(vscode.window.activeTextEditor, f);
-
     export const toggleMute = (textEditor: vscode.TextEditor) =>
     {
         const currentEditorDecorationCache = editorDecorationCache.get(textEditor);
@@ -528,7 +500,6 @@ export module BackgroundPhiColors
             delayUpdateDecoration(textEditor);
         }
     };
-
     export const togglePause = (textEditor: vscode.TextEditor) =>
     {
         const currentEditorDecorationCache = editorDecorationCache.get(textEditor);
@@ -544,25 +515,21 @@ export module BackgroundPhiColors
             }
         }
     };
-
     export const overTheLimit = (textEditor: vscode.TextEditor) =>
     {
         isOverTheLimit[textEditor.document.fileName] = true;
         vscode.window.visibleTextEditors.filter(i => i.document === textEditor.document).forEach(i => delayUpdateDecoration(i));
     };
-
     const isIndentInfoNeed = (lang: string) =>
     {
         const showActive = 0 <= ["smart", "full"].indexOf(indentMode.get(lang));
         const showRegular = 0 <= ["light", "full"].indexOf(indentMode.get(lang));
         return showActive || showRegular || lineEnabled.get(lang);
     };
-
     const windowDecorationCache =
     {
         strongTokens: <string[]>[],
     };
-
     class DocumentDecorationCacheEntry
     {
         isDefaultIndentCharactorSpace: boolean = false;
@@ -571,7 +538,6 @@ export module BackgroundPhiColors
         indentLevelMap: { cursor: number, length: number }[][] = [[]];
         indents: { index: number, text: string }[] = []; // これをここに持っておくのはメモリの消費量的には避けたいところだが、どうせタブ切り替えの度に必要になり、削ったところであまり意味のあるメモリ節約にならないのでキャッシュしておく。
         strongTokens: string[] = [];
-
         public constructor(lang: string, text: string, tabSize: number)
         {
             Profiler.profile
@@ -623,7 +589,6 @@ export module BackgroundPhiColors
         }
     }
     const documentDecorationCache = new Map<vscode.TextDocument, DocumentDecorationCacheEntry>();
-
     class EditorDecorationCacheEntry
     {
         tabSize: number = 0;
@@ -634,7 +599,6 @@ export module BackgroundPhiColors
         isMuted: boolean | undefined;
         isPaused: boolean | undefined;
         isCleared: boolean = false;
-
         public constructor
         (
             textEditor: vscode.TextEditor,
@@ -657,7 +621,6 @@ export module BackgroundPhiColors
                             .replace(/[^ \t]+.*$/, ""),
                         tabSize
                     );
-
                 this.indentIndex = Math.floor(currentIndentSize /currentDocumentDecorationCache.indentUnitSize);
             }
             else
@@ -672,11 +635,9 @@ export module BackgroundPhiColors
                 //this.isCleared = previousEditorDecorationCache.isCleared; このフラグをリセットするべきタイミングがちょうどこの constructor が呼ばれるタイミングなので、これは引き継がない。
             }
         }
-
         getLineNumber = () => undefined !== this.line ? this.line.lineNumber: undefined;
     }
     const editorDecorationCache = new Map<vscode.TextEditor, EditorDecorationCacheEntry>();
-
     export const clearAllDecorationCache = (): void =>
     {
         windowDecorationCache.strongTokens = [];
@@ -707,8 +668,6 @@ export module BackgroundPhiColors
             }
         }
     };
-
-
     export const onDidChangeConfiguration = (): void =>
     {
         [
@@ -747,17 +706,13 @@ export module BackgroundPhiColors
             overTheLimitMessageShowMode,
         ]
         .forEach(i => i.clear());
-
         mapCache.clear();
-
         Object.keys(decorations).forEach(i => decorations[i].decorator.dispose());
         decorations = { };
         clearAllDecorationCache();
-
         startOrStopProfile();
         updateAllDecoration();
     };
-
     const lastUpdateStamp = new Map<vscode.TextEditor, number>();
     export const delayUpdateDecoration = (textEditor: vscode.TextEditor): void =>
     {
@@ -781,20 +736,15 @@ export module BackgroundPhiColors
             )
         );
     };
-
     export const updateAllDecoration = () =>
         vscode.window.visibleTextEditors.forEach(i => delayUpdateDecoration(i));
-
     export const onDidChangeWorkspaceFolders = onDidChangeConfiguration;
-
     export const onDidChangeActiveTextEditor = (): void =>
     {
         clearDecorationCache();
         activeTextEditor(delayUpdateDecoration);
     };
-
     export const onDidCloseTextDocument = clearDecorationCache;
-
     export const onDidChangeTextDocument = (document: vscode.TextDocument): void =>
     {
         clearDecorationCache(document);
@@ -802,7 +752,6 @@ export module BackgroundPhiColors
             .filter(i => i.document === document)
             .forEach(i => delayUpdateDecoration(i));
     };
-    
     export const onDidChangeTextEditorSelection = () => activeTextEditor
     (
         textEditor =>
@@ -823,9 +772,7 @@ export module BackgroundPhiColors
             }
         }
     );
-
     export const gcd = (a: number, b: number) : number => b ? gcd(b, a % b): a;
-
     export const getIndentSize = (text: string, tabSize: number): number =>
     {
         let delta = 0;
@@ -840,7 +787,6 @@ export module BackgroundPhiColors
             }
         ).length;
     };
-
     export const getIndentUnit =
     (
         indentSizeDistribution:{ [key: number]: number },
@@ -875,13 +821,11 @@ export module BackgroundPhiColors
             return "\t";
         }
     );
-    
     const makeRange = (textEditor: vscode.TextEditor, startPosition: number, length: number) => new vscode.Range
     (
         textEditor.document.positionAt(startPosition),
         textEditor.document.positionAt(startPosition +length)
     );
-
     const updateDecoration = (textEditor: vscode.TextEditor) => Profiler.profile
     (
         "updateDecoration",
@@ -904,10 +848,8 @@ export module BackgroundPhiColors
                 lastActiveTextEditor = vscode.window.activeTextEditor;
             }
             const isActiveTextEditor = lastActiveTextEditor === textEditor;
-
             //  clear
             Profiler.profile("updateDecoration.clear", () => Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []));
-    
             if (isEnabled && (!isPaused || isCleared))
             {
                 if (text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
@@ -926,11 +868,8 @@ export module BackgroundPhiColors
                             );
                     const currentDocumentDecorationCache = documentDecorationCache.get(textEditor.document) || new DocumentDecorationCacheEntry(lang, text, tabSize);
                     const currentEditorDecorationCache = new EditorDecorationCacheEntry(textEditor, tabSize, currentDocumentDecorationCache, previousEditorDecorationCache);
-
                     const validPreviousEditorDecorationCache = isCleared ? undefined: previousEditorDecorationCache;
-
                     let entry: DecorationEntry[] = [];
-
                     //  update
                     entry = entry.concat
                     (
@@ -1015,7 +954,6 @@ export module BackgroundPhiColors
                         {
                             currentEditorDecorationCache.strongTokens = [];
                         }
-                        
                         if
                         (
                             !validPreviousEditorDecorationCache ||
@@ -1039,7 +977,6 @@ export module BackgroundPhiColors
                                     undefined !== validPreviousEditorDecorationCache ? validPreviousEditorDecorationCache.strongTokens: undefined
                                 )
                             );
-
                             if (validPreviousEditorDecorationCache)
                             {
                                 entry = entry.concat
@@ -1103,7 +1040,6 @@ export module BackgroundPhiColors
                     {
                         entry = entry.concat(updateTrailSpacesDecoration(lang, text, textEditor, tabSize, trailingSpacesErrorEnabled.get(lang)));
                     }
-
                     //  apply
                     Profiler.profile
                     (
@@ -1131,7 +1067,6 @@ export module BackgroundPhiColors
                 else
                 {
                     clearDecorationCache(textEditor.document);
-
                     if
                     (
                         overTheLimitMessageShowMode.get(lang)(text.length / Math.min(fileSizeLimit.get(lang), 1024)) && // ここの Math.min は基本的に要らないんだけど、万が一にも fileSizeLimit が 0 になってゼロ除算を発生させない為の保険
@@ -1175,7 +1110,6 @@ export module BackgroundPhiColors
                         }
                     }
                 );
-
                 if (previousEditorDecorationCache)
                 {
                     previousEditorDecorationCache.isCleared = true;
@@ -1183,7 +1117,6 @@ export module BackgroundPhiColors
             }
         }
     );
-
     export const addDecoration = (textEditor: vscode.TextEditor, entry: DecorationEntry) =>
     {
         const key = JSON.stringify(entry.decorationParam);
@@ -1228,7 +1161,6 @@ export module BackgroundPhiColors
             );
         }
     };
-
     export const getIndents = (text: string)=> Profiler.profile
     (
         "getIndents",
@@ -1247,7 +1179,6 @@ export module BackgroundPhiColors
             })
         )
     );
-
     export const updateIndentDecoration =
     (
         lang: string,
@@ -1514,7 +1445,6 @@ export module BackgroundPhiColors
             return result;
         }
     );
-
     export const regExpExecToArray = (regexp: RegExp, text: string) => Profiler.profile
     (
         `regExpExecToArray(/${regexp.source}/${regexp.flags})`,
@@ -1533,7 +1463,6 @@ export module BackgroundPhiColors
             return result;
         }
     );
-
     export const updateSymbolsDecoration =
     (
         lang: string,
@@ -1748,7 +1677,6 @@ export module BackgroundPhiColors
             })
         )
     );
-
     export const createTextEditorDecorationType =
     (
         backgroundColor: string,
@@ -1762,29 +1690,21 @@ export module BackgroundPhiColors
         isWholeLine,
     });
 }
-
 export function activate(context: vscode.ExtensionContext): void
 {
     BackgroundPhiColors.initialize(context);
 }
-
 export function deactivate(): void
 {
 }
-
 //  for sample
-
     /*
      *
      * EXACTLY WRONG INDENT
      *
      */
-
     // spaces indent
 	// tab indent
   	// spaces and tab indent
-
     //    body spaces
-
     // trailing spaces        
-
