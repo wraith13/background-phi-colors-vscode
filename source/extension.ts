@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as Profiler from "./lib/profiler";
+import { Cache } from "./lib/cache";
 import * as Locale from "./lib/locale";
 import { phiColors } from 'phi-colors';
 const getTicks = () => new Date().getTime();
@@ -12,18 +13,6 @@ const objctToMap = <valueT>(object: {[key:string]: valueT }) => new Map<string, 
 export module BackgroundPhiColors
 {
     const applicationKey = "backgroundPhiColors";
-    class Cache<keyT, valueT>
-    {
-        cache: { [key: string]: valueT } = { };
-        public constructor(public loader: (key: keyT) => valueT)
-        {
-        }
-        public get = (key: keyT): valueT => this.getCore(key, JSON.stringify(key));
-        private getCore = (key: keyT, keyJson: string): valueT => undefined === this.cache[keyJson] ?
-            (this.cache[keyJson] = this.loader(key)):
-            this.cache[keyJson]
-        public clear = () => this.cache = { };
-    }
     class Config<valueT>
     {
         public constructor
