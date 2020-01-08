@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as Profiler from "./lib/profiler";
 import * as Locale from "./lib/locale";
 import { phiColors } from 'phi-colors';
 const getTicks = () => new Date().getTime();
@@ -8,94 +9,6 @@ const isCompatibleArray = <valueT>(a: valueT[], b:valueT[]) =>
     !a.some(i => b.indexOf(i) < 0) &&
     !b.some(i => a.indexOf(i) < 0);
 const objctToMap = <valueT>(object: {[key:string]: valueT }) => new Map<string, valueT>(Object.keys(object).map(key => [key, object[key]]));
-export module Profiler
-{
-    let profileScore: { [scope: string]: number } = { };
-    let entryStack: ProfileEntry[] = [ ];
-    let isProfiling = false;
-    let startAt = 0;
-    let endAt = 0;
-    export class ProfileEntry
-    {
-        startTicks: number;
-        childrenTicks: number;
-        public constructor(public name: string)
-        {
-            this.childrenTicks = 0;
-            if (isProfiling)
-            {
-                this.startTicks = getTicks();
-                entryStack.push(this);
-                //console.log(`${"*".repeat(entryStack.length)} ${this.name} begin`);
-            }
-            else
-            {
-                this.startTicks = 0;
-            }
-        }
-        public end()
-        {
-            if (0 !== this.startTicks)
-            {
-                //console.log(`${"*".repeat(entryStack.length)} ${this.name} end`);
-                const wholeTicks = getTicks() -this.startTicks;
-                if (undefined === profileScore[this.name])
-                {
-                    profileScore[this.name] = 0;
-                }
-                profileScore[this.name] += wholeTicks -this.childrenTicks;
-                entryStack.pop();
-                if (0 < entryStack.length)
-                {
-                    entryStack[entryStack.length -1].childrenTicks += wholeTicks;
-                }
-            }
-        }
-    }
-    export const profile = <ResultT>(name: string, target: ()=>ResultT): ResultT =>
-    {
-        const entry = new ProfileEntry(name);
-        try
-        {
-            return target();
-        }
-        catch(error) // 現状(VS Code v1.32.3)、こうしておかないとデバッグコンソールに例外情報が出力されない為の処置。
-        {
-            console.error(`Exception at: ${name}`);
-            console.error(error);
-            throw error; // ※この再送出により外側のこの関数で再び catch し重複してエラーが出力されることに注意。
-        }
-        finally
-        {
-            entry.end();
-        }
-    };
-    export const getIsProfiling = () => isProfiling;
-    export const start = () =>
-    {
-        isProfiling = true;
-        profileScore = { };
-        entryStack = [ ];
-        startAt = getTicks();
-    };
-    export const stop = () =>
-    {
-        isProfiling = false;
-        endAt = getTicks();
-    };
-    export const getOverall = () => (isProfiling ? getTicks(): endAt) - startAt;
-    export const getReport = () =>
-        Object.keys(profileScore)
-            .map
-            (
-                name =>
-                ({
-                    name,
-                    ticks: profileScore[name]
-                })
-            )
-            .sort((a, b) => b.ticks -a.ticks);
-}
 export module BackgroundPhiColors
 {
     const applicationKey = "backgroundPhiColors";
