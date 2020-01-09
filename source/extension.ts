@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as Profiler from "./lib/profiler";
 import { Cache } from "./lib/cache";
+import * as Config from "./lib/config";
 import * as Locale from "./lib/locale";
 import { phiColors } from 'phi-colors';
 const getTicks = () => new Date().getTime();
@@ -13,102 +14,16 @@ const objctToMap = <valueT>(object: {[key:string]: valueT }) => new Map<string, 
 export module BackgroundPhiColors
 {
     const applicationKey = "backgroundPhiColors";
-    class Config<valueT>
-    {
-        public constructor
-        (
-            public name: string,
-            public defaultValue: valueT,
-            public validator?: (value: valueT) => boolean,
-            public minValue?: valueT,
-            public maxValue?: valueT
-        )
-        {
-        }
-        regulate = (rawKey: string, value: valueT): valueT =>
-        {
-            let result = value;
-            if (this.validator && !this.validator(result))
-            {
-                // settings.json をテキストとして直接編集してる時はともかく GUI での編集時に無駄にエラー表示が行われてしまうので、エンドユーザーに対するエラー表示は行わない。
-                //vscode.window.showErrorMessage(`${rawKey} setting value is invalid! Please check your settings.`);
-                console.error(`"${rawKey}" setting value(${JSON.stringify(value)}) is invalid! Please check your settings.`);
-                result = this.defaultValue;
-            }
-            else
-            {
-                if (undefined !== this.minValue && result < this.minValue)
-                {
-                    result = this.minValue;
-                }
-                else
-                if (undefined !== this.maxValue && this.maxValue < result)
-                {
-                    result = this.maxValue;
-                }
-            }
-            return result;
-        }
-        cache = new Cache
-        (
-            (lang: string): valueT =>
-            {
-                let result: valueT;
-                if (undefined === lang || null === lang || 0 === lang.length)
-                {
-                    result = <valueT>vscode.workspace.getConfiguration(applicationKey)[this.name];
-                    if (undefined === result)
-                    {
-                        result = this.defaultValue;
-                    }
-                    else
-                    {
-                        result = this.regulate(`${applicationKey}.${this.name}`, result);
-                    }
-                }
-                else
-                {
-                    const langSection = vscode.workspace.getConfiguration(`[${lang}]`, null);
-                    result = <valueT>langSection[`${applicationKey}.${this.name}`];
-                    if (undefined === result)
-                    {
-                        result = this.get("");
-                    }
-                    else
-                    {
-                        result = this.regulate(`[${lang}].${applicationKey}.${this.name}`, result);
-                    }
-                }
-                return result;
-            }
-        );
-        public get = this.cache.get;
-        public clear = this.cache.clear;
-    }
-    class ConfigMap<valueT, mapObjectT extends { [key: string]: valueT }>
-    {
-        public constructor
-        (
-            public name: string,
-            public defaultValue: keyof mapObjectT,
-            public mapObject: mapObjectT
-        )
-        {
-        }
-        config = new Config<keyof mapObjectT>(this.name, this.defaultValue, (value: string) =>0 <= Object.keys(this.mapObject).indexOf(value));
-        public get = (key: string) => this.mapObject[this.config.cache.get(key)];
-        public clear = this.config.cache.clear;
-    }
+
     const colorValidator = (value: string): boolean => /^#[0-9A-Fa-f]{6}$/.test(value);
     const colorOrNullValidator = (value: string | null): boolean => null === value || colorValidator(value);
     const colorMapValidator = (value: {[key: string]: string}): boolean =>
         undefined !== value &&
         null !== value &&
         !Object.keys(value).some(key => !colorOrNullValidator(value[key]));
-    const makeEnumValidator = <ObjectT>(mapObject: ObjectT): (value: string) => boolean => (value: string): boolean => 0 <= Object.keys(mapObject).indexOf(value);
-    const indentModeObject = Object.freeze({ "none": null, "light": null, "smart": null, "full": null, });
-    const tokenModeObject = Object.freeze ({ "none": null, "light": null, "smart": null, "full": null, });
-    const activeScopeObject = Object.freeze ({ "editor": null, "document": null, "window": null, });
+    const indentModeObject = Object.freeze({ "none": "none", "light": "light", "smart": "smart", "full": "full", });
+    const tokenModeObject = Object.freeze ({ "none": "none", "light": "light", "smart": "smart", "full": "full", });
+    const activeScopeObject = Object.freeze ({ "editor": "editor", "document": "document", "window": "window", });
     const laneObject = Object.freeze
     ({
         "none": undefined,
@@ -137,39 +52,39 @@ export module BackgroundPhiColors
         "until 256x": (rate: number) => rate <= 256,
         "always": (rate: number) => true,
     });
-    const enabled = new Config("enabled", true);
-    const enabledPanels = new Config("enabledPanels", false);
-    const fileSizeLimit = new Config("fileSizeLimit", 100 *1024, undefined, 10 *1024, 10 *1024 *1024);
-    const basicDelay = new Config("basicDelay", 10, undefined, 1, 1500);
-    const additionalDelay = new Config("additionalDelay", 200, undefined, 50, 1500);
-    const baseColor = new Config("baseColor", "#5679C9", colorValidator);
-    const spaceBaseColor = new Config("spaceBaseColor", <string | null>null, colorOrNullValidator);
-    const spaceErrorColor = new Config("spaceErrorColor", "#DD4444", colorValidator);
-    const symbolBaseColor = new Config("symbolBaseColor", <string | null>null, colorOrNullValidator);
-    const symbolColorMap = new Config("symbolColorMap", <{[key: string]: string}>{}, colorMapValidator);
-    const tokenBaseColor = new Config("tokenBaseColor", <string | null>null, colorOrNullValidator);
-    const tokenColorMap = new Config("tokenColorMap", <{[key: string]: string}>{}, colorMapValidator);
-    const indentMode = new Config<keyof typeof indentModeObject>("indentMode", "full", makeEnumValidator(indentModeObject));
-    const lineEnabled = new Config("lineEnabled", true);
-    const tokenMode = new Config<keyof typeof tokenModeObject>("tokenMode", "smart", makeEnumValidator(tokenModeObject));
-    const activeScope = new Config<keyof typeof activeScopeObject>("activeScope", "window", makeEnumValidator(activeScopeObject));
-    const indentErrorEnabled = new Config("indentErrorEnabled", true);
-    const trailingSpacesErrorEnabled = new Config("trailingSpacesErrorEnabled", true);
-    const bodySpacesEnabled = new Config("bodySpacesEnabled", true);
-    const trailingSpacesEnabled = new Config("trailingSpacesEnabled", true);
-    const symbolEnabled = new Config("symbolEnabled", false);
-    const indentErrorInOverviewRulerLane = new ConfigMap("indentErrorInOverviewRulerLane", "left", laneObject);
-    const activeTokenInOverviewRulerLane = new ConfigMap("activeTokenInOverviewRulerLane", "center", laneObject);
-    const trailingSpacesErrorInOverviewRulerLane = new ConfigMap("trailingSpacesErrorInOverviewRulerLane", "right", laneObject);
-    const spacesAlpha = new Config("spacesAlpha", 0x11, undefined, 0x00, 0xFF);
-    const spacesActiveAlpha = new Config("spacesActiveAlpha", 0x33, undefined, 0x00, 0xFF);
-    const spacesErrorAlpha = new Config("spacesErrorAlpha", 0x88, undefined, 0x00, 0xFF);
-    const symbolAlpha = new Config("symbolAlpha", 0x44, undefined, 0x00, 0xFF);
-    const tokenAlpha = new Config("tokenAlpha", 0x33, undefined, 0x00, 0xFF);
-    const tokenActiveAlpha = new Config("tokenActiveAlpha", 0x66, undefined, 0x00, 0xFF);
-    const indentConfig = new ConfigMap("indent", "auto", indentObject);
-    const enabledProfile = new Config("enabledProfile", true);
-    const overTheLimitMessageShowMode = new ConfigMap("overTheLimitMessageShowMode", "until 256x", overTheLimitMessageShowModeObject);
+    const enabled = new Config.Entry<boolean>("backgroundPhiColors.enabled");
+    const enabledPanels = new Config.Entry<boolean>("backgroundPhiColors.enabledPanels");
+    const fileSizeLimit = new Config.Entry<number>("backgroundPhiColors.fileSizeLimit");
+    const basicDelay = new Config.Entry<number>("backgroundPhiColors.basicDelay");
+    const additionalDelay = new Config.Entry<number>("backgroundPhiColors.additionalDelay");
+    const baseColor = new Config.Entry("backgroundPhiColors.baseColor", colorValidator);
+    const spaceBaseColor = new Config.Entry("backgroundPhiColors.spaceBaseColor", colorOrNullValidator);
+    const spaceErrorColor = new Config.Entry("backgroundPhiColors.spaceErrorColor", colorValidator);
+    const symbolBaseColor = new Config.Entry("backgroundPhiColors.symbolBaseColor", colorOrNullValidator);
+    const symbolColorMap = new Config.Entry("backgroundPhiColors.symbolColorMap", colorMapValidator);
+    const tokenBaseColor = new Config.Entry("backgroundPhiColors.tokenBaseColor", colorOrNullValidator);
+    const tokenColorMap = new Config.Entry("backgroundPhiColors.tokenColorMap", colorMapValidator);
+    const indentMode = new Config.MapEntry("backgroundPhiColors.indentMode", indentModeObject);
+    const lineEnabled = new Config.Entry<boolean>("backgroundPhiColors.lineEnabled");
+    const tokenMode = new Config.MapEntry("backgroundPhiColors.tokenMode", tokenModeObject);
+    const activeScope = new Config.MapEntry("backgroundPhiColors.activeScope", activeScopeObject);
+    const indentErrorEnabled = new Config.Entry<boolean>("backgroundPhiColors.indentErrorEnabled");
+    const trailingSpacesErrorEnabled = new Config.Entry<boolean>("backgroundPhiColors.trailingSpacesErrorEnabled");
+    const bodySpacesEnabled = new Config.Entry<boolean>("backgroundPhiColors.bodySpacesEnabled");
+    const trailingSpacesEnabled = new Config.Entry<boolean>("backgroundPhiColors.trailingSpacesEnabled");
+    const symbolEnabled = new Config.Entry<boolean>("backgroundPhiColors.symbolEnabled");
+    const indentErrorInOverviewRulerLane = new Config.MapEntry("backgroundPhiColors.indentErrorInOverviewRulerLane", laneObject);
+    const activeTokenInOverviewRulerLane = new Config.MapEntry("backgroundPhiColors.activeTokenInOverviewRulerLane", laneObject);
+    const trailingSpacesErrorInOverviewRulerLane = new Config.MapEntry("backgroundPhiColors.trailingSpacesErrorInOverviewRulerLane", laneObject);
+    const spacesAlpha = new Config.Entry<number>("backgroundPhiColors.spacesAlpha");
+    const spacesActiveAlpha = new Config.Entry<number>("backgroundPhiColors.spacesActiveAlpha");
+    const spacesErrorAlpha = new Config.Entry<number>("backgroundPhiColors.spacesErrorAlpha");
+    const symbolAlpha = new Config.Entry<number>("backgroundPhiColors.symbolAlpha");
+    const tokenAlpha = new Config.Entry<number>("backgroundPhiColors.tokenAlpha");
+    const tokenActiveAlpha = new Config.Entry<number>("backgroundPhiColors.tokenActiveAlpha");
+    const indentConfig = new Config.MapEntry("backgroundPhiColors.indent", indentObject);
+    const enabledProfile = new Config.Entry<boolean>("backgroundPhiColors.enabledProfile");
+    const overTheLimitMessageShowMode = new Config.MapEntry("backgroundPhiColors.overTheLimitMessageShowMode", overTheLimitMessageShowModeObject);
     const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
     const isLimitNoticed: { [fileName: string]: boolean } = { };
@@ -202,9 +117,9 @@ export module BackgroundPhiColors
     (
         name: string,
         lang: string,
-        color: Config<string | null>,
+        color: Config.Entry<string | null>,
         hue: string | number,
-        alpha: Config<number>,
+        alpha: Config.Entry<number>,
         overviewRulerLane?: vscode.OverviewRulerLane,
         isWholeLine?: boolean
     ): DecorationParam =>
