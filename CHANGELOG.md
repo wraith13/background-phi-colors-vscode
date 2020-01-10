@@ -4,6 +4,12 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 2.1.1 - 2020-??-??
+
+### Fixed
+
+- Added missing Japanese translation.
+
 ## 2.1.0 - 2019-11-03
 
 ### Added
