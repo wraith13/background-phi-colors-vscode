@@ -52,6 +52,12 @@ export module BackgroundPhiColors
         "until 256x": (rate: number) => rate <= 256,
         "always": (rate: number) => true,
     });
+    const clipByVisibleRangeObject = Object.freeze
+    ({
+        "none": (rate: number) => false,
+        "smart": (rate: number) => 1 <= rate,
+        "always": (rate: number) => true,
+    });
     const enabled = new Config.Entry<boolean>("backgroundPhiColors.enabled");
     const enabledPanels = new Config.Entry<boolean>("backgroundPhiColors.enabledPanels");
     const fileSizeLimit = new Config.Entry<number>("backgroundPhiColors.fileSizeLimit");
@@ -85,6 +91,7 @@ export module BackgroundPhiColors
     const indentConfig = new Config.MapEntry("backgroundPhiColors.indent", indentObject);
     const enabledProfile = new Config.Entry<boolean>("backgroundPhiColors.enabledProfile");
     const overTheLimitMessageShowMode = new Config.MapEntry("backgroundPhiColors.overTheLimitMessageShowMode", overTheLimitMessageShowModeObject);
+    const clipByVisibleRange = new Config.MapEntry("backgroundPhiColors.clipByVisibleRange", clipByVisibleRangeObject);
     const isDecorated: { [fileName: string]: boolean } = { };
     const isOverTheLimit: { [fileName: string]: boolean } = { };
     const isLimitNoticed: { [fileName: string]: boolean } = { };
@@ -511,6 +518,7 @@ export module BackgroundPhiColors
             indentConfig,
             enabledProfile,
             overTheLimitMessageShowMode,
+            clipByVisibleRange,
         ]
         .forEach(i => i.clear());
         mapCache.clear();
