@@ -3,7 +3,7 @@ import packageJson from "../../package.json";
 import { Cache } from "./cache";
 export const properties = Object.freeze(packageJson.contributes.configuration[0].properties);
 export const applicationName = packageJson.displayName;
-export const applicationKey = packageJson.name;
+//export const applicationKey = packageJson.name;
 export class Entry<valueT>
 {
     public defaultValue: valueT;
@@ -50,6 +50,7 @@ export class Entry<valueT>
             let result: valueT;
             if (undefined === languageId || null === languageId || 0 === languageId.length)
             {
+                const applicationKey = this.key.replace(/\..*/, "");
                 const name = this.key.replace(/[^.]+\./, "");
                 result = <valueT>vscode.workspace.getConfiguration(applicationKey)[name];
                 if (undefined === result)
