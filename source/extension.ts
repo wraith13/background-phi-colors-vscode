@@ -275,6 +275,7 @@ export module BackgroundPhiColors
             vscode.workspace.onDidCloseTextDocument((document) => onDidCloseTextDocument(document)),
             vscode.window.onDidChangeActiveTextEditor(() => onDidChangeActiveTextEditor()),
             vscode.window.onDidChangeTextEditorSelection(() => onDidChangeTextEditorSelection()),
+            vscode.window.onDidChangeTextEditorVisibleRanges(() => onDidChangeTextEditorVisibleRanges())
         );
         startOrStopProfile();
         updateAllDecoration();
@@ -529,7 +530,7 @@ export module BackgroundPhiColors
         updateAllDecoration();
     };
     const lastUpdateStamp = new Map<vscode.TextEditor, number>();
-    export const delayUpdateDecoration = (textEditor: vscode.TextEditor): void =>
+    export const delayUpdateDecoration = (textEditor: vscode.TextEditor, delay?: number): void =>
     {
         const updateStamp = getTicks();
         lastUpdateStamp.set(textEditor, updateStamp);
@@ -543,12 +544,14 @@ export module BackgroundPhiColors
                     updateDecoration(textEditor);
                 }
             },
-            basicDelay.get(textEditor.document.languageId) +
-            (
-                undefined === documentDecorationCache.get(textEditor.document) ?
-                    additionalDelay.get(textEditor.document.languageId):
-                    0
-            )
+            undefined !== delay ?
+                delay:
+                basicDelay.get(textEditor.document.languageId) +
+                (
+                    undefined === documentDecorationCache.get(textEditor.document) ?
+                        additionalDelay.get(textEditor.document.languageId):
+                        0
+                )
         );
     };
     export const updateAllDecoration = () =>
@@ -584,6 +587,21 @@ export module BackgroundPhiColors
             )
             {
                 delayUpdateDecoration(textEditor);
+            }
+        }
+    );
+    export const onDidChangeTextEditorVisibleRanges = ()=> activeTextEditor
+    (
+        textEditor =>
+        {
+            const lang = textEditor.document.languageId;
+            if
+            (
+                clipByVisibleRange.get(lang)(textEditor.document.getText().length / Math.min(fileSizeLimit.get(lang), 1024))
+            )
+            {
+                clearDecorationCache(textEditor.document);
+                delayUpdateDecoration(textEditor, 50);
             }
         }
     );
@@ -860,7 +878,12 @@ export module BackgroundPhiColors
                     (
                         "updateDecoration.apply(regular)", () =>
                         {
-                            entry.forEach(i => addDecoration(textEditor, i));
+                            const clip = clipByVisibleRange.get(lang)(text.length / Math.min(fileSizeLimit.get(lang), 1024));
+                            entry.filter
+                                (
+                                    i => !clip || textEditor.visibleRanges.some(range => range.contains(makeRange(textEditor, i.startPosition, i.length)))
+                                )
+                                .forEach(i => addDecoration(textEditor, i));
                             const isToDecorate = 0 < entry.length; //Object.keys(decorations).some(i => 0 < decorations[i].rangesOrOptions.length);
                             if (isDecorated[textEditor.document.fileName] || isToDecorate)
                             {
