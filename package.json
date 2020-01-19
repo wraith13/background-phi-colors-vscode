@@ -364,6 +364,17 @@
                         ],
                         "overridable": true,
                         "description": "%backgroundPhiColors.overTheLimitMessageShowMode.description%"
+                    },
+                    "backgroundPhiColors.clipByVisibleRange": {
+                        "type": "string",
+                        "default": "smart",
+                        "enum": [
+                            "none",
+                            "smart",
+                            "always"
+                        ],
+                        "overridable": true,
+                        "description": "%backgroundPhiColors.clipByVisibleRange.description%"
                     }
                 }
             }
