@@ -601,7 +601,7 @@ export module BackgroundPhiColors
             )
             {
                 clearDecorationCache(textEditor.document);
-                delayUpdateDecoration(textEditor, 50);
+                delayUpdateDecoration(textEditor, 10);
             }
         }
     );
@@ -702,20 +702,9 @@ export module BackgroundPhiColors
                     const currentDocumentDecorationCache = documentDecorationCache.get(textEditor.document) || new DocumentDecorationCacheEntry(lang, text, tabSize);
                     const currentEditorDecorationCache = new EditorDecorationCacheEntry(textEditor, tabSize, currentDocumentDecorationCache, previousEditorDecorationCache);
                     const validPreviousEditorDecorationCache = isCleared ? undefined: previousEditorDecorationCache;
+                    const clip = clipByVisibleRange.get(lang)(text.length / Math.min(fileSizeLimit.get(lang), 1024));
                     let entry: DecorationEntry[] = [];
                     //  update
-                    entry = entry.concat
-                    (
-                        updateIndentDecoration
-                        (
-                            lang,
-                            text,
-                            textEditor,
-                            currentDocumentDecorationCache,
-                            currentEditorDecorationCache,
-                            validPreviousEditorDecorationCache
-                        )
-                    );
                     if (lineEnabled.get(lang))
                     {
                         entry = entry.concat
@@ -731,10 +720,22 @@ export module BackgroundPhiColors
                             )
                         );
                     }
+                    entry = entry.concat
+                    (
+                        updateIndentDecoration
+                        (
+                            lang,
+                            //text,
+                            textEditor,
+                            currentDocumentDecorationCache,
+                            currentEditorDecorationCache,
+                            validPreviousEditorDecorationCache
+                        )
+                    );
+                    const showActive = 0 <= ["smart", "full"].indexOf(tokenMode.get(lang));
+                    const showRegular = 0 <= ["light", "full"].indexOf(tokenMode.get(lang));
                     if ("none" !== tokenMode.get(lang))
                     {
-                        const showActive = 0 <= ["smart", "full"].indexOf(tokenMode.get(lang));
-                        const showRegular = 0 <= ["light", "full"].indexOf(tokenMode.get(lang));
                         if (showActive)
                         {
                             if (isActiveTextEditor || "editor" === activeScope.get(""))
@@ -796,20 +797,6 @@ export module BackgroundPhiColors
                             )
                         )
                         {
-                            entry = entry.concat
-                            (
-                                updateTokesDecoration
-                                (
-                                    lang,
-                                    text,
-                                    textEditor,
-                                    tabSize,
-                                    showRegular,
-                                    currentEditorDecorationCache.strongTokens,
-                                    mapCache.get(tokenColorMap.get(lang)),
-                                    undefined !== validPreviousEditorDecorationCache ? validPreviousEditorDecorationCache.strongTokens: undefined
-                                )
-                            );
                             if (validPreviousEditorDecorationCache)
                             {
                                 entry = entry.concat
@@ -861,24 +848,59 @@ export module BackgroundPhiColors
                             }
                         }
                     }
-                    if (!validPreviousEditorDecorationCache && symbolEnabled.get(lang))
-                    {
-                        entry = entry.concat(updateSymbolsDecoration(lang, text, textEditor, tabSize, mapCache.get(symbolColorMap.get(lang))));
-                    }
-                    if (!validPreviousEditorDecorationCache && bodySpacesEnabled.get(lang))
-                    {
-                        entry = entry.concat(updateBodySpacesDecoration(lang, text, textEditor, tabSize));
-                    }
-                    if (!validPreviousEditorDecorationCache && trailingSpacesEnabled.get(lang))
-                    {
-                        entry = entry.concat(updateTrailSpacesDecoration(lang, text, textEditor, tabSize, trailingSpacesErrorEnabled.get(lang)));
-                    }
+                    (clip ? textEditor.visibleRanges: [makeRange(textEditor, 0, text.length)]).forEach
+                    (
+                        range =>
+                        {
+                            const offset = textEditor.document.offsetAt(range.start);
+                            const text = textEditor.document.getText(range);
+                            if ("none" !== tokenMode.get(lang))
+                            {
+                                if
+                                (
+                                    !validPreviousEditorDecorationCache ||
+                                    (
+                                        showActive &&
+                                        !isCompatibleArray(currentEditorDecorationCache.strongTokens, validPreviousEditorDecorationCache.strongTokens)
+                                    )
+                                )
+                                {
+                                    entry = entry.concat
+                                    (
+                                        updateTokesDecoration
+                                        (
+                                            lang,
+                                            offset,
+                                            text,
+                                            textEditor,
+                                            tabSize,
+                                            showRegular,
+                                            currentEditorDecorationCache.strongTokens,
+                                            mapCache.get(tokenColorMap.get(lang)),
+                                            undefined !== validPreviousEditorDecorationCache ? validPreviousEditorDecorationCache.strongTokens: undefined
+                                        )
+                                    );
+                                }
+                            }
+                            if (!validPreviousEditorDecorationCache && symbolEnabled.get(lang))
+                            {
+                                entry = entry.concat(updateSymbolsDecoration(lang, offset, text, textEditor, tabSize, mapCache.get(symbolColorMap.get(lang))));
+                            }
+                            if (!validPreviousEditorDecorationCache && bodySpacesEnabled.get(lang))
+                            {
+                                entry = entry.concat(updateBodySpacesDecoration(lang, offset, text, textEditor, tabSize));
+                            }
+                            if (!validPreviousEditorDecorationCache && trailingSpacesEnabled.get(lang))
+                            {
+                                entry = entry.concat(updateTrailSpacesDecoration(lang, offset, text, textEditor, tabSize, trailingSpacesErrorEnabled.get(lang)));
+                            }
+                        }
+                    );
                     //  apply
                     Profiler.profile
                     (
                         "updateDecoration.apply(regular)", () =>
                         {
-                            const clip = clipByVisibleRange.get(lang)(text.length / Math.min(fileSizeLimit.get(lang), 1024));
                             entry.filter
                                 (
                                     i => !clip || textEditor.visibleRanges.some(range => range.contains(makeRange(textEditor, i.startPosition, i.length)))
@@ -1020,7 +1042,7 @@ export module BackgroundPhiColors
     export const updateIndentDecoration =
     (
         lang: string,
-        text: string,
+        //text: string,
         textEditor: vscode.TextEditor,
         currentDocumentDecorationCache: DocumentDecorationCacheEntry,
         currentEditorDecorationCache: EditorDecorationCacheEntry,
@@ -1304,6 +1326,7 @@ export module BackgroundPhiColors
     export const updateSymbolsDecoration =
     (
         lang: string,
+        offset: number,
         text: string,
         textEditor: vscode.TextEditor,
         tabSize: number,
@@ -1330,7 +1353,7 @@ export module BackgroundPhiColors
         (
             i =>
             ({
-                startPosition: i.index,
+                startPosition: offset +i.index,
                 length: i.token.length,
                 decorationParam: makeHueDecoration
                 (
@@ -1385,6 +1408,7 @@ export module BackgroundPhiColors
     export const updateTokesDecoration =
     (
         lang: string,
+        offset: number,
         text: string,
         textEditor: vscode.TextEditor,
         tabSize: number,
@@ -1423,7 +1447,7 @@ export module BackgroundPhiColors
         (
             i =>
             ({
-                startPosition: i.index,
+                startPosition: offset +i.index,
                 length: i.token.length,
                 decorationParam: makeHueDecoration
                 (
@@ -1440,6 +1464,7 @@ export module BackgroundPhiColors
     export const updateBodySpacesDecoration =
     (
         lang: string,
+        offset: number,
         text: string,
         textEditor: vscode.TextEditor,
         tabSize: number
@@ -1462,7 +1487,7 @@ export module BackgroundPhiColors
             (
                 match =>
                 ({
-                    startPosition: prematch.index +prematch[1].length +prematch[2].length +match.index,
+                    startPosition: offset +prematch.index +prematch[1].length +prematch[2].length +match.index,
                     length: match[0].length,
                     decorationParam: makeHueDecoration
                     (
@@ -1484,6 +1509,7 @@ export module BackgroundPhiColors
     export const updateTrailSpacesDecoration =
     (
         lang: string,
+        offset: number,
         text: string,
         textEditor: vscode.TextEditor,
         tabSize: number,
@@ -1500,7 +1526,7 @@ export module BackgroundPhiColors
         (
             match =>
             ({
-                startPosition: match.index +match[1].length,
+                startPosition: offset +match.index +match[1].length,
                 length: match[2].length,
                 decorationParam: showError ?
                     makeTrailingSpacesErrorDecorationParam(lang):
