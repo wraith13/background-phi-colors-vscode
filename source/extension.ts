@@ -665,8 +665,12 @@ export module BackgroundPhiColors
         () =>
         {
             const lang = textEditor.document.languageId;
-            const text = textEditor.document.getText();
-            const previousEditorDecorationCache = editorDecorationCache.get(textEditor);
+            const textLength = textEditor.document.offsetAt
+            (
+                textEditor.document.lineAt(textEditor.document.lineCount - 1).range.end
+            );
+            const clip = clipByVisibleRange.get(lang)(textLength / Math.min(fileSizeLimit.get(lang), 1024));
+            const previousEditorDecorationCache = !clip ? editorDecorationCache.get(textEditor): undefined;
             const isMuted = previousEditorDecorationCache && undefined !== previousEditorDecorationCache.isMuted ?
                 previousEditorDecorationCache.isMuted:
                 isMutedAll;
@@ -685,7 +689,7 @@ export module BackgroundPhiColors
             Profiler.profile("updateDecoration.clear", () => Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []));
             if (isEnabled && (!isPaused || isCleared))
             {
-                if (text.length <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
+                if (textLength <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
                 {
                     const tabSize =
                         undefined !== previousEditorDecorationCache ?
@@ -699,10 +703,37 @@ export module BackgroundPhiColors
                                         parseInt(textEditor.options.tabSize)
                                 )
                             );
-                    const currentDocumentDecorationCache = documentDecorationCache.get(textEditor.document) || new DocumentDecorationCacheEntry(lang, text, tabSize);
+                    const currentDocumentDecorationCache =
+                        (!clip && documentDecorationCache.get(textEditor.document)) ||
+                        new DocumentDecorationCacheEntry
+                        (
+                            lang,
+                            !clip ?
+                                textEditor.document.getText():
+                                textEditor.document.getText
+                                (
+                                    new vscode.Range
+                                    (
+                                        textEditor.visibleRanges
+                                            .map(i => i.start)
+                                            .reduce
+                                            (
+                                                (a, b) => a.compareTo(b) < 0 ? a: b,
+                                                textEditor.document.lineAt(0).range.start
+                                            ),
+                                        textEditor.visibleRanges
+                                            .map(i => i.end)
+                                            .reduce
+                                            (
+                                                (a, b) => a.compareTo(b) < 0 ? b: a,
+                                                textEditor.document.lineAt(textEditor.document.lineCount - 1).range.end
+                                            )
+                                    )
+                                ),
+                            tabSize
+                        );
                     const currentEditorDecorationCache = new EditorDecorationCacheEntry(textEditor, tabSize, currentDocumentDecorationCache, previousEditorDecorationCache);
                     const validPreviousEditorDecorationCache = isCleared ? undefined: previousEditorDecorationCache;
-                    const clip = clipByVisibleRange.get(lang)(text.length / Math.min(fileSizeLimit.get(lang), 1024));
                     let entry: DecorationEntry[] = [];
                     //  update
                     if (lineEnabled.get(lang))
@@ -712,7 +743,7 @@ export module BackgroundPhiColors
                             updateLineDecoration
                             (
                                 lang,
-                                text,
+                                //text,
                                 textEditor,
                                 currentDocumentDecorationCache,
                                 currentEditorDecorationCache,
@@ -848,7 +879,7 @@ export module BackgroundPhiColors
                             }
                         }
                     }
-                    (clip ? textEditor.visibleRanges: [makeRange(textEditor, 0, text.length)]).forEach
+                    (clip ? textEditor.visibleRanges: [makeRange(textEditor, 0, textLength)]).forEach
                     (
                         range =>
                         {
@@ -929,7 +960,7 @@ export module BackgroundPhiColors
                     clearDecorationCache(textEditor.document);
                     if
                     (
-                        overTheLimitMessageShowMode.get(lang)(text.length / Math.min(fileSizeLimit.get(lang), 1024)) && // ここの Math.min は基本的に要らないんだけど、万が一にも fileSizeLimit が 0 になってゼロ除算を発生させない為の保険
+                        overTheLimitMessageShowMode.get(lang)(textLength / Math.min(fileSizeLimit.get(lang), 1024)) && // ここの Math.min は基本的に要らないんだけど、万が一にも fileSizeLimit が 0 になってゼロ除算を発生させない為の保険
                         !isLimitNoticed[textEditor.document.fileName]
                     )
                     {
@@ -1247,7 +1278,7 @@ export module BackgroundPhiColors
     export const updateLineDecoration =
     (
         lang: string,
-        text: string,
+        //text: string,
         textEditor: vscode.TextEditor,
         currentDocumentDecorationCache: DocumentDecorationCacheEntry,
         currentEditorDecorationCache: EditorDecorationCacheEntry,
