@@ -335,6 +335,11 @@ export module BackgroundPhiColors
         isOverTheLimit[textEditor.document.fileName] = true;
         vscode.window.visibleTextEditors.filter(i => i.document === textEditor.document).forEach(i => delayUpdateDecoration(i));
     };
+    const getDocumentTextLength = (document: vscode.TextDocument) => document.offsetAt
+    (
+        document.lineAt(document.lineCount - 1).range.end
+    );
+    const isClip = (lang: string, textLength: number) => clipByVisibleRange.get(lang)(textLength / Math.min(fileSizeLimit.get(lang), 1024));
     const isIndentInfoNeed = (lang: string) =>
     {
         const showActive = 0 <= ["smart", "full"].indexOf(indentMode.get(lang));
@@ -534,6 +539,17 @@ export module BackgroundPhiColors
     {
         const updateStamp = getTicks();
         lastUpdateStamp.set(textEditor, updateStamp);
+        if (undefined === delay)
+        {
+            delay = isClip(textEditor.document.languageId, getDocumentTextLength(textEditor.document)) ?
+                10:
+                basicDelay.get(textEditor.document.languageId) +
+                (
+                    undefined === documentDecorationCache.get(textEditor.document) ?
+                        additionalDelay.get(textEditor.document.languageId):
+                        0
+                );
+        }
         setTimeout
         (
             () =>
@@ -544,14 +560,7 @@ export module BackgroundPhiColors
                     updateDecoration(textEditor);
                 }
             },
-            undefined !== delay ?
-                delay:
-                basicDelay.get(textEditor.document.languageId) +
-                (
-                    undefined === documentDecorationCache.get(textEditor.document) ?
-                        additionalDelay.get(textEditor.document.languageId):
-                        0
-                )
+            delay
         );
     };
     export const updateAllDecoration = () =>
@@ -594,10 +603,9 @@ export module BackgroundPhiColors
     (
         textEditor =>
         {
-            const lang = textEditor.document.languageId;
             if
             (
-                clipByVisibleRange.get(lang)(textEditor.document.getText().length / Math.min(fileSizeLimit.get(lang), 1024))
+                isClip(textEditor.document.languageId, getDocumentTextLength(textEditor.document))
             )
             {
                 clearDecorationCache(textEditor.document);
@@ -665,11 +673,8 @@ export module BackgroundPhiColors
         () =>
         {
             const lang = textEditor.document.languageId;
-            const textLength = textEditor.document.offsetAt
-            (
-                textEditor.document.lineAt(textEditor.document.lineCount - 1).range.end
-            );
-            const clip = clipByVisibleRange.get(lang)(textLength / Math.min(fileSizeLimit.get(lang), 1024));
+            const textLength = getDocumentTextLength(textEditor.document);
+            const clip = isClip(lang, textLength);
             const previousEditorDecorationCache = !clip ? editorDecorationCache.get(textEditor): undefined;
             const isMuted = previousEditorDecorationCache && undefined !== previousEditorDecorationCache.isMuted ?
                 previousEditorDecorationCache.isMuted:
@@ -689,7 +694,7 @@ export module BackgroundPhiColors
             Profiler.profile("updateDecoration.clear", () => Object.keys(decorations).forEach(i => decorations[i].rangesOrOptions = []));
             if (isEnabled && (!isPaused || isCleared))
             {
-                if (textLength <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
+                if (isClip || textLength <= fileSizeLimit.get(lang) || isOverTheLimit[textEditor.document.fileName])
                 {
                     const tabSize =
                         undefined !== previousEditorDecorationCache ?
