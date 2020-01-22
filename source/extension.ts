@@ -937,10 +937,23 @@ export module BackgroundPhiColors
                     (
                         "updateDecoration.apply(regular)", () =>
                         {
-                            entry.filter
+                            entry
+                                /*
+                                .filter
                                 (
-                                    i => !clip || textEditor.visibleRanges.some(range => range.contains(makeRange(textEditor, i.startPosition, i.length)))
+                                    i =>
+                                        !clip ||
+                                        i.startPosition < 0 ||
+                                        textEditor.visibleRanges.some
+                                        (
+                                            range => range.contains
+                                            (
+                                                i.range ||
+                                                makeRange(textEditor, i.startPosition, i.length)
+                                            )
+                                        )
                                 )
+                                */
                                 .forEach(i => addDecoration(textEditor, i));
                             const isToDecorate = 0 < entry.length; //Object.keys(decorations).some(i => 0 < decorations[i].rangesOrOptions.length);
                             if (isDecorated[textEditor.document.fileName] || isToDecorate)
