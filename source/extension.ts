@@ -937,6 +937,10 @@ export module BackgroundPhiColors
                     (
                         "updateDecoration.apply(regular)", () =>
                         {
+                            if (clip)
+                            {
+                                entry.forEach(i => i.decorationParam.overviewRulerLane = undefined);
+                            }
                             entry
                                 /*
                                 .filter
