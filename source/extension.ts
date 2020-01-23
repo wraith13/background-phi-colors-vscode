@@ -339,7 +339,7 @@ export module BackgroundPhiColors
     (
         document.lineAt(document.lineCount - 1).range.end
     );
-    const isClip = (lang: string, textLength: number) => clipByVisibleRange.get(lang)(textLength / Math.min(fileSizeLimit.get(lang), 1024));
+    const isClip = (lang: string, textLength: number) => clipByVisibleRange.get(lang)(textLength / Math.max(fileSizeLimit.get(lang), 1024));
     const isIndentInfoNeed = (lang: string) =>
     {
         const showActive = 0 <= ["smart", "full"].indexOf(indentMode.get(lang));
@@ -982,7 +982,7 @@ export module BackgroundPhiColors
                     clearDecorationCache(textEditor.document);
                     if
                     (
-                        overTheLimitMessageShowMode.get(lang)(textLength / Math.min(fileSizeLimit.get(lang), 1024)) && // ここの Math.min は基本的に要らないんだけど、万が一にも fileSizeLimit が 0 になってゼロ除算を発生させない為の保険
+                        overTheLimitMessageShowMode.get(lang)(textLength / Math.max(fileSizeLimit.get(lang), 1024)) && // ここの Math.max は基本的に要らないんだけど、万が一にも fileSizeLimit が 0 になってゼロ除算を発生させない為の保険
                         !isLimitNoticed[textEditor.document.fileName]
                     )
                     {
