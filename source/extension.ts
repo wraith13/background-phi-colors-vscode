@@ -63,6 +63,7 @@ export module BackgroundPhiColors
     const fileSizeLimit = new Config.Entry<number>("backgroundPhiColors.fileSizeLimit");
     const basicDelay = new Config.Entry<number>("backgroundPhiColors.basicDelay");
     const additionalDelay = new Config.Entry<number>("backgroundPhiColors.additionalDelay");
+    const clipDelay = new Config.Entry<number>("backgroundPhiColors.clipDelay");
     const baseColor = new Config.Entry("backgroundPhiColors.baseColor", colorValidator);
     const spaceBaseColor = new Config.Entry("backgroundPhiColors.spaceBaseColor", colorOrNullValidator);
     const spaceErrorColor = new Config.Entry("backgroundPhiColors.spaceErrorColor", colorValidator);
@@ -496,6 +497,7 @@ export module BackgroundPhiColors
             fileSizeLimit,
             basicDelay,
             additionalDelay,
+            clipDelay,
             baseColor,
             spaceBaseColor,
             spaceErrorColor,
@@ -542,7 +544,7 @@ export module BackgroundPhiColors
         if (undefined === delay)
         {
             delay = isClip(textEditor.document.languageId, getDocumentTextLength(textEditor.document)) ?
-                10:
+                clipDelay.get(textEditor.document.languageId):
                 basicDelay.get(textEditor.document.languageId) +
                 (
                     undefined === documentDecorationCache.get(textEditor.document) ?
@@ -609,7 +611,7 @@ export module BackgroundPhiColors
             )
             {
                 clearDecorationCache(textEditor.document);
-                delayUpdateDecoration(textEditor, 10);
+                delayUpdateDecoration(textEditor, clipDelay.get(textEditor.document.languageId));
             }
         }
     );

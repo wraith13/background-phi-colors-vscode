@@ -120,6 +120,14 @@
                         "overridable": true,
                         "description": "%backgroundPhiColors.additionalDelay.description%"
                     },
+                    "backgroundPhiColors.clipDelay": {
+                        "type": "number",
+                        "default": 20,
+                        "minimum": 1,
+                        "maximum": 500,
+                        "overridable": true,
+                        "description": "%backgroundPhiColors.clipDelay.description%"
+                    },
                     "backgroundPhiColors.baseColor": {
                         "type": "string",
                         "default": "#5679C9",
