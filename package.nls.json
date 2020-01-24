@@ -41,7 +41,7 @@
     "backgroundPhiColors.indent.description": "Indent unit.",
     "backgroundPhiColors.enabledProfile.description": "Enables that self-profiler.",
     "backgroundPhiColors.overTheLimitMessageShowMode.description": "Over the limit message show mode. `none`: never show message, `until 16x`: show message until 16 times the limit size, `until 256x`: show message until 256 times the limit size, `always`: always show message",
-    "backgroundPhiColors.clipByVisibleRange.description": "Clips the rendering only to the viewing area for high performance. Overview ruler lane is hidden.",
+    "backgroundPhiColors.clipByVisibleRange.description": "Clips the rendering only to the viewing area for large documents. Conversely, it is slower for small documents. Overview ruler lane is hidden.",
     "🚫 You have already started the profile.": "🚫 You have already started the profile.",
     "⏱ Start Profile!": "⏱ Start Profile!",
     "🏁 Stop Profile!": "🏁 Stop Profile!",

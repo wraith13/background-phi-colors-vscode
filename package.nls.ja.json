@@ -41,7 +41,7 @@
     "backgroundPhiColors.indent.description": "インデント単位",
     "backgroundPhiColors.enabledProfile.description": "自己プロファイラを有効にする。",
     "backgroundPhiColors.showOverTheLimitMessageMode.description": "`none`: 常にメッセージを非表示, `until 16x`: 制限サイズの16倍までメッセージを表示, `until 256x`: 制限サイズの16倍までメッセージを表示, `always`: 常にメッセージを表示",
-    "backgroundPhiColors.clipByVisibleRange.description": "高パフォーマンスの為にレンダリングを表示範囲のみにクリップします。オーバービュールーラーは非表示になります。",
+    "backgroundPhiColors.clipByVisibleRange.description": "サイズが大きいドキュメントの為にレンダリングを表示範囲のみにクリップします。小さいドキュメントの場合は逆に遅くなります。オーバービュールーラーは非表示になります。",
     "🚫 You have already started the profile.": "🚫 既にプロファイル開始しています。",
     "⏱ Start Profile!": "⏱ プロファイル開始！",
     "🏁 Stop Profile!": "🏁 プロファイル終了！",
