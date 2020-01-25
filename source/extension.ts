@@ -537,21 +537,20 @@ export module BackgroundPhiColors
         updateAllDecoration();
     };
     const lastUpdateStamp = new Map<vscode.TextEditor, number>();
-    export const delayUpdateDecoration = (textEditor: vscode.TextEditor, delay?: number): void =>
+    export const delayUpdateDecoration = (textEditor: vscode.TextEditor): void =>
     {
         const updateStamp = getTicks();
         lastUpdateStamp.set(textEditor, updateStamp);
-        if (undefined === delay)
-        {
-            delay = isClip(textEditor.document.languageId, getDocumentTextLength(textEditor.document)) ?
-                clipDelay.get(textEditor.document.languageId):
-                basicDelay.get(textEditor.document.languageId) +
+        const textLength = getDocumentTextLength(textEditor.document);
+        const lang = textEditor.document.languageId;
+        const delay = isClip(lang, textLength) ?
+                clipDelay.get(lang):
+                basicDelay.get(lang) +
                 (
                     undefined === documentDecorationCache.get(textEditor.document) ?
-                        additionalDelay.get(textEditor.document.languageId):
+                        additionalDelay.get(lang):
                         0
                 );
-        }
         setTimeout
         (
             () =>
@@ -610,8 +609,8 @@ export module BackgroundPhiColors
                 isClip(textEditor.document.languageId, getDocumentTextLength(textEditor.document))
             )
             {
-                clearDecorationCache(textEditor.document);
-                delayUpdateDecoration(textEditor, clipDelay.get(textEditor.document.languageId));
+                //clearDecorationCache(textEditor.document);
+                delayUpdateDecoration(textEditor);
             }
         }
     );
@@ -944,7 +943,6 @@ export module BackgroundPhiColors
                                 entry.forEach(i => i.decorationParam.overviewRulerLane = undefined);
                             }
                             entry
-                                /*
                                 .filter
                                 (
                                     i =>
@@ -959,7 +957,6 @@ export module BackgroundPhiColors
                                             )
                                         )
                                 )
-                                */
                                 .forEach(i => addDecoration(textEditor, i));
                             const isToDecorate = 0 < entry.length; //Object.keys(decorations).some(i => 0 < decorations[i].rangesOrOptions.length);
                             if (isDecorated[textEditor.document.fileName] || isToDecorate)
