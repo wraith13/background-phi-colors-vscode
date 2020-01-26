@@ -108,23 +108,23 @@
                         "type": "number",
                         "default": 10,
                         "minimum": 1,
-                        "maximum": 1500,
+                        "maximum": 500,
                         "overridable": true,
                         "description": "%backgroundPhiColors.basicDelay.description%"
                     },
                     "backgroundPhiColors.additionalDelay": {
                         "type": "number",
-                        "default": 200,
-                        "minimum": 50,
-                        "maximum": 1500,
+                        "default": 50,
+                        "minimum": 10,
+                        "maximum": 500,
                         "overridable": true,
                         "description": "%backgroundPhiColors.additionalDelay.description%"
                     },
                     "backgroundPhiColors.clipDelay": {
                         "type": "number",
-                        "default": 20,
+                        "default": 30,
                         "minimum": 1,
-                        "maximum": 500,
+                        "maximum": 1500,
                         "overridable": true,
                         "description": "%backgroundPhiColors.clipDelay.description%"
                     },

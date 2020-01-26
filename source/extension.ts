@@ -542,15 +542,21 @@ export module BackgroundPhiColors
         const updateStamp = getTicks();
         lastUpdateStamp.set(textEditor, updateStamp);
         const textLength = getDocumentTextLength(textEditor.document);
+        const logUnit = 16 *1024;
+        const logRate = Math.pow(Math.max(textLength, logUnit) / logUnit, 1.0 / 2.0);
         const lang = textEditor.document.languageId;
         const delay = isClip(lang, textLength) ?
                 clipDelay.get(lang):
-                basicDelay.get(lang) +
+                logRate *
                 (
-                    undefined === documentDecorationCache.get(textEditor.document) ?
-                        additionalDelay.get(lang):
-                        0
+                    basicDelay.get(lang) +
+                    (
+                        undefined === documentDecorationCache.get(textEditor.document) ?
+                            additionalDelay.get(lang):
+                            0
+                    )
                 );
+        //console.log(`document: ${textEditor.document.fileName}, textLength: ${textLength}, logRate: ${logRate}, delay: ${delay}`);
         setTimeout
         (
             () =>
