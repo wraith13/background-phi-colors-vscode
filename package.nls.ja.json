@@ -13,6 +13,7 @@
     "backgroundPhiColors.fileSizeLimit.description": "これより大きなサイズのファイルでは機能しません。",
     "backgroundPhiColors.basicDelay.description": "イベント発生から着色までの遅延(ミリ秒)",
     "backgroundPhiColors.additionalDelay.description": "更新イベント発生から着色までの追加の遅延(ミリ秒)",
+    "backgroundPhiColors.clipDelay.description": "クリップして処理する場合のイベント発生から着色までの遅延(ミリ秒)",
     "backgroundPhiColors.baseColor.description": "背景色はこの色を元に色相を全周の 1 / φ ずつ回転させて自動生成されます。 ( #RRGGBB )",
     "backgroundPhiColors.spaceBaseColor.description": "空白の背景色はこの色を元に色相を全周の 1 / φ ずつ回転させて自動生成されます。この値が null の場合、代わりに `backgroundPhiColors.baseColor` が使用されます。 ( #RRGGBB )",
     "backgroundPhiColors.spaceErrorColor.description": "エラーの空白の背景色。 ( #RRGGBB )",
