@@ -4,6 +4,16 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 3.0.0 - 2020-0?-??
+
+### Added
+
+- `backgroundPhiColors.clipByVisibleRange` setting and `backgroundPhiColors.clipDelay` setting.
+
+### Changed
+
+- Changed delay when not clipped to be proportional to the square root of file size.
+
 ## 2.1.2 - 2020-01-16
 
 ### Fixed
