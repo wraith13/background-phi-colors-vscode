@@ -14,7 +14,6 @@ const objctToMap = <valueT>(object: {[key:string]: valueT }) => new Map<string, 
 export module BackgroundPhiColors
 {
     const applicationKey = "backgroundPhiColors";
-
     const colorValidator = (value: string): boolean => /^#[0-9A-Fa-f]{6}$/.test(value);
     const colorOrNullValidator = (value: string | null): boolean => null === value || colorValidator(value);
     const colorMapValidator = (value: {[key: string]: string}): boolean =>
