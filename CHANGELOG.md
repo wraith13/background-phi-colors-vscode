@@ -4,7 +4,7 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## 3.0.0 - 2020-0?-??
+## 3.0.0 - 2020-01-28
 
 ### Added
 
@@ -13,6 +13,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Changed
 
 - Changed delay when not clipped to be proportional to the square root of file size.
+
+### Fixed
+
+- Fixed an issue where the `backgroundPhiColors.overTheLimitMessageShowMode` setting was not working.
 
 ## 2.1.2 - 2020-01-16
 

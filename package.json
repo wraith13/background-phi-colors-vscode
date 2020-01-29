@@ -3,7 +3,7 @@
     "displayName": "Background Phi Colors",
     "description": "This extension colors the background in various ways.",
     "icon": "images/phihex.128.png",
-    "version": "2.1.2",
+    "version": "3.0.0",
     "publisher": "wraith13",
     "license": "SEE LICENSE IN LICENSE_1_0.txt",
     "engines": {
