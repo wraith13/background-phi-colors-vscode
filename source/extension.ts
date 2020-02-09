@@ -72,6 +72,7 @@ export module BackgroundPhiColors
     const tokenColorMap = new Config.Entry("backgroundPhiColors.tokenColorMap", colorMapValidator);
     const indentMode = new Config.MapEntry("backgroundPhiColors.indentMode", indentModeObject);
     const lineEnabled = new Config.Entry<boolean>("backgroundPhiColors.lineEnabled");
+    const consecutiveBlankLinesEnabled = new Config.Entry<boolean>("backgroundPhiColors.consecutiveBlankLinesEnabled");
     const tokenMode = new Config.MapEntry("backgroundPhiColors.tokenMode", tokenModeObject);
     const activeScope = new Config.MapEntry("backgroundPhiColors.activeScope", activeScopeObject);
     const indentErrorEnabled = new Config.Entry<boolean>("backgroundPhiColors.indentErrorEnabled");
@@ -506,6 +507,7 @@ export module BackgroundPhiColors
             tokenColorMap,
             indentMode,
             lineEnabled,
+            consecutiveBlankLinesEnabled,
             tokenMode,
             activeScope,
             indentErrorEnabled,

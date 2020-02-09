@@ -197,6 +197,12 @@
                         "overridable": true,
                         "description": "%backgroundPhiColors.lineEnabled.description%"
                     },
+                    "backgroundPhiColors.consecutiveBlankLinesEnabled": {
+                        "type": "boolean",
+                        "default": false,
+                        "overridable": true,
+                        "description": "%backgroundPhiColors.consecutiveBlankLinesEnabled.description%"
+                    },
                     "backgroundPhiColors.tokenMode": {
                         "type": "string",
                         "default": "smart",
