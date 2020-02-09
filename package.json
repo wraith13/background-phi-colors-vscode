@@ -282,6 +282,19 @@
                         "overridable": true,
                         "description": "%backgroundPhiColors.activeTokenInOverviewRulerLane.description%"
                     },
+                    "backgroundPhiColors.consecutiveBlankLinesInOverviewRulerLane": {
+                        "type": "string",
+                        "default": "full",
+                        "enum": [
+                            "none",
+                            "left",
+                            "center",
+                            "right",
+                            "full"
+                        ],
+                        "overridable": true,
+                        "description": "%backgroundPhiColors.consecutiveBlankLinesInOverviewRulerLane.description%"
+                    },
                     "backgroundPhiColors.trailingSpacesErrorInOverviewRulerLane": {
                         "type": "string",
                         "default": "right",
@@ -318,6 +331,14 @@
                         "maximum": 255,
                         "overridable": true,
                         "description": "%backgroundPhiColors.spacesErrorAlpha.description%"
+                    },
+                    "backgroundPhiColors.consecutiveBlankLinesAlpha": {
+                        "type": "number",
+                        "default": 40,
+                        "minimum": 0,
+                        "maximum": 255,
+                        "overridable": true,
+                        "description": "%backgroundPhiColors.consecutiveBlankLinesAlpha.description%"
                     },
                     "backgroundPhiColors.symbolAlpha": {
                         "type": "number",
