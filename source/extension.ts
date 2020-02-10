@@ -72,7 +72,7 @@ export module BackgroundPhiColors
     const tokenColorMap = new Config.Entry("backgroundPhiColors.tokenColorMap", colorMapValidator);
     const indentMode = new Config.MapEntry("backgroundPhiColors.indentMode", indentModeObject);
     const lineEnabled = new Config.Entry<boolean>("backgroundPhiColors.lineEnabled");
-    const consecutiveBlankLinesEnabled = new Config.Entry<boolean>("backgroundPhiColors.consecutiveBlankLinesEnabled");
+    const blankLinesEnabled = new Config.Entry<boolean>("backgroundPhiColors.blankLinesEnabled");
     const tokenMode = new Config.MapEntry("backgroundPhiColors.tokenMode", tokenModeObject);
     const activeScope = new Config.MapEntry("backgroundPhiColors.activeScope", activeScopeObject);
     const indentErrorEnabled = new Config.Entry<boolean>("backgroundPhiColors.indentErrorEnabled");
@@ -83,11 +83,11 @@ export module BackgroundPhiColors
     const indentErrorInOverviewRulerLane = new Config.MapEntry("backgroundPhiColors.indentErrorInOverviewRulerLane", laneObject);
     const activeTokenInOverviewRulerLane = new Config.MapEntry("backgroundPhiColors.activeTokenInOverviewRulerLane", laneObject);
     const trailingSpacesErrorInOverviewRulerLane = new Config.MapEntry("backgroundPhiColors.trailingSpacesErrorInOverviewRulerLane", laneObject);
-    const consecutiveBlankLinesInOverviewRulerLane = new Config.MapEntry("backgroundPhiColors.consecutiveBlankLinesInOverviewRulerLane", laneObject);
+    const blankLinesInOverviewRulerLane = new Config.MapEntry("backgroundPhiColors.blankLinesInOverviewRulerLane", laneObject);
     const spacesAlpha = new Config.Entry<number>("backgroundPhiColors.spacesAlpha");
     const spacesActiveAlpha = new Config.Entry<number>("backgroundPhiColors.spacesActiveAlpha");
     const spacesErrorAlpha = new Config.Entry<number>("backgroundPhiColors.spacesErrorAlpha");
-    const consecutiveBlankLinesAlpha = new Config.Entry<number>("backgroundPhiColors.consecutiveBlankLinesAlpha");
+    const blankLinesAlpha = new Config.Entry<number>("backgroundPhiColors.blankLinesAlpha");
     const symbolAlpha = new Config.Entry<number>("backgroundPhiColors.symbolAlpha");
     const tokenAlpha = new Config.Entry<number>("backgroundPhiColors.tokenAlpha");
     const tokenActiveAlpha = new Config.Entry<number>("backgroundPhiColors.tokenActiveAlpha");
@@ -509,7 +509,7 @@ export module BackgroundPhiColors
             tokenColorMap,
             indentMode,
             lineEnabled,
-            consecutiveBlankLinesEnabled,
+            blankLinesEnabled,
             tokenMode,
             activeScope,
             indentErrorEnabled,
@@ -520,11 +520,11 @@ export module BackgroundPhiColors
             indentErrorInOverviewRulerLane,
             activeTokenInOverviewRulerLane,
             trailingSpacesErrorInOverviewRulerLane,
-            consecutiveBlankLinesInOverviewRulerLane,
+            blankLinesInOverviewRulerLane,
             spacesAlpha,
             spacesActiveAlpha,
             spacesErrorAlpha,
-            consecutiveBlankLinesAlpha,
+            blankLinesAlpha,
             symbolAlpha,
             tokenAlpha,
             tokenActiveAlpha,
@@ -942,9 +942,9 @@ export module BackgroundPhiColors
                             {
                                 entry = entry.concat(updateTrailSpacesDecoration(lang, offset, text, textEditor, tabSize, trailingSpacesErrorEnabled.get(lang)));
                             }
-                            if (!validPreviousEditorDecorationCache && consecutiveBlankLinesEnabled.get(lang))
+                            if (!validPreviousEditorDecorationCache && blankLinesEnabled.get(lang))
                             {
-                                entry = entry.concat(updateConsecutiveBlankLinesDecoration(lang, offset, text, textEditor));
+                                entry = entry.concat(updateBlankLinesDecoration(lang, offset, text, textEditor));
                             }
                         }
                     );
@@ -1608,7 +1608,7 @@ export module BackgroundPhiColors
             })
         )
     );
-    export const updateConsecutiveBlankLinesDecoration =
+    export const updateBlankLinesDecoration =
     (
         lang: string,
         offset: number,
@@ -1616,7 +1616,7 @@ export module BackgroundPhiColors
         textEditor: vscode.TextEditor
     ): DecorationEntry[] => Profiler.profile
     (
-        "updateConsecutiveBlankLinesDecoration", () =>
+        "updateBlankLinesDecoration", () =>
         regExpExecToArray
         (
             /(^|[\r\n])([ \t\r\n]*)(\r\n|\r|\n)([^\r\n]|$)/g,
@@ -1630,12 +1630,12 @@ export module BackgroundPhiColors
                 length: match[2].length,
                 decorationParam: makeHueDecoration
                 (
-                    "consecutive-blank-lines",
+                    "blank-lines",
                     lang,
                     spaceBaseColor,
                     match[2].replace(/[ \t]+/, "").replace(/\r\n|\r/, "\n").length,
-                    consecutiveBlankLinesAlpha,
-                    consecutiveBlankLinesInOverviewRulerLane.get("lang"),
+                    blankLinesAlpha,
+                    blankLinesInOverviewRulerLane.get("lang"),
                     true
                 )
             })

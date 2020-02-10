@@ -197,11 +197,11 @@
                         "overridable": true,
                         "description": "%backgroundPhiColors.lineEnabled.description%"
                     },
-                    "backgroundPhiColors.consecutiveBlankLinesEnabled": {
+                    "backgroundPhiColors.blankLinesEnabled": {
                         "type": "boolean",
                         "default": false,
                         "overridable": true,
-                        "description": "%backgroundPhiColors.consecutiveBlankLinesEnabled.description%"
+                        "description": "%backgroundPhiColors.blankLinesEnabled.description%"
                     },
                     "backgroundPhiColors.tokenMode": {
                         "type": "string",
@@ -282,7 +282,7 @@
                         "overridable": true,
                         "description": "%backgroundPhiColors.activeTokenInOverviewRulerLane.description%"
                     },
-                    "backgroundPhiColors.consecutiveBlankLinesInOverviewRulerLane": {
+                    "backgroundPhiColors.blankLinesInOverviewRulerLane": {
                         "type": "string",
                         "default": "full",
                         "enum": [
@@ -293,7 +293,7 @@
                             "full"
                         ],
                         "overridable": true,
-                        "description": "%backgroundPhiColors.consecutiveBlankLinesInOverviewRulerLane.description%"
+                        "description": "%backgroundPhiColors.blankLinesInOverviewRulerLane.description%"
                     },
                     "backgroundPhiColors.trailingSpacesErrorInOverviewRulerLane": {
                         "type": "string",
@@ -332,13 +332,13 @@
                         "overridable": true,
                         "description": "%backgroundPhiColors.spacesErrorAlpha.description%"
                     },
-                    "backgroundPhiColors.consecutiveBlankLinesAlpha": {
+                    "backgroundPhiColors.blankLinesAlpha": {
                         "type": "number",
                         "default": 40,
                         "minimum": 0,
                         "maximum": 255,
                         "overridable": true,
-                        "description": "%backgroundPhiColors.consecutiveBlankLinesAlpha.description%"
+                        "description": "%backgroundPhiColors.blankLinesAlpha.description%"
                     },
                     "backgroundPhiColors.symbolAlpha": {
                         "type": "number",
