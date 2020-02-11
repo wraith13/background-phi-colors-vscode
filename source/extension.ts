@@ -1619,8 +1619,8 @@ export module BackgroundPhiColors
         "updateBlankLinesDecoration", () =>
         regExpExecToArray
         (
-            /(^|[\r\n])([ \t\r\n]*)(\r\n|\r|\n)([^\r\n]|$)/g,
-            text
+            /(^|\n)([ \t\n]*)\n([^\n]|$)/g,
+            text.replace(/\r\n/g, " \n").replace(/\r/g, " \n")
         )
         .map
         (
