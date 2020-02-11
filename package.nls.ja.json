@@ -31,7 +31,7 @@
     "backgroundPhiColors.trailingSpacesEnabled.description": "末尾の空白を着色します。",
     "backgroundPhiColors.symbolEnabled.description": "シンボルの背景を着色します。",
     "backgroundPhiColors.indentErrorInOverviewRulerLane.description": "インデントエラーのオーバービュールーラーでの表示レーン。",
-    "backgroundPhiColors.activeTokenInOverviewRulerLane.description": "]。",
+    "backgroundPhiColors.activeTokenInOverviewRulerLane.description": "アクティブなトークンのオーバービュールーラーでの表示レーン。",
     "backgroundPhiColors.trailingSpacesErrorInOverviewRulerLane.description": "末尾空白エラーのオーバービュールーラーでの表示レーン。",
     "backgroundPhiColors.spacesAlpha.description": "空白の背景色の不透明度。( 0 - 255)",
     "backgroundPhiColors.spacesActiveAlpha.description": "アクティブな空白の背景色の不透明度。( 0 - 255)",

@@ -4,6 +4,12 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 3.1.0 - 2020-02-??
+
+### Fixed
+
+- Fixed an issue that Japanese description of activeTokenInOverviewRulerLane setting was broken.
+
 ## 3.0.0 - 2020-01-28
 
 ### Added
