@@ -1620,7 +1620,7 @@ export module BackgroundPhiColors
         regExpExecToArray
         (
             /(^|\n)([ \t\n]*)\n([^\n]|$)/g,
-            text.replace(/\r\n/g, " \n").replace(/\r/g, " \n")
+            text.replace(/\r\n/g, " \n").replace(/\r/g, "\n")
         )
         .map
         (
@@ -1633,7 +1633,7 @@ export module BackgroundPhiColors
                     "blank-lines",
                     lang,
                     spaceBaseColor,
-                    match[2].replace(/[ \t]+/, "").replace(/\r\n|\r/, "\n").length,
+                    match[2].replace(/[^\n]+/g, "").length,
                     blankLinesAlpha,
                     blankLinesInOverviewRulerLane.get("lang"),
                     true
