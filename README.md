@@ -15,6 +15,7 @@ This extension colors the background in follow ways.
 - indent level
 - error indent
 - current line
+- blank lines ( this is disabled by default )
 - tokens
 - symbols ( this is disabled by default )
 - spaces in body
@@ -35,6 +36,10 @@ This extension colors the background in follow ways.
 ### Current line
 
 ![Current line](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/current.line.png)
+
+### Blank lines
+
+![Blank lines](https://github.com/wraith13/background-phi-colors-vscode/raw/master/images/screenshot/blank.lines.png)
 
 ### Token: light
 
@@ -105,6 +110,7 @@ This extension contributes the following settings by [`settings.json`](https://c
 * `backgroundPhiColors.tokenColorMap`: you can specify the background color for each token.
 * `backgroundPhiColors.indentMode`: `none`: does not color indents, `light`: colors indents statically, `smart`: colors the current indent, `full`: light + smart,
 * `backgroundPhiColors.lineEnabled`: colors the current line.
+* `backgroundPhiColors.blankLinesEnabled`: colors blank lines.
 * `backgroundPhiColors.tokenMode`: `none`: does not color tokens, `light`: colors all tokens statically, `smart`:colors the tokens contained in the current line, `full`: light + smart,
 * `backgroundPhiColors.activeScope`: `editor`: each editor is highlighted independently, `document`: highlight are shared in the same document editors, `window`: highlight are shared in the all editors,
 * `backgroundPhiColors.indentErrorEnabled`: colors indent errors
@@ -114,10 +120,12 @@ This extension contributes the following settings by [`settings.json`](https://c
 * `backgroundPhiColors.symbolEnabled`: colors symbol background.
 * `backgroundPhiColors.indentErrorInOverviewRulerLane`: overview ruler lane of indent errors.
 * `backgroundPhiColors.activeTokenInOverviewRulerLane`: overview ruler lane of active tokens.
+* `backgroundPhiColors.blankLinesInOverviewRulerLane`: overview ruler lane of blank lines.
 * `backgroundPhiColors.trailingSpacesErrorInOverviewRulerLane`: overview ruler lane of trailing sspaces errors.
 * `backgroundPhiColors.spacesAlpha`: Spaces background color opacity. ( 0 - 255)
 * `backgroundPhiColors.spacesActiveAlpha`: active spaces background color opacity. ( 0 - 255)
 * `backgroundPhiColors.spacesErrorAlpha`: error Spaces background color opacity. ( 0 - 255)
+* `backgroundPhiColors.blankLinesAlpha`: blank lines background color opacity. ( 0 - 255)
 * `backgroundPhiColors.symbolAlpha`: symbols background color opacity. ( 0 - 255)
 * `backgroundPhiColors.tokenAlpha`: tokens background color opacity. ( 0 - 255)
 * `backgroundPhiColors.tokenActiveAlpha`: active tokens background color opacity. ( 0 - 255)
