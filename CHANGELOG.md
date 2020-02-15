@@ -4,7 +4,11 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## 3.1.0 - 2020-02-??
+## 3.1.0 - 2020-02-14
+
+### Added
+
+- `backgroundPhiColors.blankLinesEnabled` setting and `backgroundPhiColors.blankLinesInOverviewRulerLane` setting and `backgroundPhiColors.blankLinesAlpha` setting.
 
 ### Fixed
 
