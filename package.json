@@ -417,6 +417,7 @@
     },
     "scripts": {
         "npm:install": "npm install",
+        "npm:audit": "npm audit",
         "vscode:package": "vsce package",
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
