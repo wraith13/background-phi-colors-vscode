@@ -59,6 +59,7 @@ export module BackgroundPhiColors
     });
     const enabled = new Config.Entry<boolean>("backgroundPhiColors.enabled");
     const enabledPanels = new Config.Entry<boolean>("backgroundPhiColors.enabledPanels");
+    const enabledReflectAppearanceFrequencyInOpacity = new Config.Entry<boolean>("backgroundPhiColors.enabledReflectAppearanceFrequencyInOpacity");
     const fileSizeLimit = new Config.Entry<number>("backgroundPhiColors.fileSizeLimit");
     const basicDelay = new Config.Entry<number>("backgroundPhiColors.basicDelay");
     const additionalDelay = new Config.Entry<number>("backgroundPhiColors.additionalDelay");
@@ -496,6 +497,7 @@ export module BackgroundPhiColors
         [
             enabled,
             enabledPanels,
+            enabledReflectAppearanceFrequencyInOpacity,
             fileSizeLimit,
             basicDelay,
             additionalDelay,

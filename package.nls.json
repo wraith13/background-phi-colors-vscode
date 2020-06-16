@@ -10,6 +10,7 @@
     "backgroundPhiColors.reportProfile.title": "Report Profile",
     "backgroundPhiColors.enabled.description": "Enables that colors background. ( `Background Phi Colors: Mute` and` Background Phi Colors: Mute All` commands take precedence over this setting. )",
     "backgroundPhiColors.enabledPanels.description": "Enables that colors background in output panels.",
+    "backgroundPhiColors.enabledReflectAppearanceFrequencyInOpacity.description": "Enables that reflect appearance frequency in opacity.",
     "backgroundPhiColors.fileSizeLimit.description": "Does not working for files that exceed this size.",
     "backgroundPhiColors.basicDelay.description": "Delay from event occurrence to coloring. ( Milliseconds when file size is 16KiB or less. It is proportional to the square root of the file size. )",
     "backgroundPhiColors.additionalDelay.description": "Addtional delay from update event occurrence to coloring. ( Milliseconds when file size is 16KiB or less. )",

@@ -96,6 +96,12 @@
                         "overridable": true,
                         "description": "%backgroundPhiColors.enabledPanels.description%"
                     },
+                    "backgroundPhiColors.enabledReflectAppearanceFrequencyInOpacity": {
+                        "type": "boolean",
+                        "default": true,
+                        "overridable": true,
+                        "description": "%backgroundPhiColors.enabledReflectAppearanceFrequencyInOpacity.description%"
+                    },
                     "backgroundPhiColors.fileSizeLimit": {
                         "type": "number",
                         "default": 102400,
