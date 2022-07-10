@@ -4,6 +4,12 @@ All notable changes to the "Background Phi Colors" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## ?.?.? - 202?-??-??
+
+### Security
+
+- npm audit fix --force
+
 ## 3.1.0 - 2020-02-14
 
 ### Added
